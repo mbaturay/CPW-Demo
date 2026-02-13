@@ -1,11 +1,11 @@
 import { Outlet } from 'react-router';
-import { Navigation } from './components/Navigation';
+import { CollapsibleSidebar } from './components/CollapsibleSidebar';
 
 export default function Layout() {
   return (
     <div className="min-h-screen">
-      <Navigation />
-      <main className="ml-64">
+      <CollapsibleSidebar position="left" />
+      <main className="ml-16">
         <Outlet />
       </main>
     </div>
