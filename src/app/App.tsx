@@ -1,11 +1,14 @@
 import { RouterProvider } from 'react-router';
 import { router } from './routes';
 import { RoleProvider } from './context/RoleContext';
+import { DemoProvider } from './context/DemoContext';
 
 export default function App() {
   return (
     <RoleProvider>
-      <RouterProvider router={router} />
+      <DemoProvider>
+        <RouterProvider router={router} />
+      </DemoProvider>
     </RoleProvider>
   );
 }

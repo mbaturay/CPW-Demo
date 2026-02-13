@@ -8,16 +8,18 @@ import { WaterBanner } from '../components/WaterBanner';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
 import { useSearchParams } from 'react-router';
-import { surveys, getWaterById, getTrendForWater } from '../data/world';
+import { getWaterById, getTrendForWater } from '../data/world';
+import { useDemo } from '../context/DemoContext';
 
 export default function Insights() {
   const { role } = useRole();
+  const { surveys } = useDemo();
   const [metric, setMetric] = useState('population');
   const [compareMode, setCompareMode] = useState(false);
   const [searchParams] = useSearchParams();
   const waterId = searchParams.get('waterId') || 'south-platte';
 
-  // Load data from world.ts
+  // Load data from world.ts + demo overrides
   const water = getWaterById(waterId);
   const trend = getTrendForWater(waterId);
   const waterSurveys = surveys.filter(s => s.waterId === waterId);

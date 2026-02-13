@@ -7,11 +7,13 @@ import { Label } from '../components/ui/label';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
-import { waters, surveys, buildActivityFeed } from '../data/world';
+import { waters, buildActivityFeed } from '../data/world';
 import type { SurveyStatus } from '../data/world';
+import { useDemo } from '../context/DemoContext';
 
 export default function ActivityFeed() {
-  const activityItems = buildActivityFeed('Northeast');
+  const { surveys } = useDemo();
+  const activityItems = buildActivityFeed('Northeast', surveys);
   const neWaters = waters.filter(w => w.region === 'Northeast');
 
   // Group activity items by water

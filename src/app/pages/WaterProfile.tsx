@@ -7,10 +7,12 @@ import { Link, useSearchParams } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
 import { Breadcrumb } from '../components/Breadcrumb';
-import { surveys, species as allSpecies, getWaterById, getTrendForWater } from '../data/world';
+import { species as allSpecies, getWaterById, getTrendForWater } from '../data/world';
+import { useDemo } from '../context/DemoContext';
 
 export default function WaterProfile() {
   const { role } = useRole();
+  const { surveys } = useDemo();
   const [searchParams] = useSearchParams();
   const waterId = searchParams.get('waterId') || 'south-platte';
 
@@ -435,8 +437,9 @@ export default function WaterProfile() {
               <CardContent className="pt-6">
                 <div className="space-y-3">
                   {recentSurveys.map((survey) => (
-                    <div
+                    <Link
                       key={survey.id}
+                      to={`/validation?surveyId=${survey.id}`}
                       className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20 transition-colors"
                     >
                       <div className="flex items-center gap-4">
@@ -454,7 +457,7 @@ export default function WaterProfile() {
                           {survey.status}
                         </span>
                       </div>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               </CardContent>

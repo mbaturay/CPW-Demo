@@ -9,7 +9,8 @@ import { Plus, X, Play } from 'lucide-react';
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
-import { waters, species as allSpecies, surveys } from '../data/world';
+import { waters, species as allSpecies } from '../data/world';
+import { useDemo } from '../context/DemoContext';
 
 type Condition = {
   id: string;
@@ -20,6 +21,7 @@ type Condition = {
 
 export default function QueryBuilder() {
   const { role } = useRole();
+  const { surveys } = useDemo();
   const [conditions, setConditions] = useState<Condition[]>([
     { id: '1', field: 'species', operator: 'equals', value: 'Brown Trout' },
     { id: '2', field: 'region', operator: 'equals', value: 'Northeast' },

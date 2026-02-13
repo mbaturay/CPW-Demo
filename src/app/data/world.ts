@@ -252,9 +252,122 @@ export const waters: Water[] = [
 ];
 
 // -------------------------
+// Fish-level records for validation page (per survey)
+// -------------------------
+export type FishRecord = {
+  row: number;
+  pass: number;
+  species: string;
+  length: number; // mm
+  weight: number; // g
+  status: "valid" | "warning" | "error";
+  error?: string;
+};
+
+export const fishRecords: Record<string, FishRecord[]> = {
+  // Hero A — Clean survey (all valid)
+  "SVY-2026-NE-0100": [
+    { row: 1, pass: 1, species: "BNT", length: 287, weight: 312, status: "valid" },
+    { row: 2, pass: 1, species: "RBT", length: 245, weight: 186, status: "valid" },
+    { row: 3, pass: 1, species: "BNT", length: 198, weight: 105, status: "valid" },
+    { row: 4, pass: 1, species: "WHS", length: 302, weight: 380, status: "valid" },
+    { row: 5, pass: 1, species: "RBT", length: 176, weight: 78, status: "valid" },
+    { row: 6, pass: 1, species: "BNT", length: 334, weight: 510, status: "valid" },
+    { row: 7, pass: 1, species: "RBT", length: 223, weight: 148, status: "valid" },
+    { row: 8, pass: 2, species: "BNT", length: 256, weight: 224, status: "valid" },
+    { row: 9, pass: 2, species: "WHS", length: 275, weight: 290, status: "valid" },
+    { row: 10, pass: 2, species: "RBT", length: 190, weight: 98, status: "valid" },
+    { row: 11, pass: 2, species: "BNT", length: 312, weight: 425, status: "valid" },
+    { row: 12, pass: 2, species: "RBT", length: 267, weight: 260, status: "valid" },
+    { row: 13, pass: 2, species: "WHS", length: 340, weight: 490, status: "valid" },
+    { row: 14, pass: 2, species: "BNT", length: 201, weight: 112, status: "valid" },
+    { row: 15, pass: 2, species: "RBT", length: 234, weight: 168, status: "valid" },
+    { row: 16, pass: 2, species: "BNT", length: 278, weight: 295, status: "valid" },
+    { row: 17, pass: 2, species: "RBT", length: 156, weight: 56, status: "valid" },
+    { row: 18, pass: 2, species: "WHS", length: 290, weight: 340, status: "valid" },
+  ],
+  // Hero B — Warning-only survey (1 warning: young-of-year CTT)
+  "SVY-2026-NE-0101": [
+    { row: 1, pass: 1, species: "BNT", length: 310, weight: 420, status: "valid" },
+    { row: 2, pass: 1, species: "CTT", length: 198, weight: 115, status: "valid" },
+    { row: 3, pass: 1, species: "BNT", length: 245, weight: 195, status: "valid" },
+    { row: 4, pass: 1, species: "CRD", length: 112, weight: 18, status: "valid" },
+    { row: 5, pass: 1, species: "CTT", length: 275, weight: 310, status: "valid" },
+    { row: 6, pass: 1, species: "BNT", length: 189, weight: 92, status: "valid" },
+    { row: 7, pass: 1, species: "CTT", length: 134, weight: 38, status: "warning", error: "Young of year detected (134mm CTT)" },
+    { row: 8, pass: 1, species: "CRD", length: 98, weight: 12, status: "valid" },
+    { row: 9, pass: 1, species: "BNT", length: 356, weight: 625, status: "valid" },
+    { row: 10, pass: 1, species: "CTT", length: 223, weight: 162, status: "valid" },
+    { row: 11, pass: 1, species: "BNT", length: 267, weight: 258, status: "valid" },
+    { row: 12, pass: 1, species: "CRD", length: 105, weight: 15, status: "valid" },
+    { row: 13, pass: 1, species: "CTT", length: 256, weight: 240, status: "valid" },
+    { row: 14, pass: 1, species: "BNT", length: 201, weight: 112, status: "valid" },
+    { row: 15, pass: 1, species: "CTT", length: 178, weight: 82, status: "valid" },
+  ],
+  // Hero C — Error survey (2 errors, 1 warning)
+  "SVY-2026-NE-0102": [
+    { row: 1, pass: 1, species: "BNT", length: 245, weight: 186, status: "valid" },
+    { row: 2, pass: 1, species: "RBT", length: 198, weight: 124, status: "valid" },
+    { row: 3, pass: 1, species: "BNT", length: 312, weight: 425, status: "valid" },
+    { row: 4, pass: 1, species: "RNTR", length: 189, weight: 98, status: "error", error: "Invalid species code \"RNTR\" — Not in CPW reference database" },
+    { row: 5, pass: 1, species: "RBT", length: 156, weight: 67, status: "valid" },
+    { row: 6, pass: 1, species: "BNT", length: 267, weight: 289, status: "valid" },
+    { row: 7, pass: 1, species: "RBT", length: 892, weight: 1245, status: "error", error: "Length exceeds biological maximum (892mm for Rainbow Trout)" },
+    { row: 8, pass: 2, species: "BNT", length: 234, weight: 198, status: "valid" },
+    { row: 9, pass: 2, species: "CTT", length: 145, weight: 45, status: "warning", error: "Young of year detected (145mm CTT)" },
+    { row: 10, pass: 2, species: "RBT", length: 223, weight: 167, status: "valid" },
+    { row: 11, pass: 2, species: "BNT", length: 178, weight: 78, status: "valid" },
+    { row: 12, pass: 2, species: "RBT", length: 290, weight: 340, status: "valid" },
+    { row: 13, pass: 2, species: "BNT", length: 256, weight: 224, status: "valid" },
+    { row: 14, pass: 2, species: "RBT", length: 201, weight: 118, status: "valid" },
+    { row: 15, pass: 2, species: "BNT", length: 334, weight: 510, status: "valid" },
+    { row: 16, pass: 2, species: "RBT", length: 167, weight: 68, status: "valid" },
+    { row: 17, pass: 2, species: "BNT", length: 223, weight: 148, status: "valid" },
+    { row: 18, pass: 2, species: "RBT", length: 278, weight: 295, status: "valid" },
+    { row: 19, pass: 2, species: "BNT", length: 190, weight: 95, status: "valid" },
+    { row: 20, pass: 2, species: "RBT", length: 245, weight: 192, status: "valid" },
+  ],
+};
+
+// -------------------------
 // Surveys (enough for queue + clicks)
 // -------------------------
 export const surveys: Survey[] = [
+  // ── Hero surveys for demo flow (2026 dates → sort to top) ──
+  {
+    id: "SVY-2026-NE-0100",
+    waterId: "south-platte",
+    stationId: "SP-04",
+    date: "2026-02-10",
+    protocol: "Two-Pass Removal",
+    uploader: "J. Alvarez",
+    status: "Pending Approval",
+    fishCount: 18,
+    speciesDetected: ["BNT", "RBT", "WHS"],
+  },
+  {
+    id: "SVY-2026-NE-0101",
+    waterId: "cache-la-poudre",
+    stationId: "PDR-01",
+    date: "2026-02-08",
+    protocol: "Single-Pass CPUE",
+    uploader: "K. Singh",
+    status: "Pending Approval",
+    fishCount: 15,
+    speciesDetected: ["BNT", "CTT", "CRD"],
+  },
+  {
+    id: "SVY-2026-NE-0102",
+    waterId: "south-platte",
+    stationId: "SP-03",
+    date: "2026-02-06",
+    protocol: "Two-Pass Removal",
+    uploader: "M. Chen",
+    status: "Pending Validation",
+    fishCount: 20,
+    speciesDetected: ["BNT", "RBT", "RNTR"],
+  },
+
   // South Platte
   {
     id: "SVY-2025-SP-0007",
@@ -406,6 +519,52 @@ export const surveys: Survey[] = [
 // Validation cases (believable scientific errors)
 // -------------------------
 export const validationCases: ValidationCase[] = [
+  // Hero B — warning only
+  {
+    surveyId: "SVY-2026-NE-0101",
+    summary: { errors: 0, warnings: 1 },
+    issues: [
+      {
+        severity: "Warning",
+        code: "LENGTH_OUT_OF_RANGE",
+        message: "Young of year detected (134mm CTT) — Consider exclusion flag for population analysis.",
+        row: 7,
+        field: "length_mm",
+        suggestion: "Flag young-of-year or exclude from depletion estimate.",
+      },
+    ],
+  },
+  // Hero C — errors
+  {
+    surveyId: "SVY-2026-NE-0102",
+    summary: { errors: 2, warnings: 1 },
+    issues: [
+      {
+        severity: "Error",
+        code: "SPECIES_CODE_INVALID",
+        message: "Species code \"RNTR\" not recognized in CPW reference database.",
+        row: 4,
+        field: "species_code",
+        suggestion: "Did you mean \"RBT\" (Rainbow Trout) or \"CTT\" (Cutthroat Trout)?",
+      },
+      {
+        severity: "Error",
+        code: "LENGTH_OUT_OF_RANGE",
+        message: "Length 892mm exceeds biological maximum for Rainbow Trout (max 800mm).",
+        row: 7,
+        field: "length_mm",
+        suggestion: "Check measurement units (mm) and transcription.",
+      },
+      {
+        severity: "Warning",
+        code: "LENGTH_OUT_OF_RANGE",
+        message: "Young of year detected (145mm CTT) — Consider exclusion flag for population analysis.",
+        row: 9,
+        field: "length_mm",
+        suggestion: "Flag young-of-year or exclude from depletion estimate.",
+      },
+    ],
+  },
   {
     surveyId: "SVY-2025-SP-0006",
     summary: { errors: 2, warnings: 1 },
@@ -601,13 +760,17 @@ export function getValidationBySurveyId(surveyId: string) {
   return validationCases.find((v) => v.surveyId === surveyId);
 }
 
-export function buildActivityFeed(region: "Northeast" | "Comparison" | "All" = "Northeast"): ActivityItem[] {
+export function buildActivityFeed(
+  region: "Northeast" | "Comparison" | "All" = "Northeast",
+  surveyList?: Survey[],
+): ActivityItem[] {
+  const source = surveyList ?? surveys;
   const allowedWaterIds =
     region === "All"
       ? new Set(waters.map((w) => w.id))
       : new Set(waters.filter((w) => w.region === region).map((w) => w.id));
 
-  return surveys
+  return source
     .filter((s) => allowedWaterIds.has(s.waterId))
     .filter((s) =>
       ["Pending Validation", "Returned for Correction", "Pending Approval", "Flagged Suspect"].includes(s.status)
@@ -632,4 +795,8 @@ export function buildActivityFeed(region: "Northeast" | "Comparison" | "All" = "
 
 export function getTrendForWater(waterId: string) {
   return trends.find((t) => t.waterId === waterId);
+}
+
+export function getFishRecords(surveyId: string): FishRecord[] | undefined {
+  return fishRecords[surveyId];
 }

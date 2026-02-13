@@ -14,14 +14,17 @@ import {
 import { WaterBanner } from '../components/WaterBanner';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
+import { useDemo } from '../context/DemoContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { useSearchParams } from 'react-router';
-import { surveys, species as allSpecies, getWaterById, getSurveyById, getValidationBySurveyId } from '../data/world';
+import { species as allSpecies, getWaterById, getSurveyById, getValidationBySurveyId, getFishRecords } from '../data/world';
 
 export default function Validation() {
   const { role } = useRole();
+  const { surveys, getSurveyStatus, updateSurveyStatus } = useDemo();
   const [unit, setUnit] = useState<'mm' | 'inches'>('mm');
   const [searchParams] = useSearchParams();
+  const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   // Load survey from world.ts via search param
   const surveyId = searchParams.get('surveyId') || surveys.find(s =>
@@ -32,19 +35,24 @@ export default function Validation() {
   const water = survey ? getWaterById(survey.waterId) : undefined;
   const validationCase = survey ? getValidationBySurveyId(survey.id) : undefined;
 
-  // Fish data table (representative sample — world.ts doesn't include fish-level records)
-  const data = [
-    { row: 1, pass: 1, species: 'RBT', length: 245, weight: 186, status: 'valid' },
-    { row: 2, pass: 1, species: 'RBT', length: 198, weight: 124, status: 'valid' },
-    { row: 3, pass: 1, species: 'BNT', length: 312, weight: 425, status: 'valid' },
-    { row: 4, pass: 1, species: 'RNTR', length: 189, weight: 98, status: 'error', error: 'Invalid species code' },
-    { row: 5, pass: 2, species: 'RBT', length: 156, weight: 67, status: 'valid' },
-    { row: 6, pass: 2, species: 'BNT', length: 267, weight: 289, status: 'valid' },
-    { row: 7, pass: 2, species: 'RBT', length: 892, weight: 1245, status: 'error', error: 'Length exceeds biological max' },
-    { row: 8, pass: 2, species: 'BNT', length: 234, weight: 198, status: 'valid' },
-    { row: 9, pass: 1, species: 'CTT', length: 145, weight: 45, status: 'warning', error: 'Young of year detected' },
-    { row: 10, pass: 1, species: 'RBT', length: 223, weight: 167, status: 'valid' },
+  // Effective status from demo store (may be overridden)
+  const effectiveStatus = getSurveyStatus(surveyId) ?? survey?.status;
+
+  // Fish data — use per-survey records if available, otherwise fall back to generic sample
+  const fallbackData = [
+    { row: 1, pass: 1, species: 'RBT', length: 245, weight: 186, status: 'valid' as const },
+    { row: 2, pass: 1, species: 'RBT', length: 198, weight: 124, status: 'valid' as const },
+    { row: 3, pass: 1, species: 'BNT', length: 312, weight: 425, status: 'valid' as const },
+    { row: 4, pass: 1, species: 'RNTR', length: 189, weight: 98, status: 'error' as const, error: 'Invalid species code' },
+    { row: 5, pass: 2, species: 'RBT', length: 156, weight: 67, status: 'valid' as const },
+    { row: 6, pass: 2, species: 'BNT', length: 267, weight: 289, status: 'valid' as const },
+    { row: 7, pass: 2, species: 'RBT', length: 892, weight: 1245, status: 'error' as const, error: 'Length exceeds biological max' },
+    { row: 8, pass: 2, species: 'BNT', length: 234, weight: 198, status: 'valid' as const },
+    { row: 9, pass: 1, species: 'CTT', length: 145, weight: 45, status: 'warning' as const, error: 'Young of year detected' },
+    { row: 10, pass: 1, species: 'RBT', length: 223, weight: 167, status: 'valid' as const },
   ];
+
+  const data = getFishRecords(surveyId) ?? fallbackData;
 
   const validCount = data.filter(d => d.status === 'valid').length;
   const warningCount = validationCase ? validationCase.summary.warnings : data.filter(d => d.status === 'warning').length;
@@ -64,6 +72,39 @@ export default function Validation() {
     : 'Aug 14, 2024';
   const surveyProtocol = survey?.protocol ?? 'Two-Pass Removal';
   const surveyUploader = survey?.uploader ?? 'J. Martinez';
+
+  // ── Action handlers ───────────────────────────────────────────────
+  const handleApprove = () => {
+    updateSurveyStatus(surveyId, 'Approved');
+    setActionMessage('Survey approved successfully.');
+  };
+
+  const handleRequestCorrection = () => {
+    updateSurveyStatus(surveyId, 'Returned for Correction');
+    setActionMessage('Survey returned for correction.');
+  };
+
+  const handleRevalidate = () => {
+    setActionMessage('Validation rules reapplied — no new issues found.');
+    setTimeout(() => setActionMessage(null), 3000);
+  };
+
+  const handleSubmitForReview = () => {
+    updateSurveyStatus(surveyId, 'Pending Approval');
+    setActionMessage('Survey submitted for review.');
+  };
+
+  const handleFlagSuspect = () => {
+    updateSurveyStatus(surveyId, 'Flagged Suspect');
+    setActionMessage('Survey flagged as suspect.');
+  };
+
+  const handlePublish = () => {
+    updateSurveyStatus(surveyId, 'Published');
+    setActionMessage('Survey published to analysis.');
+  };
+
+  const isTerminalStatus = effectiveStatus === 'Approved' || effectiveStatus === 'Published';
 
   return (
     <div className="min-h-screen bg-background">
@@ -90,40 +131,86 @@ export default function Validation() {
                 />
                 <Label htmlFor="unit-toggle" className="text-[13px]">inches</Label>
               </div>
-              <Button variant="outline" size="sm" className="text-[13px]">
+              <Button variant="outline" size="sm" className="text-[13px]" onClick={handleRevalidate}>
                 <RotateCw className="w-4 h-4 mr-2" />
                 Revalidate
               </Button>
               {role === 'data-entry' && (
-                <Button size="sm" className="text-[13px]">
+                <Button
+                  size="sm"
+                  className="text-[13px]"
+                  onClick={handleSubmitForReview}
+                  disabled={isTerminalStatus}
+                >
                   <Save className="w-4 h-4 mr-2" />
                   Submit for Review
                 </Button>
               )}
               {role === 'area-biologist' && (
                 <>
-                  <Button variant="outline" size="sm" className="text-[13px]">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-[13px]"
+                    onClick={handleRequestCorrection}
+                    disabled={isTerminalStatus}
+                  >
                     Request Correction
                   </Button>
-                  <Button size="sm" className="text-[13px]">
+                  <Button
+                    size="sm"
+                    className="text-[13px]"
+                    onClick={handleApprove}
+                    disabled={isTerminalStatus || errorCount > 0}
+                  >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Approve Survey
+                    {effectiveStatus === 'Approved' ? 'Approved' : 'Approve Survey'}
                   </Button>
                 </>
               )}
               {role === 'senior-biologist' && (
                 <>
-                  <Button variant="outline" size="sm" className="text-[13px]">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="text-[13px]"
+                    onClick={handleFlagSuspect}
+                    disabled={isTerminalStatus}
+                  >
                     Flag as Suspect
                   </Button>
-                  <Button size="sm" className="text-[13px]">
+                  <Button
+                    size="sm"
+                    className="text-[13px]"
+                    onClick={handlePublish}
+                    disabled={isTerminalStatus || errorCount > 0}
+                  >
                     <CheckCircle2 className="w-4 h-4 mr-2" />
-                    Publish to Analysis
+                    {effectiveStatus === 'Published' ? 'Published' : 'Publish to Analysis'}
                   </Button>
                 </>
               )}
             </div>
           </div>
+
+          {/* Inline action confirmation */}
+          {actionMessage && (
+            <div className="mt-3 flex items-center gap-2 text-[13px]">
+              <CheckCircle2 className="w-4 h-4 text-[#059669]" />
+              <span className="text-[#059669] font-medium">{actionMessage}</span>
+              {effectiveStatus && (
+                <span className={`ml-2 inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${
+                  effectiveStatus === 'Approved' || effectiveStatus === 'Published'
+                    ? 'bg-[#059669]/10 text-[#059669]'
+                    : effectiveStatus === 'Returned for Correction' || effectiveStatus === 'Flagged Suspect'
+                    ? 'bg-[#B91C1C]/10 text-[#B91C1C]'
+                    : 'bg-[#D97706]/10 text-[#D97706]'
+                }`}>
+                  {effectiveStatus}
+                </span>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
@@ -415,6 +502,14 @@ export default function Validation() {
                           )}
                         </div>
                       ))
+                    ) : errorCount === 0 && warningCount === 0 ? (
+                      <div className="p-4 border border-[#059669]/20 rounded bg-[#059669]/5 text-center">
+                        <CheckCircle2 className="w-6 h-6 text-[#059669] mx-auto mb-2" />
+                        <p className="text-[13px] font-medium text-foreground">No issues detected</p>
+                        <p className="text-[11px] text-muted-foreground mt-1">
+                          All records passed validation rules. This survey is ready for approval.
+                        </p>
+                      </div>
                     ) : (
                       <>
                         <div className="p-3 border border-[#B91C1C]/20 rounded bg-[#B91C1C]/5">

@@ -8,10 +8,12 @@ import { useRole } from '../context/RoleContext';
 import { RoleIndicator } from '../components/RoleIndicator';
 import DataEntryDashboard from './DataEntryDashboard';
 import SeniorBiologistDashboard from './SeniorBiologistDashboard';
-import { waters, surveys, buildActivityFeed, getTrendForWater } from '../data/world';
+import { waters, buildActivityFeed, getTrendForWater } from '../data/world';
+import { useDemo } from '../context/DemoContext';
 
 export default function Dashboard() {
   const { role } = useRole();
+  const { surveys } = useDemo();
 
   // Route to role-specific dashboards
   if (role === 'data-entry') {
@@ -22,11 +24,11 @@ export default function Dashboard() {
     return <SeniorBiologistDashboard />;
   }
 
-  // Default: Area Biologist view — derived from world.ts
+  // Default: Area Biologist view — derived from world.ts + demo overrides
   const neWaters = waters.filter(w => w.region === 'Northeast');
   const neWaterIds = new Set(neWaters.map(w => w.id));
   const neSurveys = surveys.filter(s => neWaterIds.has(s.waterId));
-  const reviewQueue = buildActivityFeed('Northeast');
+  const reviewQueue = buildActivityFeed('Northeast', surveys);
 
   const pendingCount = neSurveys.filter(s =>
     s.status === 'Pending Validation' || s.status === 'Pending Approval'
