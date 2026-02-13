@@ -3,7 +3,7 @@ import { Button } from '../components/ui/button';
 import { WaterBanner } from '../components/WaterBanner';
 import { Area, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, FileText, CheckCircle2, Clock } from 'lucide-react';
-import { Link, useSearchParams } from 'react-router';
+import { Link, Navigate, useSearchParams } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
 import { Breadcrumb } from '../components/Breadcrumb';
@@ -14,7 +14,8 @@ export default function WaterProfile() {
   const { role } = useRole();
   const { surveys } = useDemo();
   const [searchParams] = useSearchParams();
-  const waterId = searchParams.get('waterId') || 'south-platte';
+  const waterId = searchParams.get('waterId');
+  if (!waterId) return <Navigate to="/water" replace />;
 
   // Load water data from world.ts
   const water = getWaterById(waterId);
@@ -97,7 +98,7 @@ export default function WaterProfile() {
       <header className="bg-white border-b border-border px-8 py-6">
         <div className="max-w-[1280px] mx-auto">
           <Breadcrumb items={[
-            { label: 'Waters', path: '/' },
+            { label: 'Waters', path: '/water' },
             { label: water.name }
           ]} />
           <div className="flex items-center justify-between mt-3">

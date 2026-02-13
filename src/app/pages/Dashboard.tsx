@@ -195,7 +195,7 @@ export default function Dashboard() {
                       <TableRow key={row.id}>
                         <TableCell className="font-mono text-[13px] text-primary">{row.id}</TableCell>
                         <TableCell className="text-[13px]">
-                          <Link to={`/water?waterId=${row.waterId}`} className="text-primary hover:underline">
+                          <Link to={`/water/profile?waterId=${row.waterId}`} className="text-primary hover:underline">
                             {row.waterName}
                           </Link>
                         </TableCell>
@@ -274,7 +274,7 @@ export default function Dashboard() {
                   {watersInRegion.map((water) => (
                     <TableRow key={water.id}>
                       <TableCell className="text-[13px]">
-                        <Link to={`/water?waterId=${water.id}`} className="text-primary hover:underline font-medium">
+                        <Link to={`/water/profile?waterId=${water.id}`} className="text-primary hover:underline font-medium">
                           {water.name}
                         </Link>
                       </TableCell>

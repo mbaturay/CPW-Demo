@@ -112,7 +112,7 @@ export default function Validation() {
         <div className="max-w-[1280px] mx-auto">
           <Breadcrumb items={[
             { label: 'Waters', path: '/' },
-            { label: waterName, path: `/water?waterId=${water?.id ?? 'south-platte'}` },
+            { label: waterName, path: `/water/profile?waterId=${water?.id ?? 'south-platte'}` },
             { label: 'Survey Validation' }
           ]} />
           <div className="flex items-center justify-between mt-3">

@@ -209,7 +209,7 @@ export default function ActivityFeed() {
                         )}
                         <div>
                           <Link
-                            to={`/water?waterId=${water.waterId}`}
+                            to={`/water/profile?waterId=${water.waterId}`}
                             className="text-[16px] font-semibold text-primary hover:underline"
                             onClick={(e) => e.stopPropagation()}
                           >
