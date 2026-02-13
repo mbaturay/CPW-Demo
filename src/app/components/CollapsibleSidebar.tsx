@@ -90,7 +90,7 @@ export function CollapsibleSidebar({
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
         setExpanded(false);
-        // Move focus back to collapsed strip
+        // Move focus back to first nav link
         navRef.current?.querySelector<HTMLElement>('a')?.focus();
       }
     },
@@ -115,9 +115,9 @@ export function CollapsibleSidebar({
   const tapToggle = !canHover
     ? {
         onClick: (e: React.MouseEvent) => {
-          // Toggle only if clicking the icon strip area (not a link in expanded panel)
+          // Toggle only if clicking empty sidebar area (not links)
           const target = e.target as HTMLElement;
-          if (!target.closest('[data-expanded-link]')) {
+          if (!target.closest('a')) {
             setExpanded((prev) => !prev);
           }
         },
@@ -128,90 +128,33 @@ export function CollapsibleSidebar({
   const isLeft = position === 'left';
   const fixedSide = isLeft ? 'left-0' : 'right-0';
 
-  // Overlay transform: slide in from the collapsed strip side
-  const overlayTransform = expanded
-    ? 'translateX(0)'
-    : isLeft
-      ? `translateX(-${EXPANDED_W - COLLAPSED_W}px)`
-      : `translateX(${EXPANDED_W - COLLAPSED_W}px)`;
-
   return (
     <>
-      {/* Collapsed icon strip — always visible */}
+      {/* Single-layer sidebar: width expands/collapses (no second panel) */}
       <div
         ref={navRef}
         role="navigation"
         aria-label="Main navigation"
         aria-expanded={expanded}
-        className={`fixed top-0 ${fixedSide} h-screen bg-white border-r border-border flex flex-col z-50`}
-        style={{ width: COLLAPSED_W }}
+        className={`fixed top-0 ${fixedSide} h-screen bg-white border-r border-border flex flex-col z-50 shadow-lg overflow-hidden`}
+        style={{
+          width: expanded ? EXPANDED_W : COLLAPSED_W,
+          transition: 'width 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+        }}
         {...hoverHandlers}
         {...focusHandlers}
         {...tapToggle}
         onKeyDown={handleKeyDown}
       >
-        {/* Branding icon */}
-        <div className="flex items-center justify-center h-[72px] border-b border-border">
-          <span className="text-[14px] font-semibold text-primary tracking-tight">
-            AD
-          </span>
-        </div>
+        {/* Header */}
+        <div className="h-[72px] border-b border-border flex items-center">
+          <div className="flex items-center justify-center" style={{ width: COLLAPSED_W }}>
+            <span className="text-[14px] font-semibold text-primary tracking-tight">AD</span>
+          </div>
 
-        {/* Icon-only nav */}
-        <div className="flex-1 flex flex-col items-center gap-1 pt-3">
-          {filtered.map((item) => {
-            const Icon = item.icon;
-            const isActive = location.pathname === item.to;
-            const label =
-              role === 'data-entry' && item.dataEntryLabel
-                ? item.dataEntryLabel
-                : item.label;
-            return (
-              <Link
-                key={item.key}
-                to={item.to}
-                aria-label={label}
-                title={label}
-                className={`
-                  flex items-center justify-center w-10 h-10 rounded transition-colors
-                  ${isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
-                  }
-                `}
-              >
-                <Icon className="w-[18px] h-[18px]" />
-              </Link>
-            );
-          })}
-        </div>
-
-        {/* Footer icon area */}
-        <div className="flex items-center justify-center h-12 border-t border-border">
-          <span className="text-[9px] text-muted-foreground font-mono">1.0.2</span>
-        </div>
-      </div>
-
-      {/* Expanded overlay panel */}
-      <div
-        aria-hidden={!expanded}
-        className={`fixed top-0 ${fixedSide} h-screen bg-white border-r border-border flex flex-col z-40 shadow-lg pointer-events-none`}
-        style={{
-          width: EXPANDED_W,
-          transform: overlayTransform,
-          transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-        // Need pointer-events on expanded panel when visible
-      >
-        <div
-          className={expanded ? 'pointer-events-auto h-full flex flex-col' : 'pointer-events-none h-full flex flex-col'}
-          {...hoverHandlers}
-          {...focusHandlers}
-          onKeyDown={handleKeyDown}
-        >
-          {/* Header */}
-          <div className="h-[72px] flex items-center border-b border-border" style={{ paddingLeft: COLLAPSED_W + 4 }}>
-            <div>
+          {/* Brand text only when expanded */}
+          {expanded && (
+            <div className="pl-2">
               <h1 className="text-[18px] font-semibold tracking-tight text-primary">
                 ADAMAS
               </h1>
@@ -219,54 +162,70 @@ export function CollapsibleSidebar({
                 Aquatic Data & Monitoring<br />Analysis System
               </p>
             </div>
+          )}
+        </div>
+
+        {/* Nav */}
+        <div className="flex-1 pt-3">
+          {filtered.map((item) => {
+            const Icon = item.icon;
+            const isActive = location.pathname === item.to;
+            const label =
+              role === 'data-entry' && item.dataEntryLabel
+                ? item.dataEntryLabel
+                : item.label;
+
+            return (
+              <Link
+                key={item.key}
+                to={item.to}
+                aria-label={label}
+                title={label}
+                className={`
+                  flex items-center rounded transition-colors mx-2 my-1
+                  ${isActive
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                  }
+                `}
+                style={{
+                  height: 40,
+                }}
+              >
+                {/* Icon column stays fixed */}
+                <div className="flex items-center justify-center" style={{ width: COLLAPSED_W }}>
+                  <Icon className="w-[18px] h-[18px]" />
+                </div>
+
+                {/* Label appears only when expanded */}
+                {expanded && (
+                  <div className="flex-1 pr-3 text-[13px]">
+                    <span className={isActive ? 'font-medium' : ''}>{label}</span>
+                    {item.badge && (
+                      <span className="ml-2 text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">
+                        {item.badge}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </Link>
+            );
+          })}
+        </div>
+
+        {/* Footer */}
+        <div className="h-12 border-t border-border flex items-center">
+          <div className="flex items-center justify-center" style={{ width: COLLAPSED_W }}>
+            <span className="text-[9px] text-muted-foreground font-mono">1.0.2</span>
           </div>
 
-          {/* Expanded nav links */}
-          <div className="flex-1 py-3" style={{ paddingLeft: COLLAPSED_W }}>
-            <ul className="space-y-0.5 px-3">
-              {filtered.map((item) => {
-                const Icon = item.icon;
-                const isActive = location.pathname === item.to;
-                const label =
-                  role === 'data-entry' && item.dataEntryLabel
-                    ? item.dataEntryLabel
-                    : item.label;
-                return (
-                  <li key={item.key}>
-                    <Link
-                      data-expanded-link
-                      to={item.to}
-                      tabIndex={expanded ? 0 : -1}
-                      className={`
-                        flex items-center gap-3 px-3 py-2.5 rounded transition-colors text-[13px]
-                        ${isActive
-                          ? 'bg-primary text-primary-foreground font-medium'
-                          : 'text-foreground hover:bg-muted/50'
-                        }
-                      `}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{label}</span>
-                      {item.badge && (
-                        <span className="ml-auto text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Footer */}
-          <div className="border-t border-border py-3" style={{ paddingLeft: COLLAPSED_W }}>
-            <div className="px-4 text-[11px] text-muted-foreground leading-relaxed">
+          {expanded && (
+            <div className="px-2 text-[11px] text-muted-foreground">
               <p className="font-medium text-foreground">Version 1.0.2</p>
               <p className="mt-1.5">Colorado Parks & Wildlife</p>
               <p className="mt-0.5 text-[10px]">Fisheries Program</p>
             </div>
-          </div>
+          )}
         </div>
       </div>
     </>
