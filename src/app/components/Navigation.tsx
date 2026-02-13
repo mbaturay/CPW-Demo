@@ -21,16 +21,16 @@ export function Navigation() {
   
   return (
     <nav className="fixed left-0 top-0 h-screen w-64 bg-white border-r border-border flex flex-col">
-      <div className="p-6 border-b border-border">
+      <div className="px-6 pt-5 pb-4 border-b border-border/60">
         <h1 className="text-[18px] font-semibold tracking-tight text-primary">
           ADAMAS
         </h1>
-        <p className="text-[11px] text-muted-foreground mt-1 leading-relaxed">
-          Aquatic Data & Monitoring<br />Analysis System
+        <p className="text-[11px] text-muted-foreground mt-1 whitespace-nowrap">
+          Aquatic Data & Monitoring
         </p>
       </div>
-      
-      <div className="flex-1 p-4">
+
+      <div className="flex-1 mt-3 px-4">
         <ul className="space-y-1">
           {navItems.map((item) => {
             const Icon = item.icon;
@@ -58,7 +58,7 @@ export function Navigation() {
         </ul>
       </div>
       
-      <div className="p-4 border-t border-border">
+      <div className="mt-auto p-4 border-t border-border">
         <div className="text-[11px] text-muted-foreground leading-relaxed">
           <p className="font-medium text-foreground">Version 1.0.2</p>
           <p className="mt-1.5">Colorado Parks & Wildlife</p>

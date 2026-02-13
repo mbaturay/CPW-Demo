@@ -43,8 +43,8 @@ interface CollapsibleSidebarProps {
   items?: NavItem[];
 }
 
-const COLLAPSED_W = 64; // w-16 in px
-const EXPANDED_W = 288; // w-72 in px
+const COLLAPSED_W = 64;
+const EXPANDED_W = 288;
 const DEBOUNCE_MS = 80;
 
 export function CollapsibleSidebar({
@@ -59,7 +59,6 @@ export function CollapsibleSidebar({
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
-  // Filtered nav items
   const filtered = (items ?? navItems).filter((item) =>
     item.roles.includes(role),
   );
@@ -82,7 +81,6 @@ export function CollapsibleSidebar({
     timerRef.current = setTimeout(() => setExpanded(false), DEBOUNCE_MS);
   }, [clearTimer]);
 
-  // Cleanup on unmount
   useEffect(() => () => clearTimer(), [clearTimer]);
 
   // ── Keyboard: Escape closes ───────────────────────────────────────
@@ -90,7 +88,6 @@ export function CollapsibleSidebar({
     (e: React.KeyboardEvent) => {
       if (e.key === 'Escape') {
         setExpanded(false);
-        // Move focus back to collapsed strip
         navRef.current?.querySelector<HTMLElement>('a')?.focus();
       }
     },
@@ -105,64 +102,83 @@ export function CollapsibleSidebar({
   const focusHandlers = {
     onFocus: openSoon,
     onBlur: (e: React.FocusEvent) => {
-      // Only close if focus leaves the entire sidebar
       if (!navRef.current?.contains(e.relatedTarget as Node)) {
         closeSoon();
       }
     },
   };
 
-  const tapToggle = !canHover
-    ? {
-        onClick: (e: React.MouseEvent) => {
-          // Toggle only if clicking the icon strip area (not a link in expanded panel)
-          const target = e.target as HTMLElement;
-          if (!target.closest('[data-expanded-link]')) {
-            setExpanded((prev) => !prev);
-          }
-        },
+  // Touch: tap link when collapsed → expand instead of navigate
+  const handleLinkClick = useCallback(
+    (e: React.MouseEvent) => {
+      if (!canHover && !expanded) {
+        e.preventDefault();
+        setExpanded(true);
       }
-    : {};
+    },
+    [canHover, expanded],
+  );
 
-  // ── Positioning ───────────────────────────────────────────────────
+  // Touch: tap non-link area → toggle
+  const handleContainerClick = !canHover
+    ? (e: React.MouseEvent) => {
+        if (!(e.target as HTMLElement).closest('a')) {
+          setExpanded((prev) => !prev);
+        }
+      }
+    : undefined;
+
   const isLeft = position === 'left';
   const fixedSide = isLeft ? 'left-0' : 'right-0';
-
-  // Overlay transform: slide in from the collapsed strip side
-  const overlayTransform = expanded
-    ? 'translateX(0)'
-    : isLeft
-      ? `translateX(-${EXPANDED_W - COLLAPSED_W}px)`
-      : `translateX(${EXPANDED_W - COLLAPSED_W}px)`;
 
   const isActiveRoute = (to: string) =>
     location.pathname === to || location.pathname.startsWith(to + '/');
 
   return (
-    <>
-      {/* Collapsed icon strip: render only when closed */}
-      {!expanded && (
-        <div
-          ref={navRef}
-          role="navigation"
-          aria-label="Main navigation"
-          aria-expanded={expanded}
-          className={`fixed top-0 ${fixedSide} h-screen bg-primary flex flex-col z-50`}
-          style={{ width: COLLAPSED_W }}
-          {...hoverHandlers}
-          {...focusHandlers}
-          {...tapToggle}
-          onKeyDown={handleKeyDown}
-        >
-          {/* Branding icon */}
-          <div className="flex items-center justify-center h-[72px] border-b border-white/12">
-            <span className="text-[14px] font-semibold text-white tracking-tight">
+    <div
+      ref={navRef}
+      role="navigation"
+      aria-label="Main navigation"
+      className={`fixed top-0 ${fixedSide} h-screen z-50 overflow-hidden ${
+        expanded ? 'shadow-lg' : ''
+      }`}
+      style={{
+        width: expanded ? EXPANDED_W : COLLAPSED_W,
+        transition: 'width 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+      }}
+      {...hoverHandlers}
+      {...focusHandlers}
+      onClick={handleContainerClick}
+      onKeyDown={handleKeyDown}
+    >
+      <div
+        className="h-full bg-primary flex flex-col"
+        style={{ width: EXPANDED_W }}
+      >
+        {/* Branding */}
+        <div className="h-14 shrink-0 flex items-center border-b border-white/15">
+          <div className="w-16 shrink-0 flex items-center justify-center">
+            <span
+              className={`text-[14px] font-semibold text-white tracking-tight transition-opacity duration-200 ${
+                expanded ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
               AD
             </span>
           </div>
+          <div>
+            <h1 className="text-[18px] font-semibold tracking-tight text-white leading-tight whitespace-nowrap">
+              ADAMAS
+            </h1>
+            <p className="text-[11px] text-white/50 leading-snug whitespace-nowrap">
+              Aquatic Data & Monitoring
+            </p>
+          </div>
+        </div>
 
-          {/* Icon-only nav */}
-          <div className="flex-1 flex flex-col items-center gap-1 pt-3">
+        {/* Navigation */}
+        <div className="flex-1 pt-3 px-3">
+          <ul className="space-y-0.5">
             {filtered.map((item) => {
               const Icon = item.icon;
               const isActive = isActiveRoute(item.to);
@@ -171,123 +187,51 @@ export function CollapsibleSidebar({
                   ? item.dataEntryLabel
                   : item.label;
               return (
-                <Link
-                  key={item.key}
-                  to={item.to}
-                  aria-label={label}
-                  title={label}
-                  className={`
-                    flex items-center justify-center w-10 h-10 rounded transition-colors
-                    ${isActive
-                      ? 'bg-white/20 text-white'
-                      : 'text-white/60 hover:bg-white/10 hover:text-white'
-                    }
-                  `}
-                >
-                  <Icon className="w-[18px] h-[18px]" />
-                </Link>
+                <li key={item.key}>
+                  <Link
+                    to={item.to}
+                    aria-label={label}
+                    title={!expanded ? label : undefined}
+                    onClick={handleLinkClick}
+                    className={`
+                      flex items-center h-10 rounded transition-colors
+                      ${isActive
+                        ? 'bg-white/20 text-white font-medium'
+                        : 'text-white/60 hover:bg-white/10 hover:text-white'
+                      }
+                    `}
+                  >
+                    <div className="w-10 shrink-0 flex items-center justify-center">
+                      <Icon className="w-[18px] h-[18px]" />
+                    </div>
+                    <span className="text-[13px] whitespace-nowrap ml-3">
+                      {label}
+                    </span>
+                  </Link>
+                </li>
               );
             })}
-          </div>
-
-          {/* Footer icon area */}
-          <div className="flex items-center justify-center h-12 border-t border-white/12">
-            <span className="text-[9px] text-white/40 font-mono">1.0.2</span>
-          </div>
+          </ul>
         </div>
-      )}
 
-      {/* Expanded overlay panel */}
-      <div
-        aria-hidden={!expanded}
-        className={`fixed top-0 ${fixedSide} h-screen bg-primary flex flex-col shadow-lg pointer-events-none ${
-          expanded ? 'z-[100]' : 'z-40'
-        }`}
-        style={{
-          width: EXPANDED_W,
-          transform: overlayTransform,
-          transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
-        }}
-      >
-
-        <div
-          className={
-            expanded
-              ? 'pointer-events-auto h-full flex flex-col'
-              : 'pointer-events-none h-full flex flex-col'
-          }
-          {...hoverHandlers}
-          {...focusHandlers}
-          onKeyDown={handleKeyDown}
-        >
-          {/* Header */}
-          <div
-            className="h-[72px] flex items-center border-b border-white/12"
-            style={{ paddingLeft: COLLAPSED_W + 4 }}
-          >
-            <div>
-              <h1 className="text-[18px] font-semibold tracking-tight text-white">
-                ADAMAS
-              </h1>
-              <p className="text-[11px] text-white/50 leading-relaxed">
-                Aquatic Data & Monitoring
-                <br />
-                Analysis System
-              </p>
-            </div>
+        {/* Footer */}
+        <div className="mt-auto shrink-0 border-t border-white/12 py-3 flex">
+          <div className="w-16 shrink-0 flex items-center justify-center">
+            <span
+              className={`text-[9px] text-white/40 font-mono transition-opacity duration-200 ${
+                expanded ? 'opacity-0' : 'opacity-100'
+              }`}
+            >
+              1.0.2
+            </span>
           </div>
-
-          {/* Expanded nav links */}
-          <div className="flex-1 py-3" style={{ paddingLeft: COLLAPSED_W }}>
-            <ul className="space-y-0.5 px-3">
-              {filtered.map((item) => {
-                const Icon = item.icon;
-                const isActive = isActiveRoute(item.to);
-                const label =
-                  role === 'data-entry' && item.dataEntryLabel
-                    ? item.dataEntryLabel
-                    : item.label;
-                return (
-                  <li key={item.key}>
-                    <Link
-                      data-expanded-link
-                      to={item.to}
-                      tabIndex={expanded ? 0 : -1}
-                      className={`
-                        flex items-center gap-3 px-3 py-2.5 rounded transition-colors text-[13px]
-                        ${isActive
-                          ? 'bg-white/20 text-white font-medium'
-                          : 'text-white/70 hover:bg-white/10 hover:text-white'
-                        }
-                      `}
-                    >
-                      <Icon className="w-4 h-4" />
-                      <span>{label}</span>
-                      {item.badge && (
-                        <span className="ml-auto text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-medium">
-                          {item.badge}
-                        </span>
-                      )}
-                    </Link>
-                  </li>
-                );
-              })}
-            </ul>
-          </div>
-
-          {/* Footer */}
-          <div
-            className="border-t border-white/12 py-3"
-            style={{ paddingLeft: COLLAPSED_W }}
-          >
-            <div className="px-4 text-[11px] text-white/50 leading-relaxed">
-              <p className="font-medium text-white/80">Version 1.0.2</p>
-              <p className="mt-1.5">Colorado Parks & Wildlife</p>
-              <p className="mt-0.5 text-[10px]">Fisheries Program</p>
-            </div>
+          <div className="text-[11px] text-white/50 leading-relaxed whitespace-nowrap">
+            <p className="font-medium text-white/80">Version 1.0.2</p>
+            <p className="mt-1">Colorado Parks & Wildlife</p>
+            <p className="text-[10px]">Fisheries Program</p>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
