@@ -204,7 +204,7 @@ export function CollapsibleSidebar({
                     <div className="w-10 shrink-0 flex items-center justify-center">
                       <Icon className="w-[18px] h-[18px]" />
                     </div>
-                    <span className="text-[13px] whitespace-nowrap ml-3">
+                    <span className="text-sm whitespace-nowrap ml-3">
                       {label}
                     </span>
                   </Link>
