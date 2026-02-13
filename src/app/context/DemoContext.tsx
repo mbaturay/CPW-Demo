@@ -21,7 +21,7 @@ const DemoContext = createContext<DemoContextType | null>(null);
 
 function loadOverrides(): StatusOverrides {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = sessionStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : {};
   } catch {
     return {};
@@ -30,9 +30,9 @@ function loadOverrides(): StatusOverrides {
 
 function saveOverrides(overrides: StatusOverrides) {
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
+    sessionStorage.setItem(STORAGE_KEY, JSON.stringify(overrides));
   } catch {
-    // localStorage unavailable — in-memory only
+    // sessionStorage unavailable — in-memory only
   }
 }
 
@@ -69,7 +69,7 @@ export function DemoProvider({ children }: { children: ReactNode }) {
   const resetDemo = useCallback(() => {
     setOverrides({});
     try {
-      localStorage.removeItem(STORAGE_KEY);
+      sessionStorage.removeItem(STORAGE_KEY);
     } catch {
       // noop
     }
