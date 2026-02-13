@@ -85,11 +85,11 @@ export default function WaterProfile() {
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'Approved': case 'Published':
-        return 'bg-[#059669]/10 text-[#059669]';
+        return 'bg-success/10 text-success';
       case 'Flagged Suspect': case 'Returned for Correction':
-        return 'bg-[#B91C1C]/10 text-[#B91C1C]';
+        return 'bg-destructive/10 text-destructive';
       default:
-        return 'bg-[#D97706]/10 text-[#D97706]';
+        return 'bg-warning/10 text-warning';
     }
   };
 
@@ -159,7 +159,7 @@ export default function WaterProfile() {
                           <p className="text-[32px] font-semibold text-foreground leading-none">{deUploaded}</p>
                           <p className="text-[12px] text-muted-foreground mt-2">surveys submitted</p>
                         </div>
-                        <CheckCircle2 className="w-5 h-5 text-[#059669] mt-1" />
+                        <CheckCircle2 className="w-5 h-5 text-success mt-1" />
                       </div>
                     </CardContent>
                   </Card>
@@ -172,7 +172,7 @@ export default function WaterProfile() {
                           <p className="text-[32px] font-semibold text-foreground leading-none">{dePending}</p>
                           <p className="text-[12px] text-muted-foreground mt-2">awaiting data quality check</p>
                         </div>
-                        <Clock className="w-5 h-5 text-[#D97706] mt-1" />
+                        <Clock className="w-5 h-5 text-warning mt-1" />
                       </div>
                     </CardContent>
                   </Card>
@@ -185,7 +185,7 @@ export default function WaterProfile() {
                           <p className="text-[32px] font-semibold text-foreground leading-none">{deReturned}</p>
                           <p className="text-[12px] text-muted-foreground mt-2">requiring revision</p>
                         </div>
-                        <AlertTriangle className="w-5 h-5 text-[#B91C1C] mt-1" />
+                        <AlertTriangle className="w-5 h-5 text-destructive mt-1" />
                       </div>
                     </CardContent>
                   </Card>
@@ -263,7 +263,7 @@ export default function WaterProfile() {
                     <p className="text-[28px] font-semibold leading-none text-foreground">
                       {latestTrendPoint?.popEstimate?.toLocaleString() ?? `${latestTrendPoint?.cpue ?? '—'} CPUE`}
                     </p>
-                    <p className={`text-[12px] flex items-center gap-1 mt-2 ${trendDirection === 'up' ? 'text-[#059669]' : 'text-[#B91C1C]'}`}>
+                    <p className={`text-[12px] flex items-center gap-1 mt-2 ${trendDirection === 'up' ? 'text-success' : 'text-destructive'}`}>
                       {trendDirection === 'up' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
                       {trendDirection === 'up' ? 'Stable trend' : 'Declining trend'}
                     </p>
@@ -303,7 +303,7 @@ export default function WaterProfile() {
                 </p>
               </CardHeader>
               <CardContent>
-                <div className="inline-flex px-2 py-1 bg-[#059669]/10 text-[#059669] rounded text-[11px] font-medium">
+                <div className="inline-flex px-2 py-1 bg-success/10 text-success rounded text-[11px] font-medium">
                   Active Monitoring
                 </div>
               </CardContent>
@@ -481,10 +481,10 @@ export default function WaterProfile() {
           </div>
 
           {/* Management Notes */}
-          <Card className="border border-[#D97706]/20 bg-[#D97706]/[0.02] shadow-sm">
-            <CardHeader className="border-b border-[#D97706]/10">
+          <Card className="border border-warning/20 bg-warning/[0.02] shadow-sm">
+            <CardHeader className="border-b border-warning/10">
               <div className="flex items-start gap-3">
-                <AlertTriangle className="w-5 h-5 text-[#D97706] mt-0.5" />
+                <AlertTriangle className="w-5 h-5 text-warning mt-0.5" />
                 <div>
                   <CardTitle className="text-[16px]">Management Notes</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">

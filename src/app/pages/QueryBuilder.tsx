@@ -131,7 +131,7 @@ export default function QueryBuilder() {
                 <CardContent className="pt-6 space-y-5">
                   <div>
                     <Label htmlFor="water" className="text-[13px] flex items-center gap-1">
-                      {role === 'area-biologist' ? 'Waters in Northeast Region' : 'Water'} <span className="text-[#B91C1C]">*</span>
+                      {role === 'area-biologist' ? 'Waters in Northeast Region' : 'Water'} <span className="text-destructive">*</span>
                     </Label>
                     <Select defaultValue="south-platte">
                       <SelectTrigger id="water" className="mt-1.5">
@@ -355,7 +355,7 @@ export default function QueryBuilder() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="mt-5 text-[#B91C1C] hover:text-[#B91C1C] hover:bg-[#B91C1C]/10"
+                                className="mt-5 text-destructive hover:text-destructive hover:bg-destructive/10"
                                 onClick={() => removeCondition(condition.id)}
                               >
                                 <X className="w-4 h-4" />

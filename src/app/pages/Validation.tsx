@@ -196,15 +196,15 @@ export default function Validation() {
           {/* Inline action confirmation */}
           {actionMessage && (
             <div className="mt-3 flex items-center gap-2 text-[13px]">
-              <CheckCircle2 className="w-4 h-4 text-[#059669]" />
-              <span className="text-[#059669] font-medium">{actionMessage}</span>
+              <CheckCircle2 className="w-4 h-4 text-success" />
+              <span className="text-success font-medium">{actionMessage}</span>
               {effectiveStatus && (
                 <span className={`ml-2 inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${
                   effectiveStatus === 'Approved' || effectiveStatus === 'Published'
-                    ? 'bg-[#059669]/10 text-[#059669]'
+                    ? 'bg-success/10 text-success'
                     : effectiveStatus === 'Returned for Correction' || effectiveStatus === 'Flagged Suspect'
-                    ? 'bg-[#B91C1C]/10 text-[#B91C1C]'
-                    : 'bg-[#D97706]/10 text-[#D97706]'
+                    ? 'bg-destructive/10 text-destructive'
+                    : 'bg-warning/10 text-warning'
                 }`}>
                   {effectiveStatus}
                 </span>
@@ -303,7 +303,7 @@ export default function Validation() {
             <Card className="border border-border shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-[#059669]" />
+                  <CheckCircle2 className="w-5 h-5 text-success" />
                   <div>
                     <p className="text-[26px] font-semibold">{validCount}</p>
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Valid Rows</p>
@@ -315,7 +315,7 @@ export default function Validation() {
             <Card className="border border-border shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-[#D97706]" />
+                  <AlertCircle className="w-5 h-5 text-warning" />
                   <div>
                     <p className="text-[26px] font-semibold">{warningCount}</p>
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Warnings</p>
@@ -327,7 +327,7 @@ export default function Validation() {
             <Card className="border border-border shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-[#B91C1C]" />
+                  <AlertCircle className="w-5 h-5 text-destructive" />
                   <div>
                     <p className="text-[26px] font-semibold">{errorCount}</p>
                     <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Errors</p>
@@ -379,16 +379,16 @@ export default function Validation() {
                             key={item.row}
                             className={
                               item.status === 'error'
-                                ? 'bg-[#B91C1C]/[0.02] hover:bg-[#B91C1C]/[0.04]'
+                                ? 'bg-destructive/[0.02] hover:bg-destructive/[0.04]'
                                 : item.status === 'warning'
-                                ? 'bg-[#D97706]/[0.02] hover:bg-[#D97706]/[0.04]'
+                                ? 'bg-warning/[0.02] hover:bg-warning/[0.04]'
                                 : 'hover:bg-muted/20'
                             }
                           >
                             <TableCell className="p-0 w-3">
                               <div className={`h-full w-1 ${
-                                item.status === 'error' ? 'bg-[#B91C1C]' :
-                                item.status === 'warning' ? 'bg-[#D97706]' :
+                                item.status === 'error' ? 'bg-destructive' :
+                                item.status === 'warning' ? 'bg-warning' :
                                 'bg-transparent'
                               }`}></div>
                             </TableCell>
@@ -401,7 +401,7 @@ export default function Validation() {
                             <TableCell className="text-[13px]">{item.weight}</TableCell>
                             <TableCell>
                               {item.status === 'valid' && (
-                                <span className="flex items-center gap-1.5 text-[#059669] text-[12px]">
+                                <span className="flex items-center gap-1.5 text-success text-[12px]">
                                   <CheckCircle2 className="w-3.5 h-3.5" />
                                   Valid
                                 </span>
@@ -410,7 +410,7 @@ export default function Validation() {
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="flex items-center gap-1.5 text-[#D97706] text-[12px] cursor-help">
+                                      <span className="flex items-center gap-1.5 text-warning text-[12px] cursor-help">
                                         <AlertCircle className="w-3.5 h-3.5" />
                                         Warning
                                       </span>
@@ -425,7 +425,7 @@ export default function Validation() {
                                 <TooltipProvider>
                                   <Tooltip>
                                     <TooltipTrigger asChild>
-                                      <span className="flex items-center gap-1.5 text-[#B91C1C] text-[12px] cursor-help">
+                                      <span className="flex items-center gap-1.5 text-destructive text-[12px] cursor-help">
                                         <AlertCircle className="w-3.5 h-3.5" />
                                         Error
                                       </span>
@@ -474,12 +474,12 @@ export default function Validation() {
                       validationCase.issues.map((issue, idx) => (
                         <div key={idx} className={`p-3 border rounded ${
                           issue.severity === 'Error'
-                            ? 'border-[#B91C1C]/20 bg-[#B91C1C]/5'
-                            : 'border-[#D97706]/20 bg-[#D97706]/5'
+                            ? 'border-destructive/20 bg-destructive/5'
+                            : 'border-warning/20 bg-warning/5'
                         }`}>
                           <div className="flex items-start gap-2 mb-2">
                             <AlertCircle className={`w-4 h-4 mt-0.5 flex-shrink-0 ${
-                              issue.severity === 'Error' ? 'text-[#B91C1C]' : 'text-[#D97706]'
+                              issue.severity === 'Error' ? 'text-destructive' : 'text-warning'
                             }`} />
                             <div className="flex-1">
                               <p className="text-[13px] font-medium text-foreground">
@@ -503,8 +503,8 @@ export default function Validation() {
                         </div>
                       ))
                     ) : errorCount === 0 && warningCount === 0 ? (
-                      <div className="p-4 border border-[#059669]/20 rounded bg-[#059669]/5 text-center">
-                        <CheckCircle2 className="w-6 h-6 text-[#059669] mx-auto mb-2" />
+                      <div className="p-4 border border-success/20 rounded bg-success/5 text-center">
+                        <CheckCircle2 className="w-6 h-6 text-success mx-auto mb-2" />
                         <p className="text-[13px] font-medium text-foreground">No issues detected</p>
                         <p className="text-[11px] text-muted-foreground mt-1">
                           All records passed validation rules. This survey is ready for approval.
@@ -512,9 +512,9 @@ export default function Validation() {
                       </div>
                     ) : (
                       <>
-                        <div className="p-3 border border-[#B91C1C]/20 rounded bg-[#B91C1C]/5">
+                        <div className="p-3 border border-destructive/20 rounded bg-destructive/5">
                           <div className="flex items-start gap-2 mb-2">
-                            <AlertCircle className="w-4 h-4 text-[#B91C1C] mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-[13px] font-medium text-foreground">Row 4</p>
                               <p className="text-[11px] text-muted-foreground mt-1">
@@ -527,9 +527,9 @@ export default function Validation() {
                           </Button>
                         </div>
 
-                        <div className="p-3 border border-[#B91C1C]/20 rounded bg-[#B91C1C]/5">
+                        <div className="p-3 border border-destructive/20 rounded bg-destructive/5">
                           <div className="flex items-start gap-2 mb-2">
-                            <AlertCircle className="w-4 h-4 text-[#B91C1C] mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-destructive mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-[13px] font-medium text-foreground">Row 7</p>
                               <p className="text-[11px] text-muted-foreground mt-1">
@@ -542,9 +542,9 @@ export default function Validation() {
                           </Button>
                         </div>
 
-                        <div className="p-3 border border-[#D97706]/20 rounded bg-[#D97706]/5">
+                        <div className="p-3 border border-warning/20 rounded bg-warning/5">
                           <div className="flex items-start gap-2 mb-2">
-                            <AlertCircle className="w-4 h-4 text-[#D97706] mt-0.5 flex-shrink-0" />
+                            <AlertCircle className="w-4 h-4 text-warning mt-0.5 flex-shrink-0" />
                             <div className="flex-1">
                               <p className="text-[13px] font-medium text-foreground">Row 9</p>
                               <p className="text-[11px] text-muted-foreground mt-1">

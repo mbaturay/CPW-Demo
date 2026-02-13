@@ -191,7 +191,7 @@ export default function Insights() {
                   <div>
                     <p className="text-[32px] font-semibold leading-none text-foreground">{latestPoint?.popEstimate?.toLocaleString() ?? '—'}</p>
                     {popChange && (
-                      <p className="text-[12px] text-[#059669] flex items-center gap-1 mt-2">
+                      <p className="text-[12px] text-success flex items-center gap-1 mt-2">
                         <TrendingUp className="w-3.5 h-3.5" />
                         +{popChange}% from {prevPoint ? prevPoint.year : ''}
                       </p>
@@ -216,7 +216,7 @@ export default function Insights() {
                   <div>
                     <p className="text-[32px] font-semibold leading-none text-foreground">{latestPoint?.cpue ?? '—'}</p>
                     {cpueChange && (
-                      <p className="text-[12px] text-[#059669] flex items-center gap-1 mt-2">
+                      <p className="text-[12px] text-success flex items-center gap-1 mt-2">
                         <TrendingUp className="w-3.5 h-3.5" />
                         +{cpueChange}% from {prevPoint ? prevPoint.year : ''}
                       </p>
@@ -241,7 +241,7 @@ export default function Insights() {
                   <div>
                     <p className="text-[32px] font-semibold leading-none text-foreground">{latestPoint?.biomassKg ?? '—'}</p>
                     {biomassChange && (
-                      <p className="text-[12px] text-[#059669] flex items-center gap-1 mt-2">
+                      <p className="text-[12px] text-success flex items-center gap-1 mt-2">
                         <TrendingUp className="w-3.5 h-3.5" />
                         +{biomassChange}% from {prevPoint ? prevPoint.year : ''}
                       </p>
@@ -440,17 +440,17 @@ export default function Insights() {
                   <div className="grid grid-cols-3 gap-4">
                     <div className="text-center p-3 border border-border/50 rounded bg-white">
                       <p className="text-[11px] text-muted-foreground mb-1">Colorado River</p>
-                      <p className="text-[20px] font-semibold text-[#059669]">+{getDelta(crFirst, crLast)}</p>
+                      <p className="text-[20px] font-semibold text-success">+{getDelta(crFirst, crLast)}</p>
                       <p className="text-[10px] text-muted-foreground">vs. {crFirst?.year ?? '—'} baseline</p>
                     </div>
                     <div className="text-center p-3 border border-border/50 rounded bg-white">
                       <p className="text-[11px] text-muted-foreground mb-1">South Platte Basin</p>
-                      <p className="text-[20px] font-semibold text-[#059669]">+{getDelta(spFirst, spLast)}</p>
+                      <p className="text-[20px] font-semibold text-success">+{getDelta(spFirst, spLast)}</p>
                       <p className="text-[10px] text-muted-foreground">vs. {spFirst?.year ?? '—'} baseline</p>
                     </div>
                     <div className="text-center p-3 border border-border/50 rounded bg-white">
                       <p className="text-[11px] text-muted-foreground mb-1">Blue River</p>
-                      <p className="text-[20px] font-semibold text-[#059669]">+{getDelta(brFirst, brLast)}</p>
+                      <p className="text-[20px] font-semibold text-success">+{getDelta(brFirst, brLast)}</p>
                       <p className="text-[10px] text-muted-foreground">vs. {brFirst?.year ?? '—'} baseline</p>
                     </div>
                   </div>

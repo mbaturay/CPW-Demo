@@ -135,17 +135,19 @@ export function CollapsibleSidebar({
       ? `translateX(-${EXPANDED_W - COLLAPSED_W}px)`
       : `translateX(${EXPANDED_W - COLLAPSED_W}px)`;
 
+  const isActiveRoute = (to: string) =>
+    location.pathname === to || location.pathname.startsWith(to + '/');
+
   return (
     <>
       {/* Collapsed icon strip: render only when closed */}
-      {/* hide collapsed icons while overlay expanded to prevent visual duplication */}
       {!expanded && (
         <div
           ref={navRef}
           role="navigation"
           aria-label="Main navigation"
           aria-expanded={expanded}
-          className={`fixed top-0 ${fixedSide} h-screen bg-white border-r border-border flex flex-col z-50`}
+          className={`fixed top-0 ${fixedSide} h-screen bg-primary flex flex-col z-50`}
           style={{ width: COLLAPSED_W }}
           {...hoverHandlers}
           {...focusHandlers}
@@ -153,8 +155,8 @@ export function CollapsibleSidebar({
           onKeyDown={handleKeyDown}
         >
           {/* Branding icon */}
-          <div className="flex items-center justify-center h-[72px] border-b border-border">
-            <span className="text-[14px] font-semibold text-primary tracking-tight">
+          <div className="flex items-center justify-center h-[72px] border-b border-white/12">
+            <span className="text-[14px] font-semibold text-white tracking-tight">
               AD
             </span>
           </div>
@@ -163,7 +165,7 @@ export function CollapsibleSidebar({
           <div className="flex-1 flex flex-col items-center gap-1 pt-3">
             {filtered.map((item) => {
               const Icon = item.icon;
-              const isActive = location.pathname === item.to;
+              const isActive = isActiveRoute(item.to);
               const label =
                 role === 'data-entry' && item.dataEntryLabel
                   ? item.dataEntryLabel
@@ -177,8 +179,8 @@ export function CollapsibleSidebar({
                   className={`
                     flex items-center justify-center w-10 h-10 rounded transition-colors
                     ${isActive
-                      ? 'bg-primary text-primary-foreground'
-                      : 'text-muted-foreground hover:bg-muted/50 hover:text-foreground'
+                      ? 'bg-white/20 text-white'
+                      : 'text-white/60 hover:bg-white/10 hover:text-white'
                     }
                   `}
                 >
@@ -189,8 +191,8 @@ export function CollapsibleSidebar({
           </div>
 
           {/* Footer icon area */}
-          <div className="flex items-center justify-center h-12 border-t border-border">
-            <span className="text-[9px] text-muted-foreground font-mono">1.0.2</span>
+          <div className="flex items-center justify-center h-12 border-t border-white/12">
+            <span className="text-[9px] text-white/40 font-mono">1.0.2</span>
           </div>
         </div>
       )}
@@ -198,7 +200,7 @@ export function CollapsibleSidebar({
       {/* Expanded overlay panel */}
       <div
         aria-hidden={!expanded}
-        className={`fixed top-0 ${fixedSide} h-screen bg-white border-r border-border flex flex-col shadow-lg pointer-events-none ${
+        className={`fixed top-0 ${fixedSide} h-screen bg-primary flex flex-col shadow-lg pointer-events-none ${
           expanded ? 'z-[100]' : 'z-40'
         }`}
         style={{
@@ -206,7 +208,6 @@ export function CollapsibleSidebar({
           transform: overlayTransform,
           transition: 'transform 200ms cubic-bezier(0.4, 0, 0.2, 1)',
         }}
-          // Need pointer-events on expanded panel when visible
       >
 
         <div
@@ -221,14 +222,14 @@ export function CollapsibleSidebar({
         >
           {/* Header */}
           <div
-            className="h-[72px] flex items-center border-b border-border"
+            className="h-[72px] flex items-center border-b border-white/12"
             style={{ paddingLeft: COLLAPSED_W + 4 }}
           >
             <div>
-              <h1 className="text-[18px] font-semibold tracking-tight text-primary">
+              <h1 className="text-[18px] font-semibold tracking-tight text-white">
                 ADAMAS
               </h1>
-              <p className="text-[11px] text-muted-foreground leading-relaxed">
+              <p className="text-[11px] text-white/50 leading-relaxed">
                 Aquatic Data & Monitoring
                 <br />
                 Analysis System
@@ -241,7 +242,7 @@ export function CollapsibleSidebar({
             <ul className="space-y-0.5 px-3">
               {filtered.map((item) => {
                 const Icon = item.icon;
-                const isActive = location.pathname === item.to;
+                const isActive = isActiveRoute(item.to);
                 const label =
                   role === 'data-entry' && item.dataEntryLabel
                     ? item.dataEntryLabel
@@ -255,15 +256,15 @@ export function CollapsibleSidebar({
                       className={`
                         flex items-center gap-3 px-3 py-2.5 rounded transition-colors text-[13px]
                         ${isActive
-                          ? 'bg-primary text-primary-foreground font-medium'
-                          : 'text-foreground hover:bg-muted/50'
+                          ? 'bg-white/20 text-white font-medium'
+                          : 'text-white/70 hover:bg-white/10 hover:text-white'
                         }
                       `}
                     >
                       <Icon className="w-4 h-4" />
                       <span>{label}</span>
                       {item.badge && (
-                        <span className="ml-auto text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="ml-auto text-[10px] bg-white/20 text-white px-1.5 py-0.5 rounded-full font-medium">
                           {item.badge}
                         </span>
                       )}
@@ -276,11 +277,11 @@ export function CollapsibleSidebar({
 
           {/* Footer */}
           <div
-            className="border-t border-border py-3"
+            className="border-t border-white/12 py-3"
             style={{ paddingLeft: COLLAPSED_W }}
           >
-            <div className="px-4 text-[11px] text-muted-foreground leading-relaxed">
-              <p className="font-medium text-foreground">Version 1.0.2</p>
+            <div className="px-4 text-[11px] text-white/50 leading-relaxed">
+              <p className="font-medium text-white/80">Version 1.0.2</p>
               <p className="mt-1.5">Colorado Parks & Wildlife</p>
               <p className="mt-0.5 text-[10px]">Fisheries Program</p>
             </div>

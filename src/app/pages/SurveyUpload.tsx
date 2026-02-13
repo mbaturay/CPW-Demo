@@ -185,7 +185,7 @@ export default function SurveyUpload() {
                 <Card className="border border-border shadow-sm">
                   <CardHeader className="border-b border-border/50">
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-[#059669]" />
+                      <CheckCircle2 className="w-5 h-5 text-success" />
                       <CardTitle className="text-[16px]">File Detected & Analyzed</CardTitle>
                     </div>
                     <p className="text-[12px] text-muted-foreground mt-1">
@@ -272,24 +272,24 @@ export default function SurveyUpload() {
                     </p>
                   </CardHeader>
                   <CardContent className="pt-6 space-y-4">
-                    <div className="p-4 border border-[#059669]/30 bg-[#059669]/5 rounded flex items-center gap-3">
-                      <CheckCircle2 className="w-6 h-6 text-[#059669] flex-shrink-0" />
+                    <div className="p-4 border border-success/30 bg-success/5 rounded flex items-center gap-3">
+                      <CheckCircle2 className="w-6 h-6 text-success flex-shrink-0" />
                       <div>
                         <p className="text-[18px] font-semibold text-foreground">247 Valid Records</p>
                         <p className="text-[11px] text-muted-foreground">All required fields present and within range</p>
                       </div>
                     </div>
                     
-                    <div className="p-4 border border-[#D97706]/30 bg-[#D97706]/5 rounded flex items-center gap-3">
-                      <AlertCircle className="w-6 h-6 text-[#D97706] flex-shrink-0" />
+                    <div className="p-4 border border-warning/30 bg-warning/5 rounded flex items-center gap-3">
+                      <AlertCircle className="w-6 h-6 text-warning flex-shrink-0" />
                       <div>
                         <p className="text-[18px] font-semibold text-foreground">12 Warnings</p>
                         <p className="text-[11px] text-muted-foreground">Minor issues — can proceed with review</p>
                       </div>
                     </div>
                     
-                    <div className="p-4 border border-[#B91C1C]/30 bg-[#B91C1C]/5 rounded flex items-center gap-3">
-                      <AlertCircle className="w-6 h-6 text-[#B91C1C] flex-shrink-0" />
+                    <div className="p-4 border border-destructive/30 bg-destructive/5 rounded flex items-center gap-3">
+                      <AlertCircle className="w-6 h-6 text-destructive flex-shrink-0" />
                       <div>
                         <p className="text-[18px] font-semibold text-foreground">3 Errors</p>
                         <p className="text-[11px] text-muted-foreground">Must be corrected before submission</p>
@@ -301,20 +301,20 @@ export default function SurveyUpload() {
                         Issues Requiring Attention
                       </h4>
                       <div className="space-y-2 text-[12px]">
-                        <div className="flex items-start gap-2 p-2 border border-[#B91C1C]/20 rounded bg-[#B91C1C]/5">
-                          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#B91C1C]" />
+                        <div className="flex items-start gap-2 p-2 border border-destructive/20 rounded bg-destructive/5">
+                          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-destructive" />
                           <span className="text-foreground">
                             <span className="font-mono">Row 34:</span> Invalid species code "RNTR"
                           </span>
                         </div>
-                        <div className="flex items-start gap-2 p-2 border border-[#B91C1C]/20 rounded bg-[#B91C1C]/5">
-                          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#B91C1C]" />
+                        <div className="flex items-start gap-2 p-2 border border-destructive/20 rounded bg-destructive/5">
+                          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-destructive" />
                           <span className="text-foreground">
                             <span className="font-mono">Row 89:</span> Length exceeds biological maximum (892mm)
                           </span>
                         </div>
-                        <div className="flex items-start gap-2 p-2 border border-[#B91C1C]/20 rounded bg-[#B91C1C]/5">
-                          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-[#B91C1C]" />
+                        <div className="flex items-start gap-2 p-2 border border-destructive/20 rounded bg-destructive/5">
+                          <AlertCircle className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-destructive" />
                           <span className="text-foreground">
                             <span className="font-mono">Row 156:</span> Protocol mismatch (expected 2 passes, found 1)
                           </span>

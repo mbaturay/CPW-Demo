@@ -139,8 +139,8 @@ export default function DataEntryDashboard() {
                         <span className={`
                           inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium
                           ${water.status === 'Complete' 
-                            ? 'bg-[#059669]/10 text-[#059669]' 
-                            : 'bg-[#D97706]/10 text-[#D97706]'
+                            ? 'bg-success/10 text-success' 
+                            : 'bg-warning/10 text-warning'
                           }
                         `}>
                           {water.status === 'Complete' ? (
@@ -199,8 +199,8 @@ export default function DataEntryDashboard() {
                         <span className={`
                           inline-flex px-2 py-0.5 rounded text-[11px] font-medium
                           ${submission.status === 'Validated' 
-                            ? 'bg-[#059669]/10 text-[#059669]' 
-                            : 'bg-[#D97706]/10 text-[#D97706]'
+                            ? 'bg-success/10 text-success' 
+                            : 'bg-warning/10 text-warning'
                           }
                         `}>
                           {submission.status}

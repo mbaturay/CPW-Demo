@@ -90,11 +90,11 @@ export default function ActivityFeed() {
   const getStatusStyle = (status: SurveyStatus) => {
     switch (status) {
       case 'Approved': case 'Published':
-        return 'bg-[#059669]/10 text-[#059669]';
+        return 'bg-success/10 text-success';
       case 'Flagged Suspect': case 'Returned for Correction':
-        return 'bg-[#B91C1C]/10 text-[#B91C1C]';
+        return 'bg-destructive/10 text-destructive';
       default:
-        return 'bg-[#D97706]/10 text-[#D97706]';
+        return 'bg-warning/10 text-warning';
     }
   };
 

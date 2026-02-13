@@ -103,7 +103,7 @@ export default function SeniorBiologistDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-[28px] font-semibold text-foreground mb-1">7</div>
-                <p className="text-[11px] text-[#B91C1C]">Population declines require analysis</p>
+                <p className="text-[11px] text-destructive">Population declines require analysis</p>
               </CardContent>
             </Card>
             
@@ -127,7 +127,7 @@ export default function SeniorBiologistDashboard() {
               </CardHeader>
               <CardContent>
                 <div className="text-[28px] font-semibold text-foreground mb-1">96%</div>
-                <p className="text-[11px] text-[#059669]">Validation rate across all surveys</p>
+                <p className="text-[11px] text-success">Validation rate across all surveys</p>
               </CardContent>
             </Card>
           </div>
@@ -199,7 +199,7 @@ export default function SeniorBiologistDashboard() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className={`flex items-center gap-1 text-[12px] font-medium ${
-                          water.trend.startsWith('+') ? 'text-[#059669]' : 'text-[#B91C1C]'
+                          water.trend.startsWith('+') ? 'text-success' : 'text-destructive'
                         }`}>
                           {water.trend.startsWith('+') ? (
                             <TrendingUp className="w-3.5 h-3.5" />
@@ -211,10 +211,10 @@ export default function SeniorBiologistDashboard() {
                         <span className={`
                           inline-flex px-2 py-0.5 rounded text-[10px] font-medium
                           ${water.status === 'Stable' 
-                            ? 'bg-[#059669]/10 text-[#059669]' 
+                            ? 'bg-success/10 text-success' 
                             : water.status === 'Declining'
-                            ? 'bg-[#D97706]/10 text-[#D97706]'
-                            : 'bg-[#B91C1C]/10 text-[#B91C1C]'
+                            ? 'bg-warning/10 text-warning'
+                            : 'bg-destructive/10 text-destructive'
                           }
                         `}>
                           {water.status}
@@ -246,9 +246,9 @@ export default function SeniorBiologistDashboard() {
                         <span className={`
                           inline-flex px-2 py-0.5 rounded text-[10px] font-medium
                           ${report.status === 'On Track' 
-                            ? 'bg-[#059669]/10 text-[#059669]' 
+                            ? 'bg-success/10 text-success' 
                             : report.status === 'Needs Attention'
-                            ? 'bg-[#D97706]/10 text-[#D97706]'
+                            ? 'bg-warning/10 text-warning'
                             : 'bg-muted/50 text-muted-foreground'
                           }
                         `}>
@@ -259,9 +259,9 @@ export default function SeniorBiologistDashboard() {
                         <div className="flex-1 h-2 bg-muted rounded overflow-hidden">
                           <div 
                             className={`h-full ${
-                              report.progress >= 85 ? 'bg-[#059669]' :
-                              report.progress >= 70 ? 'bg-[#D97706]' :
-                              'bg-[#B91C1C]'
+                              report.progress >= 85 ? 'bg-success' :
+                              report.progress >= 70 ? 'bg-warning' :
+                              'bg-destructive'
                             }`}
                             style={{ width: `${report.progress}%` }}
                           ></div>
@@ -278,12 +278,12 @@ export default function SeniorBiologistDashboard() {
           </div>
           
           {/* Waters Requiring Attention */}
-          <Card className="border border-[#B91C1C]/20 bg-[#B91C1C]/[0.02] shadow-sm">
-            <CardHeader className="border-b border-[#B91C1C]/10">
+          <Card className="border border-destructive/20 bg-destructive/[0.02] shadow-sm">
+            <CardHeader className="border-b border-destructive/10">
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-[16px] text-foreground flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-[#B91C1C]" />
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
                     Waters Requiring Strategic Attention
                   </CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">
@@ -300,7 +300,7 @@ export default function SeniorBiologistDashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Blue River — Northwest</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-[#B91C1C]/10 text-[#B91C1C] font-medium">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
                       -12% decline
                     </span>
                   </div>
@@ -312,7 +312,7 @@ export default function SeniorBiologistDashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Arkansas River — SE</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-[#D97706]/10 text-[#D97706] font-medium">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
                       Data Quality
                     </span>
                   </div>
@@ -324,7 +324,7 @@ export default function SeniorBiologistDashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Gunnison River — SW</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-[#D97706]/10 text-[#D97706] font-medium">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
                       Range Shift
                     </span>
                   </div>

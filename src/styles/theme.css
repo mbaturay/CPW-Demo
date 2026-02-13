@@ -2,7 +2,7 @@
 
 :root {
   --font-size: 16px;
-  --background: #F6F8FA;
+  --background: #F5F6F4;
   --foreground: #1E293B;
   --card: #ffffff;
   --card-foreground: #1E293B;
@@ -13,18 +13,19 @@
   --secondary: #2F6F73;
   --secondary-foreground: #ffffff;
   --accent-steel: #5B7C99;
-  --muted: #E2E8F0;
+  --accent-gold: #B8860B;
+  --muted: #E8E6E1;
   --muted-foreground: #64748B;
-  --accent: #E2E8F0;
+  --accent: #E8E6E1;
   --accent-foreground: #1B365D;
-  --destructive: #B91C1C;
+  --destructive: #9F1B1B;
   --destructive-foreground: #ffffff;
-  --warning: #D97706;
+  --warning: #92690A;
   --warning-foreground: #ffffff;
-  --success: #059669;
+  --success: #1A6B50;
   --success-foreground: #ffffff;
-  --border: #E2E8F0;
-  --input: #CBD5E1;
+  --border: #D9D6D0;
+  --input: #C4C1BB;
   --input-background: #ffffff;
   --switch-background: #cbced4;
   --font-weight-medium: 500;
@@ -34,17 +35,17 @@
   --chart-1: #1B365D;
   --chart-2: #2F6F73;
   --chart-3: #5B7C99;
-  --chart-4: #059669;
-  --chart-5: #D97706;
-  --radius: 0.375rem;
-  --sidebar: #ffffff;
-  --sidebar-foreground: #1E293B;
-  --sidebar-primary: #1B365D;
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #F1F5F9;
-  --sidebar-accent-foreground: #1B365D;
-  --sidebar-border: #E2E8F0;
-  --sidebar-ring: #1B365D;
+  --chart-4: #1A6B50;
+  --chart-5: #B8860B;
+  --radius: 0.625rem;
+  --sidebar: #1B365D;
+  --sidebar-foreground: rgba(255, 255, 255, 0.85);
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #1B365D;
+  --sidebar-accent: rgba(255, 255, 255, 0.1);
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: rgba(255, 255, 255, 0.12);
+  --sidebar-ring: #ffffff;
 }
 
 .dark {
@@ -101,9 +102,14 @@
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
   --color-destructive-foreground: var(--destructive-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-input-background: var(--input-background);
+  --color-accent-gold: var(--accent-gold);
   --color-switch-background: var(--switch-background);
   --color-ring: var(--ring);
   --color-chart-1: var(--chart-1);

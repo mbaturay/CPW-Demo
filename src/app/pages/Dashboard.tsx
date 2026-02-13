@@ -52,7 +52,7 @@ export default function Dashboard() {
       value: String(pendingCount),
       icon: AlertTriangle,
       trend: `Across ${reviewQueue.length} items in queue`,
-      color: 'text-[#D97706]'
+      color: 'text-warning'
     },
     {
       title: 'Flagged Surveys',
@@ -60,7 +60,7 @@ export default function Dashboard() {
       value: String(flaggedCount),
       icon: AlertTriangle,
       trend: flaggedCount > 0 ? 'Data quality review needed' : 'No flagged surveys',
-      color: 'text-[#B91C1C]'
+      color: 'text-destructive'
     },
     {
       title: 'Federal Reporting',
@@ -68,7 +68,7 @@ export default function Dashboard() {
       value: '87%',
       icon: CheckCircle2,
       trend: 'Due: March 31, 2026',
-      color: 'text-[#059669]'
+      color: 'text-success'
     },
   ];
 
@@ -104,11 +104,11 @@ export default function Dashboard() {
   const getStatusStyle = (status: string) => {
     switch (status) {
       case 'Approved': case 'Published':
-        return 'bg-[#059669]/10 text-[#059669]';
+        return 'bg-success/10 text-success';
       case 'Flagged Suspect': case 'Returned for Correction':
-        return 'bg-[#B91C1C]/10 text-[#B91C1C]';
+        return 'bg-destructive/10 text-destructive';
       default:
-        return 'bg-[#D97706]/10 text-[#D97706]';
+        return 'bg-warning/10 text-warning';
     }
   };
 
@@ -281,7 +281,7 @@ export default function Dashboard() {
                       <TableCell className="text-[13px] font-mono">{water.activeSurveys}</TableCell>
                       <TableCell className="text-[12px] text-muted-foreground">{water.lastSurvey}</TableCell>
                       <TableCell>
-                        <span className="inline-flex px-2 py-0.5 bg-[#059669]/10 text-[#059669] rounded text-[11px] font-medium">
+                        <span className="inline-flex px-2 py-0.5 bg-success/10 text-success rounded text-[11px] font-medium">
                           {water.status}
                         </span>
                       </TableCell>
@@ -293,12 +293,12 @@ export default function Dashboard() {
           </Card>
 
           {/* Species of Concern Activity Panel */}
-          <Card className="border border-[#B91C1C]/20 bg-[#B91C1C]/[0.02] shadow-sm">
-            <CardHeader className="border-b border-[#B91C1C]/10">
+          <Card className="border border-destructive/20 bg-destructive/[0.02] shadow-sm">
+            <CardHeader className="border-b border-destructive/10">
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-[16px] text-foreground flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-[#B91C1C]" />
+                    <AlertTriangle className="w-4 h-4 text-destructive" />
                     Species of Concern Activity
                   </CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">
@@ -315,7 +315,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Cutthroat Trout (CTT)</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-[#B91C1C]/10 text-[#B91C1C] font-medium">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
                       {cttDecline}% decline
                     </span>
                   </div>
@@ -327,7 +327,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Mountain Whitefish (MWF)</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-[#D97706]/10 text-[#D97706] font-medium">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
                       Monitoring
                     </span>
                   </div>
@@ -339,7 +339,7 @@ export default function Dashboard() {
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Creek Chub (CRD)</span>
-                    <span className="text-[11px] px-2 py-0.5 rounded bg-[#D97706]/10 text-[#D97706] font-medium">
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
                       Range shift
                     </span>
                   </div>

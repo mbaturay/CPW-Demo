@@ -19,22 +19,25 @@ export function WaterBanner({
   yearsActive
 }: WaterBannerProps) {
   return (
-    <div className="bg-white border-b border-border">
-      <div className="px-8 py-6">
+    <div className="bg-white border-b border-border/70">
+      <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-start justify-between gap-8">
-            <div className="flex-1">
-              <h2 className="text-[24px] font-semibold text-primary mb-3">{waterName}</h2>
-              <p className="text-[14px] text-muted-foreground">
-                <span className="font-medium">Region:</span> {region} <span className="mx-3">|</span>
-                <span className="font-medium">Watershed:</span> {watershed} <span className="mx-3">|</span>
-                <span className="font-medium">Stations:</span> {stations.length} <span className="mx-3">|</span>
-                <span className="font-medium">Total Surveys:</span> {totalSurveys} <span className="mx-3">|</span>
-                <span className="font-medium">Years Active:</span> {yearsActive}
-              </p>
+            <div className="flex gap-4 flex-1">
+              <div className="w-1 shrink-0 rounded-full bg-primary" />
+              <div>
+                <h2 className="text-[24px] font-semibold text-foreground mb-3">{waterName}</h2>
+                <p className="text-[14px] text-muted-foreground">
+                  <span className="font-medium text-foreground">Region:</span> {region} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Watershed:</span> {watershed} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Stations:</span> {stations.length} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Total Surveys:</span> {totalSurveys} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Years Active:</span> {yearsActive}
+                </p>
+              </div>
             </div>
 
-            <div className="w-64 h-40 flex-shrink-0">
+            <div className="w-64 h-40 flex-shrink-0 overflow-hidden">
               <StationViz
                 stations={stations}
                 title={`Survey Stations — ${waterName}`}
@@ -43,7 +46,6 @@ export function WaterBanner({
           </div>
         </div>
       </div>
-      <div className="h-px bg-border/50"></div>
     </div>
   );
 }
