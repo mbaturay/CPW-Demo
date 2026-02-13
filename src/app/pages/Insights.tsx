@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Download, FileSpreadsheet, TrendingUp, Info, BarChart3 } from 'lucide-react';
+import { FileSpreadsheet, TrendingUp, Info, BarChart3 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
 import { WaterBanner } from '../components/WaterBanner';
 import { RoleIndicator } from '../components/RoleIndicator';
@@ -580,38 +580,6 @@ export default function Insights() {
                 </CardContent>
               </Card>
 
-              <Card className="border border-border shadow-sm">
-                <CardHeader className="border-b border-border/50">
-                  <CardTitle className="text-[16px]">Survey Water Bodies</CardTitle>
-                  <p className="text-[11px] text-muted-foreground mt-1">
-                    Geographic coverage
-                  </p>
-                </CardHeader>
-                <CardContent className="pt-6">
-                  <div className="aspect-square bg-muted/30 rounded border border-border/50 flex items-center justify-center relative overflow-hidden mb-4">
-                    <div className="absolute inset-0 opacity-40">
-                      <div className="absolute top-[20%] left-[30%] w-2 h-2 bg-primary rounded-full"></div>
-                      <div className="absolute top-[35%] left-[65%] w-2 h-2 bg-primary rounded-full"></div>
-                      <div className="absolute top-[55%] left-[45%] w-2 h-2 bg-secondary rounded-full"></div>
-                      <div className="absolute top-[70%] left-[25%] w-2 h-2 bg-secondary rounded-full"></div>
-                      <div className="absolute top-[50%] left-[75%] w-2 h-2 bg-primary rounded-full"></div>
-                    </div>
-                    <div className="relative z-10 text-center">
-                      <Download className="w-8 h-8 text-muted-foreground mx-auto mb-1.5" />
-                      <p className="text-[11px] text-muted-foreground">{waterStations.length} Stations</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2 text-[12px]">
-                    {water?.stations.map(station => (
-                      <div key={station.id} className="flex justify-between p-2 border border-border/50 rounded bg-white">
-                        <span className="text-muted-foreground">{station.name}</span>
-                        <span className="font-mono font-medium">{station.id}</span>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
             </div>
           </div>
 

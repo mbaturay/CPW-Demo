@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { WaterBanner } from '../components/WaterBanner';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Area, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { Link, useSearchParams } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
@@ -319,7 +319,13 @@ export default function WaterProfile() {
               <CardContent className="pt-6">
                 <div className="h-[280px] min-h-[280px]">
                   <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-                    <BarChart data={activityData}>
+                    <ComposedChart data={activityData}>
+                      <defs>
+                        <linearGradient id="cpueGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#1B365D" stopOpacity={0.15} />
+                          <stop offset="100%" stopColor="#1B365D" stopOpacity={0.02} />
+                        </linearGradient>
+                      </defs>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                       <XAxis
                         dataKey="year"
@@ -340,8 +346,35 @@ export default function WaterProfile() {
                           fontSize: '13px'
                         }}
                       />
-                      <Bar dataKey="cpue" fill="#1B365D" radius={[4, 4, 0, 0]} />
-                    </BarChart>
+                      <Area
+                        type="monotone"
+                        dataKey="cpue"
+                        fill="url(#cpueGradient)"
+                        stroke="none"
+                      />
+                      <Line
+                        type="monotone"
+                        dataKey="cpue"
+                        stroke="#1B365D"
+                        strokeWidth={2}
+                        dot={(props: { cx: number; cy: number; index: number }) => {
+                          const { cx, cy, index } = props;
+                          const isLast = index === activityData.length - 1;
+                          return (
+                            <circle
+                              key={index}
+                              cx={cx}
+                              cy={cy}
+                              r={isLast ? 5 : 3}
+                              fill={isLast ? '#1B365D' : 'white'}
+                              stroke="#1B365D"
+                              strokeWidth={2}
+                            />
+                          );
+                        }}
+                        activeDot={{ r: 5, fill: '#1B365D', stroke: 'white', strokeWidth: 2 }}
+                      />
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>
