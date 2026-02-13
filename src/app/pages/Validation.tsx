@@ -54,7 +54,7 @@ export default function Validation() {
   const waterName = water?.name ?? 'South Platte Basin';
   const waterRegion = water?.region ?? 'Northeast';
   const waterHuc = water?.huc12 ?? 'HUC12-123456';
-  const waterStations = water?.stations.length ?? 6;
+  const waterStations = water?.stations ?? [];
   const waterSurveyCount = water ? surveys.filter(s => s.waterId === water.id).length : 47;
   const waterYears = water ? `${water.yearsActive.start}–${water.yearsActive.end}` : '1998–2025';
 

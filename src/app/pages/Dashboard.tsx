@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { AlertTriangle, Upload, CheckCircle2, MapPin } from 'lucide-react';
+import { AlertTriangle, Upload, CheckCircle2 } from 'lucide-react';
+import { StationViz } from '../components/StationViz';
 import { Link } from 'react-router';
 import { useRole } from '../context/RoleContext';
 import { RoleIndicator } from '../components/RoleIndicator';
@@ -31,7 +32,8 @@ export default function Dashboard() {
     s.status === 'Pending Validation' || s.status === 'Pending Approval'
   ).length;
   const flaggedCount = neSurveys.filter(s => s.status === 'Flagged Suspect').length;
-  const totalStations = neWaters.reduce((sum, w) => sum + w.stations.length, 0);
+  const neStations = neWaters.flatMap(w => w.stations);
+  const totalStations = neStations.length;
 
   const stats = [
     {
@@ -223,18 +225,11 @@ export default function Dashboard() {
                 <p className="text-[12px] text-muted-foreground mt-1">Current field season locations</p>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="aspect-square bg-muted/30 rounded border border-border/50 flex items-center justify-center relative overflow-hidden">
-                  <div className="absolute inset-0 opacity-50">
-                    <div className="absolute top-1/4 left-1/3 w-2.5 h-2.5 bg-primary rounded-full"></div>
-                    <div className="absolute top-1/3 left-2/3 w-2.5 h-2.5 bg-secondary rounded-full"></div>
-                    <div className="absolute bottom-1/3 left-1/2 w-2.5 h-2.5 bg-primary rounded-full"></div>
-                    <div className="absolute top-2/3 left-1/4 w-2.5 h-2.5 bg-secondary rounded-full"></div>
-                    <div className="absolute top-1/2 left-3/4 w-2.5 h-2.5 bg-primary rounded-full"></div>
-                  </div>
-                  <div className="relative z-10 text-center">
-                    <MapPin className="w-8 h-8 text-muted-foreground mx-auto mb-2" />
-                    <p className="text-[12px] text-muted-foreground">Geographic Distribution</p>
-                  </div>
+                <div className="aspect-square">
+                  <StationViz
+                    stations={neStations}
+                    title="Survey Stations — Northeast Region"
+                  />
                 </div>
 
                 <div className="mt-6 space-y-3">

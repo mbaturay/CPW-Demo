@@ -114,7 +114,7 @@ export default function WaterProfile() {
         waterName={water.name}
         region={water.region}
         watershed={water.huc12}
-        stations={water.stations.length}
+        stations={water.stations}
         totalSurveys={waterSurveys.length}
         yearsActive={`${water.yearsActive.start}–${water.yearsActive.end}`}
       />

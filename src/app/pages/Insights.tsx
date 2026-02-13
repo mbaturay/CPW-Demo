@@ -25,7 +25,7 @@ export default function Insights() {
   const waterName = water?.name ?? 'South Platte Basin';
   const waterRegion = water?.region ?? 'Northeast';
   const waterHuc = water?.huc12 ?? 'HUC12-14010001';
-  const waterStations = water?.stations.length ?? 6;
+  const waterStations = water?.stations ?? [];
   const waterYears = water ? `${water.yearsActive.start}–${water.yearsActive.end}` : '1998–2025';
 
   // Derive trend data for chart
@@ -598,7 +598,7 @@ export default function Insights() {
                     </div>
                     <div className="relative z-10 text-center">
                       <Download className="w-8 h-8 text-muted-foreground mx-auto mb-1.5" />
-                      <p className="text-[11px] text-muted-foreground">{waterStations} Stations</p>
+                      <p className="text-[11px] text-muted-foreground">{waterStations.length} Stations</p>
                     </div>
                   </div>
 
