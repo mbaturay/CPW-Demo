@@ -1,77 +1,120 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { AlertTriangle, Upload, Database, CheckCircle2, MapPin } from 'lucide-react';
+import { AlertTriangle, Upload, CheckCircle2, MapPin } from 'lucide-react';
 import { Link } from 'react-router';
 import { useRole } from '../context/RoleContext';
 import { RoleIndicator } from '../components/RoleIndicator';
 import DataEntryDashboard from './DataEntryDashboard';
 import SeniorBiologistDashboard from './SeniorBiologistDashboard';
+import { waters, surveys, buildActivityFeed, getTrendForWater } from '../data/world';
 
 export default function Dashboard() {
   const { role } = useRole();
-  
+
   // Route to role-specific dashboards
   if (role === 'data-entry') {
     return <DataEntryDashboard />;
   }
-  
+
   if (role === 'senior-biologist') {
     return <SeniorBiologistDashboard />;
   }
-  
-  // Default: Area Biologist view
+
+  // Default: Area Biologist view — derived from world.ts
+  const neWaters = waters.filter(w => w.region === 'Northeast');
+  const neWaterIds = new Set(neWaters.map(w => w.id));
+  const neSurveys = surveys.filter(s => neWaterIds.has(s.waterId));
+  const reviewQueue = buildActivityFeed('Northeast');
+
+  const pendingCount = neSurveys.filter(s =>
+    s.status === 'Pending Validation' || s.status === 'Pending Approval'
+  ).length;
+  const flaggedCount = neSurveys.filter(s => s.status === 'Flagged Suspect').length;
+  const totalStations = neWaters.reduce((sum, w) => sum + w.stations.length, 0);
+
   const stats = [
-    { 
-      title: 'Waters Active', 
+    {
+      title: 'Waters Active',
       subtitle: 'Current Season',
-      value: '18', 
+      value: String(neWaters.length),
       icon: Upload,
-      trend: '+3 from last month',
+      trend: `${neWaters.length} in Northeast Region`,
       color: 'text-primary'
     },
-    { 
-      title: 'Pending Validation', 
-      subtitle: 'Waters with Issues',
-      value: '3', 
+    {
+      title: 'Pending Approval',
+      subtitle: 'Surveys Requiring Review',
+      value: String(pendingCount),
       icon: AlertTriangle,
-      trend: 'Across 8 surveys',
+      trend: `Across ${reviewQueue.length} items in queue`,
       color: 'text-[#D97706]'
     },
-    { 
-      title: 'Flagged Surveys', 
-      subtitle: 'Waters Affected',
-      value: '2', 
+    {
+      title: 'Flagged Surveys',
+      subtitle: 'Data Quality Review',
+      value: String(flaggedCount),
       icon: AlertTriangle,
-      trend: 'Data quality review needed',
+      trend: flaggedCount > 0 ? 'Data quality review needed' : 'No flagged surveys',
       color: 'text-[#B91C1C]'
     },
-    { 
-      title: 'Federal Reporting', 
+    {
+      title: 'Federal Reporting',
       subtitle: 'Annual Compliance',
-      value: '87%', 
+      value: '87%',
       icon: CheckCircle2,
       trend: 'Due: March 31, 2026',
       color: 'text-[#059669]'
     },
   ];
-  
-  const recentUploads = [
-    { id: 'SRV-2026-089', water: 'South Platte Basin', station: 'SP-04', protocol: 'Two-Pass Removal', date: '2026-02-10', status: 'Validated', biologist: 'J. Martinez' },
-    { id: 'SRV-2026-088', water: 'Cache la Poudre', station: 'CP-12', protocol: 'Single Pass', date: '2026-02-09', status: 'Validated', biologist: 'S. Chen' },
-    { id: 'SRV-2026-087', water: 'Blue River', station: 'BR-06', protocol: 'Two-Pass Removal', date: '2026-02-09', status: 'Pending', biologist: 'A. Williams' },
-    { id: 'SRV-2026-086', water: 'Arkansas River', station: 'AR-18', protocol: 'Electrofish Survey', date: '2026-02-08', status: 'Validated', biologist: 'J. Martinez' },
-    { id: 'SRV-2026-085', water: 'Roaring Fork', station: 'RF-03', protocol: 'Two-Pass Removal', date: '2026-02-07', status: 'Validated', biologist: 'M. Johnson' },
-  ];
-  
-  const watersInRegion = [
-    { name: 'South Platte Basin', activeSurveys: 12, lastSurvey: '2026-02-10', status: 'Active' },
-    { name: 'Cache la Poudre', activeSurveys: 8, lastSurvey: '2026-02-09', status: 'Active' },
-    { name: 'Blue River', activeSurveys: 6, lastSurvey: '2026-02-09', status: 'Active' },
-    { name: 'Arkansas River', activeSurveys: 5, lastSurvey: '2026-02-08', status: 'Active' },
-    { name: 'Roaring Fork', activeSurveys: 4, lastSurvey: '2026-02-07', status: 'Active' },
-  ];
-  
+
+  // Review queue rows with full survey details
+  const reviewRows = reviewQueue.map(item => {
+    const survey = surveys.find(s => s.id === item.surveyId)!;
+    return {
+      id: survey.id,
+      waterId: item.waterId,
+      waterName: item.waterName,
+      stationId: survey.stationId,
+      protocol: survey.protocol,
+      date: survey.date,
+      status: survey.status,
+      uploader: survey.uploader,
+      primaryAction: item.primaryAction,
+    };
+  });
+
+  // Waters in region with survey counts
+  const watersInRegion = neWaters.map(w => {
+    const wSurveys = surveys.filter(s => s.waterId === w.id);
+    const sorted = [...wSurveys].sort((a, b) => b.date.localeCompare(a.date));
+    return {
+      id: w.id,
+      name: w.name,
+      activeSurveys: wSurveys.length,
+      lastSurvey: sorted[0]?.date ?? 'N/A',
+      status: 'Active',
+    };
+  });
+
+  const getStatusStyle = (status: string) => {
+    switch (status) {
+      case 'Approved': case 'Published':
+        return 'bg-[#059669]/10 text-[#059669]';
+      case 'Flagged Suspect': case 'Returned for Correction':
+        return 'bg-[#B91C1C]/10 text-[#B91C1C]';
+      default:
+        return 'bg-[#D97706]/10 text-[#D97706]';
+    }
+  };
+
+  // Species of concern: derive CTT decline from Poudre trend
+  const poudreTrend = getTrendForWater('cache-la-poudre');
+  const cttTrend = poudreTrend?.bySpecies?.CTT;
+  const cttDecline = cttTrend && cttTrend.length >= 2
+    ? Math.round(((cttTrend[cttTrend.length - 1].cpue - cttTrend[0].cpue) / cttTrend[0].cpue) * 100)
+    : 0;
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white border-b border-border px-8 py-6">
@@ -85,10 +128,10 @@ export default function Dashboard() {
           </div>
         </div>
       </header>
-      
+
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-8">
-          
+
           {/* Stats Grid - Operational Focus */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat) => {
@@ -116,7 +159,7 @@ export default function Dashboard() {
               );
             })}
           </div>
-          
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Review Queue */}
             <Card className="lg:col-span-2 border border-border shadow-sm">
@@ -144,31 +187,25 @@ export default function Dashboard() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {recentUploads.map((upload) => (
-                      <TableRow key={upload.id}>
-                        <TableCell className="font-mono text-[13px] text-primary">{upload.id}</TableCell>
+                    {reviewRows.map((row) => (
+                      <TableRow key={row.id}>
+                        <TableCell className="font-mono text-[13px] text-primary">{row.id}</TableCell>
                         <TableCell className="text-[13px]">
-                          <Link to="/water" className="text-primary hover:underline">
-                            {upload.water}
+                          <Link to={`/water?waterId=${row.waterId}`} className="text-primary hover:underline">
+                            {row.waterName}
                           </Link>
                         </TableCell>
-                        <TableCell className="text-[12px] text-muted-foreground">{upload.protocol}</TableCell>
-                        <TableCell className="text-[12px] text-muted-foreground">{upload.date}</TableCell>
+                        <TableCell className="text-[12px] text-muted-foreground">{row.protocol}</TableCell>
+                        <TableCell className="text-[12px] text-muted-foreground">{row.date}</TableCell>
                         <TableCell>
-                          <span className={`
-                            inline-flex px-2 py-0.5 rounded text-[11px] font-medium
-                            ${upload.status === 'Validated' 
-                              ? 'bg-[#059669]/10 text-[#059669]' 
-                              : 'bg-[#D97706]/10 text-[#D97706]'
-                            }
-                          `}>
-                            {upload.status}
+                          <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${getStatusStyle(row.status)}`}>
+                            {row.status}
                           </span>
                         </TableCell>
                         <TableCell>
-                          <Link to="/validation">
+                          <Link to={`/validation?surveyId=${row.id}`}>
                             <Button variant="outline" size="sm" className="text-[12px] h-7">
-                              Review
+                              {row.primaryAction}
                             </Button>
                           </Link>
                         </TableCell>
@@ -178,7 +215,7 @@ export default function Dashboard() {
                 </Table>
               </CardContent>
             </Card>
-            
+
             {/* Active Survey Stations Map Preview */}
             <Card className="border border-border shadow-sm">
               <CardHeader className="border-b border-border/50">
@@ -199,25 +236,25 @@ export default function Dashboard() {
                     <p className="text-[12px] text-muted-foreground">Geographic Distribution</p>
                   </div>
                 </div>
-                
+
                 <div className="mt-6 space-y-3">
                   <div className="flex items-center justify-between text-[13px]">
                     <span className="text-muted-foreground">Active Regions</span>
-                    <span className="font-mono text-foreground">5</span>
+                    <span className="font-mono text-foreground">1</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px]">
                     <span className="text-muted-foreground">Water Bodies</span>
-                    <span className="font-mono text-foreground">18</span>
+                    <span className="font-mono text-foreground">{neWaters.length}</span>
                   </div>
                   <div className="flex items-center justify-between text-[13px]">
                     <span className="text-muted-foreground">Survey Stations</span>
-                    <span className="font-mono text-foreground">127</span>
+                    <span className="font-mono text-foreground">{totalStations}</span>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Waters in Northeast Region */}
           <Card className="border border-border shadow-sm">
             <CardHeader className="border-b border-border/50">
@@ -238,9 +275,9 @@ export default function Dashboard() {
                 </TableHeader>
                 <TableBody>
                   {watersInRegion.map((water) => (
-                    <TableRow key={water.name}>
+                    <TableRow key={water.id}>
                       <TableCell className="text-[13px]">
-                        <Link to="/water" className="text-primary hover:underline font-medium">
+                        <Link to={`/water?waterId=${water.id}`} className="text-primary hover:underline font-medium">
                           {water.name}
                         </Link>
                       </TableCell>
@@ -257,7 +294,7 @@ export default function Dashboard() {
               </Table>
             </CardContent>
           </Card>
-          
+
           {/* Species of Concern Activity Panel */}
           <Card className="border border-[#B91C1C]/20 bg-[#B91C1C]/[0.02] shadow-sm">
             <CardHeader className="border-b border-[#B91C1C]/10">
@@ -282,41 +319,41 @@ export default function Dashboard() {
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Cutthroat Trout (CTT)</span>
                     <span className="text-[11px] px-2 py-0.5 rounded bg-[#B91C1C]/10 text-[#B91C1C] font-medium">
-                      -12% decline
+                      {cttDecline}% decline
                     </span>
                   </div>
                   <p className="text-[12px] text-muted-foreground">
-                    Blue River basin — 8 surveys show population decrease since 2024
+                    Cache la Poudre — CPUE declining since 2021
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-foreground">Longnose Dace (LND)</span>
+                    <span className="text-[13px] font-medium text-foreground">Mountain Whitefish (MWF)</span>
                     <span className="text-[11px] px-2 py-0.5 rounded bg-[#D97706]/10 text-[#D97706] font-medium">
                       Monitoring
                     </span>
                   </div>
                   <p className="text-[12px] text-muted-foreground">
-                    Arkansas River — Low CPUE reported in 3 recent surveys
+                    Big Thompson — Low CPUE trend observed
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-foreground">Brook Trout (BKT)</span>
+                    <span className="text-[13px] font-medium text-foreground">Creek Chub (CRD)</span>
                     <span className="text-[11px] px-2 py-0.5 rounded bg-[#D97706]/10 text-[#D97706] font-medium">
                       Range shift
                     </span>
                   </div>
                   <p className="text-[12px] text-muted-foreground">
-                    Southwest region — Expanding into non-native watersheds
+                    Cache la Poudre — Expanding into non-native watersheds
                   </p>
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
         </div>
       </div>
     </div>

@@ -7,70 +7,45 @@ import { Label } from '../components/ui/label';
 import { ChevronDown, ChevronRight } from 'lucide-react';
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
-
-type Survey = {
-  id: string;
-  station: string;
-  protocol: string;
-  date: string;
-  status: string;
-};
-
-type WaterGroup = {
-  name: string;
-  surveys: Survey[];
-  expanded: boolean;
-};
+import { waters, surveys, buildActivityFeed } from '../data/world';
+import type { SurveyStatus } from '../data/world';
 
 export default function ActivityFeed() {
-  const [waters, setWaters] = useState<WaterGroup[]>([
-    {
-      name: 'South Platte Basin',
-      expanded: true,
-      surveys: [
-        { id: 'SRV-2026-089', station: 'SP-04', protocol: 'Two-Pass Removal', date: '2026-02-10', status: 'Validated' },
-        { id: 'SRV-2026-081', station: 'SP-02', protocol: 'Single Pass', date: '2026-02-05', status: 'Pending' },
-        { id: 'SRV-2026-072', station: 'SP-06', protocol: 'Two-Pass Removal', date: '2026-01-28', status: 'Validated' },
-      ],
-    },
-    {
-      name: 'Cache la Poudre',
-      expanded: true,
-      surveys: [
-        { id: 'SRV-2026-088', station: 'CP-12', protocol: 'Single Pass', date: '2026-02-09', status: 'Validated' },
-        { id: 'SRV-2026-078', station: 'CP-08', protocol: 'Two-Pass Removal', date: '2026-02-03', status: 'Pending' },
-      ],
-    },
-    {
-      name: 'Blue River',
-      expanded: true,
-      surveys: [
-        { id: 'SRV-2026-087', station: 'BR-06', protocol: 'Two-Pass Removal', date: '2026-02-09', status: 'Pending' },
-        { id: 'SRV-2026-079', station: 'BR-04', protocol: 'Single Pass', date: '2026-02-04', status: 'Validated' },
-        { id: 'SRV-2026-071', station: 'BR-02', protocol: 'Two-Pass Removal', date: '2026-01-27', status: 'Validated' },
-      ],
-    },
-    {
-      name: 'Arkansas River',
-      expanded: true,
-      surveys: [
-        { id: 'SRV-2026-086', station: 'AR-18', protocol: 'Electrofish Survey', date: '2026-02-08', status: 'Validated' },
-        { id: 'SRV-2026-080', station: 'AR-12', protocol: 'Two-Pass Removal', date: '2026-02-04', status: 'Validated' },
-      ],
-    },
-    {
-      name: 'Roaring Fork',
-      expanded: true,
-      surveys: [
-        { id: 'SRV-2026-085', station: 'RF-03', protocol: 'Two-Pass Removal', date: '2026-02-07', status: 'Validated' },
-      ],
-    },
-  ]);
+  const activityItems = buildActivityFeed('Northeast');
+  const neWaters = waters.filter(w => w.region === 'Northeast');
 
-  const toggleWater = (waterName: string) => {
-    setWaters(waters.map(w => 
-      w.name === waterName ? { ...w, expanded: !w.expanded } : w
+  // Group activity items by water
+  const groupedByWater = new Map<string, typeof activityItems>();
+  for (const item of activityItems) {
+    const group = groupedByWater.get(item.waterId) ?? [];
+    group.push(item);
+    groupedByWater.set(item.waterId, group);
+  }
+
+  const initialWaterGroups = Array.from(groupedByWater.entries()).map(([waterId, items]) => ({
+    waterId,
+    name: items[0].waterName,
+    items,
+    expanded: true,
+  }));
+
+  const [waterGroups, setWaterGroups] = useState(initialWaterGroups);
+
+  const toggleWater = (waterId: string) => {
+    setWaterGroups(waterGroups.map(w =>
+      w.waterId === waterId ? { ...w, expanded: !w.expanded } : w
     ));
+  };
+
+  const getStatusStyle = (status: SurveyStatus) => {
+    switch (status) {
+      case 'Approved': case 'Published':
+        return 'bg-[#059669]/10 text-[#059669]';
+      case 'Flagged Suspect': case 'Returned for Correction':
+        return 'bg-[#B91C1C]/10 text-[#B91C1C]';
+      default:
+        return 'bg-[#D97706]/10 text-[#D97706]';
+    }
   };
 
   return (
@@ -88,7 +63,7 @@ export default function ActivityFeed() {
           </div>
         </div>
       </header>
-      
+
       {/* Regional Scope Strip */}
       <div className="bg-muted/20 border-b border-border px-8 py-3">
         <div className="max-w-[1280px] mx-auto">
@@ -97,10 +72,10 @@ export default function ActivityFeed() {
           </p>
         </div>
       </div>
-      
+
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-6">
-          
+
           {/* Filters */}
           <Card className="border border-border shadow-sm">
             <CardHeader className="border-b border-border/50">
@@ -116,15 +91,13 @@ export default function ActivityFeed() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Waters</SelectItem>
-                      <SelectItem value="south-platte">South Platte Basin</SelectItem>
-                      <SelectItem value="cache-poudre">Cache la Poudre</SelectItem>
-                      <SelectItem value="blue-river">Blue River</SelectItem>
-                      <SelectItem value="arkansas">Arkansas River</SelectItem>
-                      <SelectItem value="roaring-fork">Roaring Fork</SelectItem>
+                      {neWaters.map(w => (
+                        <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="filter-status" className="text-[13px]">Status</Label>
                   <Select defaultValue="all">
@@ -139,27 +112,27 @@ export default function ActivityFeed() {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div>
                   <Label htmlFor="filter-date" className="text-[13px]">Date Range</Label>
-                  <Input 
-                    id="filter-date" 
+                  <Input
+                    id="filter-date"
                     type="date"
-                    defaultValue="2026-01-01"
+                    defaultValue="2025-01-01"
                     className="mt-1.5 text-[12px]"
                   />
                 </div>
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Water-Grouped Activity */}
           <div className="space-y-4">
-            {waters.map((water) => (
-              <Card key={water.name} className="border border-border shadow-sm">
-                <CardHeader 
+            {waterGroups.map((water) => (
+              <Card key={water.waterId} className="border border-border shadow-sm">
+                <CardHeader
                   className="border-b border-border/50 cursor-pointer hover:bg-muted/20 transition-colors"
-                  onClick={() => toggleWater(water.name)}
+                  onClick={() => toggleWater(water.waterId)}
                 >
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3">
@@ -169,74 +142,71 @@ export default function ActivityFeed() {
                         <ChevronRight className="w-4 h-4 text-muted-foreground" />
                       )}
                       <div>
-                        <Link 
-                          to="/water" 
+                        <Link
+                          to={`/water?waterId=${water.waterId}`}
                           className="text-[16px] font-semibold text-primary hover:underline"
                           onClick={(e) => e.stopPropagation()}
                         >
                           {water.name}
                         </Link>
                         <p className="text-[12px] text-muted-foreground mt-0.5">
-                          {water.surveys.length} survey{water.surveys.length !== 1 ? 's' : ''}
+                          {water.items.length} survey{water.items.length !== 1 ? 's' : ''} requiring action
                         </p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className="text-[11px] text-muted-foreground">
-                        {water.surveys.filter(s => s.status === 'Pending').length} pending review
+                        {water.items.filter(s => s.status === 'Pending Validation' || s.status === 'Pending Approval').length} pending review
                       </span>
                     </div>
                   </div>
                 </CardHeader>
-                
+
                 {water.expanded && (
                   <CardContent className="pt-6">
                     <div className="space-y-3">
-                      {water.surveys.map((survey) => (
-                        <div 
-                          key={survey.id}
-                          className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20 transition-colors"
-                        >
-                          <div className="flex items-center gap-6">
-                            <div>
-                              <p className="text-[13px] font-mono text-primary font-medium">{survey.id}</p>
-                              <p className="text-[11px] text-muted-foreground mt-0.5">
-                                Station {survey.station}
-                              </p>
+                      {water.items.map((item) => {
+                        const survey = surveys.find(s => s.id === item.surveyId)!;
+                        return (
+                          <div
+                            key={item.id}
+                            className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20 transition-colors"
+                          >
+                            <div className="flex items-center gap-6">
+                              <div>
+                                <p className="text-[13px] font-mono text-primary font-medium">{item.surveyId}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">
+                                  Station {item.stationId}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[12px] text-muted-foreground">{survey.protocol}</p>
+                              </div>
+                              <div>
+                                <p className="text-[12px] text-muted-foreground">{item.date}</p>
+                              </div>
                             </div>
-                            <div>
-                              <p className="text-[12px] text-muted-foreground">{survey.protocol}</p>
-                            </div>
-                            <div>
-                              <p className="text-[12px] text-muted-foreground">{survey.date}</p>
+
+                            <div className="flex items-center gap-4">
+                              <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${getStatusStyle(item.status)}`}>
+                                {item.status}
+                              </span>
+                              <Link to={`/validation?surveyId=${item.surveyId}`}>
+                                <Button variant="outline" size="sm" className="text-[12px] h-7">
+                                  {item.primaryAction}
+                                </Button>
+                              </Link>
                             </div>
                           </div>
-                          
-                          <div className="flex items-center gap-4">
-                            <span className={`
-                              inline-flex px-2 py-0.5 rounded text-[11px] font-medium
-                              ${survey.status === 'Validated' 
-                                ? 'bg-[#059669]/10 text-[#059669]' 
-                                : 'bg-[#D97706]/10 text-[#D97706]'
-                              }
-                            `}>
-                              {survey.status}
-                            </span>
-                            <Link to="/validation">
-                              <Button variant="outline" size="sm" className="text-[12px] h-7">
-                                Review
-                              </Button>
-                            </Link>
-                          </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </CardContent>
                 )}
               </Card>
             ))}
           </div>
-          
+
         </div>
       </div>
     </div>

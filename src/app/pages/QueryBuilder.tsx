@@ -9,6 +9,7 @@ import { Plus, X, Play } from 'lucide-react';
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
+import { waters, species as allSpecies, surveys } from '../data/world';
 
 type Condition = {
   id: string;
@@ -27,6 +28,17 @@ export default function QueryBuilder() {
   const [excludeYOY, setExcludeYOY] = useState(true);
   const [unit, setUnit] = useState<'mm' | 'inches'>('mm');
   const [advancedMode, setAdvancedMode] = useState(false);
+
+  // Derive water list: NE waters for area biologist, all for senior
+  const waterOptions = role === 'area-biologist'
+    ? waters.filter(w => w.region === 'Northeast')
+    : waters;
+
+  // Derive live results from surveys
+  const neWaterIds = new Set(waters.filter(w => w.region === 'Northeast').map(w => w.id));
+  const matchingSurveys = surveys.filter(s => neWaterIds.has(s.waterId));
+  const totalFishRecords = matchingSurveys.reduce((sum, s) => sum + s.fishCount, 0);
+  const matchingWaters = new Set(matchingSurveys.map(s => s.waterId)).size;
   
   const addCondition = () => {
     setConditions([
@@ -124,10 +136,9 @@ export default function QueryBuilder() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="south-platte">South Platte Basin</SelectItem>
-                        <SelectItem value="colorado-river">Colorado River</SelectItem>
-                        <SelectItem value="blue-river">Blue River</SelectItem>
-                        <SelectItem value="cache-poudre">Cache la Poudre</SelectItem>
+                        {waterOptions.map(w => (
+                          <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
+                        ))}
                         <SelectItem value="all">All Waters</SelectItem>
                       </SelectContent>
                     </Select>
@@ -142,10 +153,9 @@ export default function QueryBuilder() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="rbt">Rainbow Trout (RBT)</SelectItem>
-                        <SelectItem value="bnt">Brown Trout (BNT)</SelectItem>
-                        <SelectItem value="ctt">Cutthroat Trout (CTT)</SelectItem>
-                        <SelectItem value="bkt">Brook Trout (BKT)</SelectItem>
+                        {allSpecies.map(sp => (
+                          <SelectItem key={sp.code} value={sp.code.toLowerCase()}>{sp.common} ({sp.code})</SelectItem>
+                        ))}
                         <SelectItem value="all">All Species</SelectItem>
                       </SelectContent>
                     </Select>
@@ -193,8 +203,9 @@ export default function QueryBuilder() {
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="two-pass">Two-Pass Removal</SelectItem>
-                        <SelectItem value="three-pass">Three-Pass Removal</SelectItem>
-                        <SelectItem value="single">Single Pass</SelectItem>
+                        <SelectItem value="single-pass">Single-Pass CPUE</SelectItem>
+                        <SelectItem value="mark-recapture">Mark-Recapture</SelectItem>
+                        <SelectItem value="electrofish">Electrofishing CPUE</SelectItem>
                         <SelectItem value="all">All Protocols</SelectItem>
                       </SelectContent>
                     </Select>
@@ -380,26 +391,26 @@ export default function QueryBuilder() {
                 </CardHeader>
                 <CardContent className="pt-6 space-y-6">
                   <div className="text-center p-6 border border-primary/30 bg-primary/5 rounded">
-                    <p className="text-[48px] font-semibold text-primary leading-none mb-2">47</p>
+                    <p className="text-[48px] font-semibold text-primary leading-none mb-2">{matchingSurveys.length}</p>
                     <p className="text-[12px] text-muted-foreground uppercase tracking-wide">Matching Surveys</p>
                   </div>
-                  
+
                   <div className="space-y-3">
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Fish Records</span>
-                      <span className="font-mono text-foreground font-medium">12,304</span>
+                      <span className="font-mono text-foreground font-medium">{totalFishRecords.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Water Bodies</span>
-                      <span className="font-mono text-foreground font-medium">8</span>
+                      <span className="font-mono text-foreground font-medium">{matchingWaters}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Date Range</span>
-                      <span className="font-mono text-foreground font-medium">2018-2025</span>
+                      <span className="font-mono text-foreground font-medium">2021-2025</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Regions</span>
-                      <span className="font-mono text-foreground font-medium">2</span>
+                      <span className="font-mono text-foreground font-medium">1</span>
                     </div>
                   </div>
                   
