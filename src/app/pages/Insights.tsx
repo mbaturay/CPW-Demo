@@ -117,7 +117,7 @@ export default function Insights() {
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[22px] font-semibold text-primary">Water Intelligence — {waterName}</h1>
+              <p className="text-lg font-semibold text-primary">Insights</p>
               <p className="text-[13px] text-muted-foreground mt-1">
                 Multi-year ecological trend analysis based on validated survey data
               </p>

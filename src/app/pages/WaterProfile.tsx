@@ -100,7 +100,7 @@ export default function WaterProfile() {
           ]} />
           <div className="flex items-center justify-between mt-3">
             <div>
-              <h1 className="text-[22px] font-semibold text-primary">Water Profile — {water.name}</h1>
+              <p className="text-lg font-semibold text-primary">Water Profile</p>
               <p className="text-[13px] text-muted-foreground mt-1">
                 Comprehensive water body intelligence and survey history
               </p>
