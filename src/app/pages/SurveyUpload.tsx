@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Upload, FileSpreadsheet, CheckCircle2, AlertCircle, Info } from 'lucide-react';
 import { Link } from 'react-router';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { useRole } from '../context/RoleContext';
 import { WaterBanner } from '../components/WaterBanner';
 
@@ -27,7 +27,7 @@ export default function SurveyUpload() {
               <h1 className="text-[22px] font-semibold text-primary">Upload Survey Data</h1>
               <p className="text-[13px] text-muted-foreground mt-1">Import field data for validation and analysis</p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

@@ -353,3 +353,43 @@ No automated tests exist in this repo. No test changes were required.
   - Rationale: Canvas containers use 4-8px corner radius.
 - **Edit 2:** Changed `shadow-sm` → `shadow-[0_1px_2px_rgba(0,0,0,0.04)]` (matches `--shadow-1` token).
   - Rationale: Minimal elevation to match Canvas DropShadow.Light.
+
+---
+
+## Top Navigation & Role Floater Pass
+
+> Date: 2026-02-13
+> Purpose: Replace the left collapsible sidebar with a horizontal top navigation bar. Relocate the role dropdown into a demo-only floating control outside page content.
+
+### 44. `src/app/components/TopNav.tsx` (NEW)
+- **Created:** Horizontal top navigation bar replacing the left sidebar.
+  - Left: ADAMAS branding ("AD" mark + "ADAMAS" text + subtitle).
+  - Center: Role-filtered nav links (reuses `navItems` from CollapsibleSidebar).
+  - Active state: `bg-white/20 text-white font-medium` (same as sidebar).
+  - ARIA: `role="navigation"`, `aria-label="Main navigation"`.
+  - Sticky positioning (`sticky top-0 z-50`).
+
+### 45. `src/app/components/RoleFloater.tsx` (NEW)
+- **Created:** Demo-only floating role selector.
+  - Fixed position below top nav (`fixed top-16 right-4 z-40`).
+  - Contains role Select dropdown with same options as previous RoleIndicator.
+  - Preserves `id="ddRole"` on the select trigger for control name parity.
+  - Marked with `// DEMO-ONLY` comment and `(demo)` badge.
+
+### 46. `src/app/Layout.tsx` (Top Nav)
+- **Edit:** Replaced `<CollapsibleSidebar position="left" />` with `<TopNav />` and `<RoleFloater />`.
+- **Edit:** Removed `ml-16` from `<main>` (no left sidebar margin needed).
+- **Rationale:** Canvas Apps typically use top navigation, not a collapsible left panel.
+
+### 47. `src/app/pages/*` — RoleIndicator removal (10 files)
+- **Edit:** Removed `import { RoleIndicator }` and `<RoleIndicator />` from:
+  Dashboard, DataEntryDashboard, SeniorBiologistDashboard, WaterSelect,
+  WaterProfile, SurveyUpload, Validation, QueryBuilder, Insights, ActivityFeed.
+- **Rationale:** Role selection is now centralized in the RoleFloater component
+  rendered by Layout. Per-page role dropdowns are no longer needed.
+
+### Preserved
+- `CollapsibleSidebar.tsx` file retained (exports `navItems` used by TopNav).
+- `RoleIndicator.tsx` file retained (no longer imported by any page).
+- All routing, role-based display logic, and business logic unchanged.
+- ARIA labels preserved on navigation.

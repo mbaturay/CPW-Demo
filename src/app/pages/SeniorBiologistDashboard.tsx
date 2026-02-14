@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { AlertTriangle, FileSpreadsheet, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { Link } from 'react-router';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
 export default function SeniorBiologistDashboard() {
@@ -43,7 +43,7 @@ export default function SeniorBiologistDashboard() {
               <h1 className="text-[22px] font-semibold text-primary">Statewide Water Intelligence Overview</h1>
               <p className="text-[13px] text-muted-foreground mt-1">Strategic cross-water analysis and federal reporting dashboard</p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

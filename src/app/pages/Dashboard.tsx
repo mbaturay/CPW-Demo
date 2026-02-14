@@ -5,7 +5,7 @@ import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { StationViz } from '../components/StationViz';
 import { Link } from 'react-router';
 import { useRole } from '../context/RoleContext';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import DataEntryDashboard from './DataEntryDashboard';
 import SeniorBiologistDashboard from './SeniorBiologistDashboard';
 import { waters, buildActivityFeed, getTrendForWater } from '../data/world';
@@ -95,7 +95,7 @@ export default function Dashboard() {
               <h1 className="text-[22px] font-semibold text-primary">Waters Overview</h1>
               <p className="text-[13px] text-muted-foreground mt-1">Statewide Operational Status</p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

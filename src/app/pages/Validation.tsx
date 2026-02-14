@@ -8,7 +8,7 @@ import { Label } from '../components/ui/label';
 /* POWERAPPS-ALIGNMENT: Removed hover-only Tooltip imports.
    Tooltip content is now shown as visible inline text (click-first parity). */
 import { WaterBanner } from '../components/WaterBanner';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { useRole } from '../context/RoleContext';
 import { useDemo } from '../context/DemoContext';
 import { Breadcrumb } from '../components/Breadcrumb';
@@ -117,7 +117,7 @@ export default function Validation() {
               <p className="text-[13px] text-muted-foreground mt-1">Designed to prevent protocol errors and preserve scientific integrity</p>
             </div>
             <div className="flex items-center gap-4">
-              <RoleIndicator />
+
               <div className="flex items-center gap-2">
                 <Label htmlFor="unit-toggle" className="text-[13px]">mm</Label>
                 <Switch

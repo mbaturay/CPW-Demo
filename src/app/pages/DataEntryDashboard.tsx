@@ -3,7 +3,7 @@ import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
 import { Upload, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 
 export default function DataEntryDashboard() {
   const assignedWaters = [
@@ -30,7 +30,7 @@ export default function DataEntryDashboard() {
               <h1 className="text-[22px] font-semibold text-primary">Assigned Waters — Data Entry View</h1>
               <p className="text-[13px] text-muted-foreground mt-1">Upload and manage survey data for your supervising biologist</p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

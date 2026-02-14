@@ -6,7 +6,7 @@ import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 // POWERAPPS-ALIGNMENT: Removed ChevronDown/ChevronRight — accordion flattened to always-expanded list
 import { Link } from 'react-router';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { waters, getWaterById } from '../data/world';
 import type { SurveyStatus } from '../data/world';
 import { useDemo } from '../context/DemoContext';
@@ -107,7 +107,7 @@ export default function ActivityFeed() {
                 {filtered.length} survey{filtered.length !== 1 ? 's' : ''} matching current filters
               </p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

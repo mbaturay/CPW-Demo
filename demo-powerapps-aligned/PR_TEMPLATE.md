@@ -4,7 +4,7 @@ This PR performs a conservative platform-alignment pass on the ADAMAS React demo
 
 ### Key changes:
 - **Fonts:** Replaced IBM Plex Sans with Segoe UI system font stack
-- **Sidebar:** Converted hover-to-expand to click-to-toggle; removed animated width transition
+- **Navigation:** Replaced left collapsible sidebar with horizontal top nav bar; role dropdown moved to demo-only floating control
 - **Tooltips:** Replaced hover-only tooltips with visible inline helper text
 - **Drag-and-drop:** Replaced drag-drop upload zone with click-only file selector
 - **Gradients/Shadows:** Replaced SVG gradient with flat fill; constrained box-shadows to minimal elevation
@@ -35,9 +35,15 @@ npm run dev      # Start dev server, check all 8 routes
 7. `/insights?waterId=south-platte` — Insights
 8. `/activity-feed` — Activity Feed
 
-### Sidebar test:
-- Click sidebar to expand/collapse (should be immediate, no animation)
-- Verify navigation links work when expanded
+### Top nav test:
+- Verify horizontal nav bar appears at top of every page
+- Nav links filter by role (data-entry hides Query Builder and Insights)
+- Active route is highlighted with `bg-white/20`
+
+### Role floater test:
+- Small floating control appears top-right below the nav bar
+- Switching role updates nav items and page content immediately
+- **Note:** Role floater is demo-only; will be removed before prod
 
 ## Screenshots
 
@@ -47,5 +53,5 @@ Screenshots saved under `demo-powerapps-aligned/sanity-screenshots/` (if availab
 
 See `demo-powerapps-aligned/PARITY_FLAGS.md` for features that cannot be fully reproduced in Power Apps:
 - **High:** Recharts interactive charts, SVG station visualization, visual query builder
-- **Medium:** Collapsible sidebar, progress bars, animation utilities
+- **Medium:** Progress bars, animation utilities
 - **Low:** Dark mode, demo role switcher, breadcrumbs

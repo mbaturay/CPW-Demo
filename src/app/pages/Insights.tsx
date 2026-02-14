@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { FileSpreadsheet, TrendingUp, Info, BarChart3 } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { WaterBanner } from '../components/WaterBanner';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { useRole } from '../context/RoleContext';
 import { useSearchParams } from 'react-router';
 import { getWaterById, getTrendForWater } from '../data/world';
@@ -109,7 +109,7 @@ export default function Insights() {
                   Save Analysis
                 </Button>
               </div>
-              <RoleIndicator />
+
             </div>
           </div>
         </div>

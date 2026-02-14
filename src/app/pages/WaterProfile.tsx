@@ -4,7 +4,7 @@ import { WaterBanner } from '../components/WaterBanner';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { Link, Navigate, useSearchParams } from 'react-router';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { useRole } from '../context/RoleContext';
 import { Breadcrumb } from '../components/Breadcrumb';
 import { species as allSpecies, getWaterById, getTrendForWater } from '../data/world';
@@ -108,7 +108,7 @@ export default function WaterProfile() {
                 Comprehensive water body intelligence and survey history
               </p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

@@ -1,7 +1,6 @@
 import { Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Waves, MapPin, ChevronRight } from 'lucide-react';
-import { RoleIndicator } from '../components/RoleIndicator';
 import { waters, species as allSpecies } from '../data/world';
 import { useDemo } from '../context/DemoContext';
 
@@ -20,7 +19,7 @@ export default function WaterSelect() {
                 Choose a water to view survey history and status
               </p>
             </div>
-            <RoleIndicator />
+
           </div>
         </div>
       </header>

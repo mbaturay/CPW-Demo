@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from '../components/ui/switch';
 import { Plus, X, Play } from 'lucide-react';
 import { Link } from 'react-router';
-import { RoleIndicator } from '../components/RoleIndicator';
+
 import { useRole } from '../context/RoleContext';
 import { waters, species as allSpecies } from '../data/world';
 import { useDemo } from '../context/DemoContext';
@@ -65,7 +65,7 @@ export default function QueryBuilder() {
               </p>
             </div>
             <div className="flex items-center gap-3">
-              <RoleIndicator />
+
               {role === 'senior-biologist' && (
                 <div className="flex items-center gap-2 px-3 py-1.5 border border-border rounded bg-muted/20">
                   <span className="text-[12px] text-muted-foreground">Mode:</span>
