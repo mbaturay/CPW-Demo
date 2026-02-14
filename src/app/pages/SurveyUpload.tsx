@@ -58,7 +58,7 @@ export default function SurveyUpload() {
         <div className="max-w-[1280px] mx-auto">
           
           {!uploaded ? (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-8">
               {/* Upload Area */}
               <div>
                 <Card className="border border-border shadow-sm">
@@ -155,7 +155,7 @@ export default function SurveyUpload() {
               </div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="space-y-8">
               {/* Auto-Detected Metadata */}
               <div className="space-y-6">
                 <Card className="border border-border shadow-sm">

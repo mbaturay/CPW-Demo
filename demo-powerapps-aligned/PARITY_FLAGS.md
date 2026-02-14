@@ -22,7 +22,7 @@ Features in this demo that cannot be fully reproduced in a Canvas Power App, or 
 | File Path | Feature | Suggested Power Apps Fallback | Notes |
 |---|---|---|---|
 | `src/app/components/CollapsibleSidebar.tsx` | Collapsible sidebar navigation | Use left-nav container with toggle button; or use standard Power Apps navigation | Power Apps supports side navigation via containers but not animated collapse |
-| `src/app/pages/ActivityFeed.tsx` | Collapsible water-grouped sections | Use nested galleries or a flat list with group headers | Nested interactive regions are complex in Power Apps |
+| `src/app/pages/ActivityFeed.tsx` | ~~Collapsible water-grouped sections~~ **Resolved** | Flattened to always-expanded list in Canvas Layout pass | No longer a parity concern |
 | `src/styles/tailwind.css` | tw-animate-css (Tailwind animation utilities) | Remove all animation classes; use immediate state changes | Power Apps has no CSS animation support |
 | `src/app/pages/WaterProfile.tsx` | Progress bars for species composition | Use Power Apps Progress Bar control or colored rectangles | Width-based progress bars require calculated Width properties |
 | `src/app/pages/SeniorBiologistDashboard.tsx` | Progress bars for federal reporting compliance | Use Power Apps Progress Bar control | Same approach as above |

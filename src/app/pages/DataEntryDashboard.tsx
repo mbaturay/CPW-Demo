@@ -52,8 +52,9 @@ export default function DataEntryDashboard() {
           </div>
           
           {/* Primary Action and Quick Stats */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            <Card className="border-2 border-primary/20 bg-primary/[0.02] shadow-sm md:col-span-1">
+          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <Card className="border-2 border-primary/20 bg-primary/[0.02] shadow-sm">
               <CardHeader className="pb-3">
                 <CardTitle className="text-[13px] text-foreground font-medium">Quick Action</CardTitle>
               </CardHeader>

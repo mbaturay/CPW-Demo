@@ -192,6 +192,63 @@ Affected ui/ files: `select.tsx`, `dialog.tsx`, `accordion.tsx`, `button.tsx`, `
 
 ---
 
+## Canvas Container Alignment Pass
+
+> Date: 2026-02-13
+> Purpose: Constrain layouts to what Canvas Apps horizontal/vertical containers can replicate. No responsive grids, no side-by-side scroll panels, no accordion toggles.
+
+### Layout refactors
+
+#### 20. `src/app/pages/Dashboard.tsx` (Canvas Layout)
+- **Edit 1:** 4-column stats grid → 2-column: `grid-cols-1 md:grid-cols-2 lg:grid-cols-4` → `grid-cols-1 md:grid-cols-2`.
+- **Edit 2:** 3-column review queue + station viz → stacked vertical: `grid grid-cols-1 lg:grid-cols-3` → `space-y-6`, removed `lg:col-span-2`.
+- **Edit 3:** 3-column species of concern → stacked: `grid grid-cols-1 md:grid-cols-3` → `space-y-4`.
+
+#### 21. `src/app/pages/DataEntryDashboard.tsx` (Canvas Layout)
+- **Edit:** 4-column stats → 2-column: `grid-cols-1 md:grid-cols-4` → `grid-cols-1 md:grid-cols-2`, removed `md:col-span-1`.
+
+#### 22. `src/app/pages/SeniorBiologistDashboard.tsx` (Canvas Layout)
+- **Edit 1:** 4-column stats → 2-column.
+- **Edit 2:** 2-column cross-water + federal → stacked: `grid grid-cols-1 lg:grid-cols-2` → `space-y-6`.
+- **Edit 3:** 3-column waters requiring attention → stacked: `grid grid-cols-1 md:grid-cols-3` → `space-y-4`.
+
+#### 23. `src/app/pages/Validation.tsx` (Canvas Layout)
+- **Edit 1:** 4-column summary cards → 2-column.
+- **Edit 2:** 3-column data grid + issues panel → stacked: removed `lg:col-span-2`.
+
+#### 24. `src/app/pages/Insights.tsx` (Canvas Layout)
+- **Edit 1:** 4-column summary cards → 2-column.
+- **Edit 2:** 3-column chart + stats → stacked: removed `lg:col-span-2`.
+
+#### 25. `src/app/pages/WaterProfile.tsx` (Canvas Layout)
+- **Edit 1:** 4-column summary cards → 2-column.
+- **Edit 2:** 3-column chart + species → stacked: removed `lg:col-span-2`.
+- **Edit 3:** 3-column surveys + stations → stacked: removed `lg:col-span-2`.
+
+#### 26. `src/app/pages/QueryBuilder.tsx` (Canvas Layout)
+- **Edit 1:** 3-panel layout → stacked vertical: `grid grid-cols-1 lg:grid-cols-4` → `space-y-6`.
+- **Edit 2:** Removed `lg:col-span-2` from builder panel.
+- **Edit 3:** Removed `lg:col-span-1` from results panel.
+
+#### 27. `src/app/pages/SurveyUpload.tsx` (Canvas Layout)
+- **Edit 1:** Pre-upload 2-column → stacked: `grid grid-cols-1 lg:grid-cols-2 gap-8` → `space-y-8`.
+- **Edit 2:** Post-upload 2-column → stacked: same pattern.
+
+#### 28. `src/app/pages/ActivityFeed.tsx` (Canvas Layout)
+- **Edit 1:** Removed `collapsed` state, `toggleWater` function, and ChevronDown/ChevronRight imports.
+  - Rationale: Canvas Apps galleries cannot host expand/collapse toggles.
+- **Edit 2:** Replaced collapsible CardHeader (cursor-pointer, hover:bg, chevron icons) with static header.
+- **Edit 3:** Removed `{isExpanded && (` conditional wrapper around CardContent — sections always expanded.
+- **Edit 4:** Removed `hover:bg-muted/20` from survey item rows and `hover:underline` from water name links.
+
+### Deliverables created
+
+| File | Purpose |
+|---|---|
+| `demo-powerapps-aligned/CANVAS_LAYOUT_RULES.md` | Layout constraint reference for Canvas container model |
+
+---
+
 ## Copy Changes
 
 No user-facing copy was changed except:

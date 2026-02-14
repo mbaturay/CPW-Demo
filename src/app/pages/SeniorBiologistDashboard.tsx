@@ -82,7 +82,8 @@ export default function SeniorBiologistDashboard() {
           </div>
           
           {/* Statewide Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="border border-border shadow-sm">
               <CardHeader className="pb-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -166,7 +167,8 @@ export default function SeniorBiologistDashboard() {
             </CardContent>
           </Card>
           
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* CANVAS-ALIGNMENT: Stacked vertical (was 2-col side-by-side) */}
+          <div className="space-y-6">
             {/* Cross-Water Population Trends */}
             <Card className="border border-border shadow-sm">
               <CardHeader className="border-b border-border/50">
@@ -289,7 +291,8 @@ export default function SeniorBiologistDashboard() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {/* CANVAS-ALIGNMENT: Stacked items (was 3-col grid) */}
+              <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Blue River — Northwest</span>

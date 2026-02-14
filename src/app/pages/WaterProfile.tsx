@@ -250,7 +250,8 @@ export default function WaterProfile() {
               {/* Area Biologist & Senior Biologist: Full Analytics View */}
 
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="border border-border shadow-sm">
               <CardHeader className="pb-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
@@ -310,9 +311,10 @@ export default function WaterProfile() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
+          <div className="space-y-6">
             {/* CPUE Trend Chart */}
-            <Card className="lg:col-span-2 border border-border shadow-sm">
+            <Card className="border border-border shadow-sm">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[16px]">CPUE Trend</CardTitle>
                 <p className="text-[12px] text-muted-foreground mt-1">
@@ -383,9 +385,10 @@ export default function WaterProfile() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
+          <div className="space-y-6">
             {/* Recent Surveys */}
-            <Card className="lg:col-span-2 border border-border shadow-sm">
+            <Card className="border border-border shadow-sm">
               <CardHeader className="border-b border-border/50">
                 <div className="flex items-center justify-between">
                   <div>

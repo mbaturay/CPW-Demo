@@ -118,9 +118,10 @@ export default function QueryBuilder() {
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto">
           
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-panel side-by-side grid) */}
+          <div className="space-y-6">
             {/* Filter Panel */}
-            <div className="lg:col-span-1 space-y-6">
+            <div className="space-y-6">
               <Card className="border border-border shadow-sm">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Query Filters</CardTitle>
@@ -250,7 +251,7 @@ export default function QueryBuilder() {
             </div>
             
             {/* Query Builder Center */}
-            <div className="lg:col-span-2 space-y-6">
+            <div className="space-y-6">
               <Card className="border border-border shadow-sm">
                 <CardHeader className="border-b border-border/50">
                   <div className="flex items-center justify-between">
@@ -383,7 +384,7 @@ export default function QueryBuilder() {
             </div>
             
             {/* Live Results Preview */}
-            <div className="lg:col-span-1">
+            <div>
               {/* POWERAPPS-ALIGNMENT: Removed sticky positioning (not supported in Power Apps) */}
               <Card className="border border-border shadow-sm">
                 <CardHeader className="border-b border-border/50">

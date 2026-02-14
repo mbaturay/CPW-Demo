@@ -284,7 +284,8 @@ export default function Validation() {
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto">
 
-          <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
             <Card className="border border-border shadow-sm">
               <CardContent className="pt-6">
                 <div className="flex items-center gap-3">
@@ -334,9 +335,10 @@ export default function Validation() {
             </Card>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
+          <div className="space-y-6">
             {/* Data Grid with Left Error Strips */}
-            <div className="lg:col-span-2">
+            <div>
               <Card className="border border-border shadow-sm">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Data Preview</CardTitle>

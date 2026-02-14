@@ -4,7 +4,7 @@ import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+// POWERAPPS-ALIGNMENT: Removed ChevronDown/ChevronRight — accordion flattened to always-expanded list
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { waters, getWaterById } from '../data/world';
@@ -57,10 +57,8 @@ export default function ActivityFeed() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [dateFrom, setDateFrom] = useState('');
 
-  // Collapsed/expanded state per water (keyed by waterId)
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({});
-  const toggleWater = (waterId: string) =>
-    setCollapsed(prev => ({ ...prev, [waterId]: !prev[waterId] }));
+  // POWERAPPS-ALIGNMENT: Removed collapsible accordion state.
+  // Canvas Apps do not support expand/collapse toggles on Gallery items.
 
   // Derive filtered list
   const filtered = useMemo(() => {
@@ -189,36 +187,24 @@ export default function ActivityFeed() {
             )}
 
             {waterGroups.map((water) => {
-              const isExpanded = !collapsed[water.waterId];
               const pendingCount = water.items.filter(
                 s => s.status === 'Pending Validation' || s.status === 'Pending Approval',
               ).length;
 
               return (
                 <Card key={water.waterId} className="border border-border shadow-sm">
-                  <CardHeader
-                    className="border-b border-border/50 cursor-pointer hover:bg-muted/20"
-                    onClick={() => toggleWater(water.waterId)}
-                  >
+                  <CardHeader className="border-b border-border/50">
                     <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        {isExpanded ? (
-                          <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                        ) : (
-                          <ChevronRight className="w-4 h-4 text-muted-foreground" />
-                        )}
-                        <div>
-                          <Link
-                            to={`/water/profile?waterId=${water.waterId}`}
-                            className="text-[16px] font-semibold text-primary hover:underline"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            {water.name}
-                          </Link>
-                          <p className="text-[12px] text-muted-foreground mt-0.5">
-                            {water.items.length} survey{water.items.length !== 1 ? 's' : ''}
-                          </p>
-                        </div>
+                      <div>
+                        <Link
+                          to={`/water/profile?waterId=${water.waterId}`}
+                          className="text-[16px] font-semibold text-primary"
+                        >
+                          {water.name}
+                        </Link>
+                        <p className="text-[12px] text-muted-foreground mt-0.5">
+                          {water.items.length} survey{water.items.length !== 1 ? 's' : ''}
+                        </p>
                       </div>
                       {pendingCount > 0 && (
                         <div className="flex items-center gap-2">
@@ -230,44 +216,42 @@ export default function ActivityFeed() {
                     </div>
                   </CardHeader>
 
-                  {isExpanded && (
-                    <CardContent className="pt-6">
-                      <div className="space-y-3">
-                        {water.items.map((survey) => (
-                          <div
-                            key={survey.id}
-                            className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20"
-                          >
-                            <div className="flex items-center gap-6">
-                              <div>
-                                <p className="text-[13px] font-mono text-primary font-medium">{survey.id}</p>
-                                <p className="text-[11px] text-muted-foreground mt-0.5">
-                                  Station {survey.stationId}
-                                </p>
-                              </div>
-                              <div>
-                                <p className="text-[12px] text-muted-foreground">{survey.protocol}</p>
-                              </div>
-                              <div>
-                                <p className="text-[12px] text-muted-foreground">{survey.date}</p>
-                              </div>
+                  <CardContent className="pt-6">
+                    <div className="space-y-3">
+                      {water.items.map((survey) => (
+                        <div
+                          key={survey.id}
+                          className="flex items-center justify-between p-4 border border-border/50 rounded bg-white"
+                        >
+                          <div className="flex items-center gap-6">
+                            <div>
+                              <p className="text-[13px] font-mono text-primary font-medium">{survey.id}</p>
+                              <p className="text-[11px] text-muted-foreground mt-0.5">
+                                Station {survey.stationId}
+                              </p>
                             </div>
-
-                            <div className="flex items-center gap-4">
-                              <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${getStatusStyle(survey.status)}`}>
-                                {survey.status}
-                              </span>
-                              <Link to={`/validation?surveyId=${survey.id}`}>
-                                <Button variant="outline" size="sm" className="text-[12px] h-7">
-                                  {getPrimaryAction(survey.status)}
-                                </Button>
-                              </Link>
+                            <div>
+                              <p className="text-[12px] text-muted-foreground">{survey.protocol}</p>
+                            </div>
+                            <div>
+                              <p className="text-[12px] text-muted-foreground">{survey.date}</p>
                             </div>
                           </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  )}
+
+                          <div className="flex items-center gap-4">
+                            <span className={`inline-flex px-2 py-0.5 rounded text-[11px] font-medium ${getStatusStyle(survey.status)}`}>
+                              {survey.status}
+                            </span>
+                            <Link to={`/validation?surveyId=${survey.id}`}>
+                              <Button variant="outline" size="sm" className="text-[12px] h-7">
+                                {getPrimaryAction(survey.status)}
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
                 </Card>
               );
             })}
