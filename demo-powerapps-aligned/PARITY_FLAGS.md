@@ -36,11 +36,26 @@ Features in this demo that cannot be fully reproduced in a Canvas Power App, or 
 | `src/app/components/Breadcrumb.tsx` | Breadcrumb navigation | Use a horizontal container with label controls and chevron icons | Straightforward to reproduce |
 | `src/app/components/WaterBanner.tsx` | Water context banner with embedded StationViz | Use a horizontal container with labels; replace StationViz with static image | Layout is simple; only the SVG viz needs fallback |
 
+## Resolved — Canvas Aesthetic Simulation Pass
+
+The following items were resolved in the Canvas Aesthetic Simulation pass:
+
+| Item | Resolution |
+|---|---|
+| Stat card grids (4-column → 2-column) | Replaced entirely with horizontal summary strips (single container, `flex divide-x`) |
+| Hover states on app-level components | Removed from all page-level and component-level code (tables, nav, cards, links, buttons) |
+| Card elevation (`shadow-sm`) | Standardized to `--shadow-1` (0 1px 2px rgba(0,0,0,0.04)) via card.tsx base + 33 per-page removals |
+| Card border radius (`rounded-xl`) | Reduced to `rounded-lg` (8px) in card.tsx base |
+| Decorative colored borders on alert cards | Flattened to standard `border border-border` |
+| Table density (small padding/height) | Increased to Canvas gallery proportions (h-12 headers, px-3 py-3 cells) |
+| Breadcrumb hover-only link styling | Changed to always-visible `text-primary underline` |
+| Scattered primary actions across card headers | Consolidated to command bar pattern below header |
+
 ## Not Applicable — UI Library Code
 
 The following patterns exist in shadcn/ui library components (`src/app/components/ui/`) but do **not** affect Power Apps build feasibility because these React components are replaced entirely by native Power Apps controls:
 
 - `transition-*`, `animate-*`, `duration-*` classes in ~28 ui/ component files (Select, Dialog, Accordion, Sheet, etc.)
-- `hover:` styles in Button, Table, Toggle, Card (card.tsx hover:shadow-md was removed in the feasibility audit pass)
+- `hover:` styles in Button, Toggle (table.tsx and card.tsx hover states were removed in the aesthetic simulation pass)
 
 These are cosmetic library-level patterns. No action needed for Power Apps build.

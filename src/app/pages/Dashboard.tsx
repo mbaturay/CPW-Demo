@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { AlertTriangle, Upload, CheckCircle2 } from 'lucide-react';
+import { AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { StationViz } from '../components/StationViz';
 import { Link } from 'react-router';
 import { useRole } from '../context/RoleContext';
@@ -37,40 +37,7 @@ export default function Dashboard() {
   const neStations = neWaters.flatMap(w => w.stations);
   const totalStations = neStations.length;
 
-  const stats = [
-    {
-      title: 'Waters Active',
-      subtitle: 'Current Season',
-      value: String(neWaters.length),
-      icon: Upload,
-      trend: `${neWaters.length} in Northeast Region`,
-      color: 'text-primary'
-    },
-    {
-      title: 'Pending Approval',
-      subtitle: 'Surveys Requiring Review',
-      value: String(pendingCount),
-      icon: AlertTriangle,
-      trend: `Across ${reviewQueue.length} items in queue`,
-      color: 'text-warning'
-    },
-    {
-      title: 'Flagged Surveys',
-      subtitle: 'Data Quality Review',
-      value: String(flaggedCount),
-      icon: AlertTriangle,
-      trend: flaggedCount > 0 ? 'Data quality review needed' : 'No flagged surveys',
-      color: 'text-destructive'
-    },
-    {
-      title: 'Federal Reporting',
-      subtitle: 'Annual Compliance',
-      value: '87%',
-      icon: CheckCircle2,
-      trend: 'Due: March 31, 2026',
-      color: 'text-success'
-    },
-  ];
+  /* Stats derived for summary strip */
 
   // Review queue rows with full survey details
   const reviewRows = reviewQueue.map(item => {
@@ -133,52 +100,57 @@ export default function Dashboard() {
         </div>
       </header>
 
+      {/* CANVAS-AESTHETIC: Command bar with primary actions */}
+      <div className="border-b border-border bg-white px-8 py-3">
+        <div className="max-w-[1280px] mx-auto flex items-center justify-between">
+          <p className="text-[13px] text-muted-foreground">{reviewQueue.length} items requiring review</p>
+          <div className="flex gap-2">
+            <Link to="/activity-feed">
+              <Button variant="outline" size="sm" className="text-[13px]">View All Surveys</Button>
+            </Link>
+            <Link to="/query">
+              <Button variant="outline" size="sm" className="text-[13px]">Run Analysis</Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-8">
 
-          {/* Stats Grid - Operational Focus */}
-          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {stats.map((stat) => {
-              const Icon = stat.icon;
-              return (
-                <Card key={stat.title} className="border border-border shadow-sm">
-                  <CardHeader className="pb-2">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">
-                          {stat.subtitle}
-                        </p>
-                        <CardTitle className="text-[13px] text-foreground font-medium">
-                          {stat.title}
-                        </CardTitle>
-                      </div>
-                      <Icon className={`w-4 h-4 ${stat.color} mt-1`} />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-[28px] font-semibold text-foreground mb-1">{stat.value}</div>
-                    <p className="text-[11px] text-muted-foreground">{stat.trend}</p>
-                  </CardContent>
-                </Card>
-              );
-            })}
+          {/* CANVAS-AESTHETIC: Summary strip replaces stat card grid */}
+          <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Waters Active</p>
+                <p className="text-[24px] font-semibold text-foreground">{neWaters.length}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Northeast Region</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Pending Approval</p>
+                <p className="text-[24px] font-semibold text-foreground">{pendingCount}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Surveys in queue</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Flagged Surveys</p>
+                <p className="text-[24px] font-semibold text-foreground">{flaggedCount}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{flaggedCount > 0 ? 'Review needed' : 'None'}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Federal Reporting</p>
+                <p className="text-[24px] font-semibold text-foreground">87%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Due: Mar 31, 2026</p>
+              </div>
+            </div>
           </div>
 
           {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
           <div className="space-y-6">
             {/* Review Queue */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-[16px]">Review Queue</CardTitle>
-                    <p className="text-[12px] text-muted-foreground mt-1">Surveys requiring attention within Northeast Region</p>
-                  </div>
-                  <Link to="/activity-feed">
-                    <Button variant="outline" size="sm" className="text-[13px]">View All</Button>
-                  </Link>
-                </div>
+                <CardTitle className="text-[16px]">Review Queue</CardTitle>
+                <p className="text-[12px] text-muted-foreground mt-1">Surveys requiring attention within Northeast Region</p>
               </CardHeader>
               <CardContent className="pt-6">
                 <Table>
@@ -223,7 +195,7 @@ export default function Dashboard() {
             </Card>
 
             {/* Active Survey Stations Map Preview */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[16px]">Active Survey Stations</CardTitle>
                 <p className="text-[12px] text-muted-foreground mt-1">Current field season locations</p>
@@ -255,7 +227,7 @@ export default function Dashboard() {
           </div>
 
           {/* Waters in Northeast Region */}
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <CardTitle className="text-[16px]">Waters in Northeast Region</CardTitle>
               <p className="text-[12px] text-muted-foreground mt-1">
@@ -295,22 +267,16 @@ export default function Dashboard() {
           </Card>
 
           {/* Species of Concern Activity Panel */}
-          <Card className="border border-destructive/20 bg-destructive/[0.02] shadow-sm">
-            <CardHeader className="border-b border-destructive/10">
-              <div className="flex items-start justify-between">
-                <div>
-                  <CardTitle className="text-[16px] text-foreground flex items-center gap-2">
-                    <AlertTriangle className="w-4 h-4 text-destructive" />
-                    Species of Concern Activity
-                  </CardTitle>
-                  <p className="text-[12px] text-muted-foreground mt-1">
-                    Population trends requiring monitoring attention
-                  </p>
-                </div>
-                <Link to="/query">
-                  <Button variant="outline" size="sm" className="text-[13px]">View Analysis</Button>
-                </Link>
-              </div>
+          {/* CANVAS-AESTHETIC: Removed decorative colored border — standard card */}
+          <Card className="border border-border" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px] text-foreground flex items-center gap-2">
+                <AlertTriangle className="w-4 h-4 text-destructive" />
+                Species of Concern Activity
+              </CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Population trends requiring monitoring attention
+              </p>
             </CardHeader>
             <CardContent className="pt-6">
               {/* CANVAS-ALIGNMENT: Stacked items (was 3-col grid) */}

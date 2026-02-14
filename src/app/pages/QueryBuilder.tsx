@@ -122,7 +122,7 @@ export default function QueryBuilder() {
           <div className="space-y-6">
             {/* Filter Panel */}
             <div className="space-y-6">
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Query Filters</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">
@@ -252,7 +252,7 @@ export default function QueryBuilder() {
             
             {/* Query Builder Center */}
             <div className="space-y-6">
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <div className="flex items-center justify-between">
                     <div>
@@ -356,7 +356,7 @@ export default function QueryBuilder() {
                               <Button
                                 variant="ghost"
                                 size="sm"
-                                className="mt-5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                                className="mt-5 text-destructive"
                                 onClick={() => removeCondition(condition.id)}
                               >
                                 <X className="w-4 h-4" />
@@ -386,7 +386,7 @@ export default function QueryBuilder() {
             {/* Live Results Preview */}
             <div>
               {/* POWERAPPS-ALIGNMENT: Removed sticky positioning (not supported in Power Apps) */}
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Live Results</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">

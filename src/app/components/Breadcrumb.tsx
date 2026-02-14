@@ -17,7 +17,7 @@ export function Breadcrumb({ items }: BreadcrumbProps) {
         <div key={index} className="flex items-center gap-2">
           {index > 0 && <ChevronRight className="w-3.5 h-3.5" />}
           {item.path ? (
-            <Link to={item.path} className="hover:text-foreground">
+            <Link to={item.path} className="text-primary underline visited:text-primary">
               {item.label}
             </Link>
           ) : (

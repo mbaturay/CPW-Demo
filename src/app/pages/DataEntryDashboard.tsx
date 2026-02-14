@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { Upload, CheckCircle2, Clock, Info } from 'lucide-react';
+import { Upload, CheckCircle2, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
 
@@ -34,82 +34,48 @@ export default function DataEntryDashboard() {
           </div>
         </div>
       </header>
-      
+
+      {/* CANVAS-AESTHETIC: Command bar with primary Upload action */}
+      <div className="border-b border-border bg-white px-8 py-3">
+        <div className="max-w-[1280px] mx-auto flex items-center justify-between">
+          <p className="text-[12px] text-muted-foreground">
+            Assigned to J. Martinez, Area Biologist — Northeast Region
+          </p>
+          <Link to="/upload">
+            <Button size="sm" className="text-[13px]">
+              <Upload className="w-4 h-4 mr-2" />
+              Upload Survey Data
+            </Button>
+          </Link>
+        </div>
+      </div>
+
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-8">
-          
-          {/* Role Scope Banner */}
-          <div className="bg-muted/20 border border-border rounded px-4 py-3 flex items-start gap-3">
-            <Info className="w-4 h-4 text-primary mt-0.5 flex-shrink-0" />
-            <div>
-              <p className="text-[13px] text-foreground font-medium mb-1">
-                Your Data Entry Scope
-              </p>
-              <p className="text-[12px] text-muted-foreground">
-                You can upload and edit surveys for waters assigned to your supervising biologist (J. Martinez, Area Biologist — Northeast Region). Contact your supervisor to request access to additional waters.
-              </p>
+
+          {/* CANVAS-AESTHETIC: Summary strip replaces stat card grid */}
+          <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Assigned Waters</p>
+                <p className="text-[24px] font-semibold text-foreground">2</p>
+                <p className="text-[11px] text-muted-foreground mt-1">South Platte, Cache la Poudre</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Pending Upload</p>
+                <p className="text-[24px] font-semibold text-foreground">2</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Stations need data entry</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Awaiting Review</p>
+                <p className="text-[24px] font-semibold text-foreground">1</p>
+                <p className="text-[11px] text-muted-foreground mt-1">By supervising biologist</p>
+              </div>
             </div>
           </div>
           
-          {/* Primary Action and Quick Stats */}
-          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border-2 border-primary/20 bg-primary/[0.02] shadow-sm">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-[13px] text-foreground font-medium">Quick Action</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <Link to="/upload">
-                  <Button className="w-full text-[13px]">
-                    <Upload className="w-4 h-4 mr-2" />
-                    Upload Survey Data
-                  </Button>
-                </Link>
-                <p className="text-[11px] text-muted-foreground text-center">
-                  Start data entry workflow
-                </p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Assigned Waters
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">2</div>
-                <p className="text-[11px] text-muted-foreground">South Platte Basin, Cache la Poudre</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Pending Upload
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">2</div>
-                <p className="text-[11px] text-muted-foreground">Stations need data entry</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Awaiting Review
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">1</div>
-                <p className="text-[11px] text-muted-foreground">By supervising biologist</p>
-              </CardContent>
-            </Card>
-          </div>
-          
           {/* Assigned Waters Status Table */}
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
@@ -168,7 +134,7 @@ export default function DataEntryDashboard() {
           </Card>
           
           {/* Recent Submissions */}
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>

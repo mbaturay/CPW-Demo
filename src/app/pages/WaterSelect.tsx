@@ -36,7 +36,7 @@ export default function WaterSelect() {
 
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto">
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <CardTitle className="text-[16px]">Waters in Northeast Region</CardTitle>
             </CardHeader>
@@ -52,7 +52,7 @@ export default function WaterSelect() {
                     <Link
                       key={water.id}
                       to={`/water/profile?waterId=${water.id}`}
-                      className="flex items-center justify-between py-4 px-2 hover:bg-muted/20 -mx-2 px-4 rounded"
+                      className="flex items-center justify-between py-4 px-4 -mx-2 rounded"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">

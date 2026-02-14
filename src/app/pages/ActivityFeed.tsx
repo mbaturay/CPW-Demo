@@ -125,7 +125,7 @@ export default function ActivityFeed() {
         <div className="max-w-[1280px] mx-auto space-y-6">
 
           {/* Filters */}
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <CardTitle className="text-[16px]">Filters</CardTitle>
             </CardHeader>
@@ -179,7 +179,7 @@ export default function ActivityFeed() {
           {/* Water-Grouped Activity */}
           <div className="space-y-4">
             {waterGroups.length === 0 && (
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardContent className="py-12 text-center">
                   <p className="text-[14px] text-muted-foreground">No surveys match the current filters.</p>
                 </CardContent>
@@ -192,7 +192,7 @@ export default function ActivityFeed() {
               ).length;
 
               return (
-                <Card key={water.waterId} className="border border-border shadow-sm">
+                <Card key={water.waterId} className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <div className="flex items-center justify-between">
                       <div>
@@ -221,7 +221,7 @@ export default function ActivityFeed() {
                       {water.items.map((survey) => (
                         <div
                           key={survey.id}
-                          className="flex items-center justify-between p-4 border border-border/50 rounded bg-white"
+                          className="flex items-center justify-between px-4 py-5 border border-border/50 rounded bg-white"
                         >
                           <div className="flex items-center gap-6">
                             <div>

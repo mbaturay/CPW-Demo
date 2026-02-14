@@ -148,7 +148,7 @@ export default function Insights() {
           {/* Summary Metric Cards */}
           {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="pb-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                   Population Estimate
@@ -173,7 +173,7 @@ export default function Insights() {
               </CardContent>
             </Card>
 
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="pb-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                   CPUE Index
@@ -198,7 +198,7 @@ export default function Insights() {
               </CardContent>
             </Card>
 
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="pb-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                   Biomass
@@ -223,7 +223,7 @@ export default function Insights() {
               </CardContent>
             </Card>
 
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="pb-2">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
                   Relative Weight Avg
@@ -247,7 +247,7 @@ export default function Insights() {
           </div>
 
           {/* Main Trend Chart */}
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
@@ -321,7 +321,7 @@ export default function Insights() {
           {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
           <div className="space-y-6">
             {/* Length-Frequency Histogram */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[18px]">Length-Frequency Distribution</CardTitle>
                 <p className="text-[11px] text-muted-foreground mt-1.5">
@@ -364,7 +364,7 @@ export default function Insights() {
 
             {/* Statistical Summary & Map */}
             <div className="space-y-6">
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Statistical Summary</CardTitle>
                   <p className="text-[11px] text-muted-foreground mt-1">

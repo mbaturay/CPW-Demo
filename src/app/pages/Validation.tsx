@@ -284,62 +284,45 @@ export default function Validation() {
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto">
 
-          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-            <Card className="border border-border shadow-sm">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <CheckCircle2 className="w-5 h-5 text-success" />
-                  <div>
-                    <p className="text-[26px] font-semibold">{validCount}</p>
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Valid Rows</p>
-                  </div>
+          {/* CANVAS-AESTHETIC: Summary strip replaces stat card grid */}
+          <div className="border border-border rounded bg-white mb-8" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5 flex items-center gap-3">
+                <CheckCircle2 className="w-5 h-5 text-success flex-shrink-0" />
+                <div>
+                  <p className="text-[24px] font-semibold text-foreground">{validCount}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Valid Rows</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-border shadow-sm">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-warning" />
-                  <div>
-                    <p className="text-[26px] font-semibold">{warningCount}</p>
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Warnings</p>
-                  </div>
+              </div>
+              <div className="flex-1 px-6 py-5 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-warning flex-shrink-0" />
+                <div>
+                  <p className="text-[24px] font-semibold text-foreground">{warningCount}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Warnings</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-border shadow-sm">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <AlertCircle className="w-5 h-5 text-destructive" />
-                  <div>
-                    <p className="text-[26px] font-semibold">{errorCount}</p>
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Errors</p>
-                  </div>
+              </div>
+              <div className="flex-1 px-6 py-5 flex items-center gap-3">
+                <AlertCircle className="w-5 h-5 text-destructive flex-shrink-0" />
+                <div>
+                  <p className="text-[24px] font-semibold text-foreground">{errorCount}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Errors</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-border shadow-sm bg-muted/30">
-              <CardContent className="pt-6">
-                <div className="flex items-center gap-3">
-                  <Info className="w-5 h-5 text-muted-foreground" />
-                  <div>
-                    <p className="text-[26px] font-semibold">{survey?.fishCount ?? data.length}</p>
-                    <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Total Records</p>
-                  </div>
+              </div>
+              <div className="flex-1 px-6 py-5 flex items-center gap-3">
+                <Info className="w-5 h-5 text-muted-foreground flex-shrink-0" />
+                <div>
+                  <p className="text-[24px] font-semibold text-foreground">{survey?.fishCount ?? data.length}</p>
+                  <p className="text-[11px] text-muted-foreground uppercase tracking-wide">Total Records</p>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
           <div className="space-y-6">
             {/* Data Grid with Left Error Strips */}
             <div>
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Data Preview</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">
@@ -361,15 +344,16 @@ export default function Validation() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
+                        {/* CANVAS-AESTHETIC: Removed hover backgrounds from table rows */}
                         {data.map((item) => (
                           <TableRow
                             key={item.row}
                             className={
                               item.status === 'error'
-                                ? 'bg-destructive/[0.02] hover:bg-destructive/[0.04]'
+                                ? 'bg-destructive/[0.03]'
                                 : item.status === 'warning'
-                                ? 'bg-warning/[0.02] hover:bg-warning/[0.04]'
-                                : 'hover:bg-muted/20'
+                                ? 'bg-warning/[0.03]'
+                                : ''
                             }
                           >
                             <TableCell className="p-0 w-3">
@@ -442,7 +426,7 @@ export default function Validation() {
             {/* Issues Panel */}
             <div>
               {/* POWERAPPS-ALIGNMENT: Removed sticky positioning (not supported in Power Apps) */}
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Validation Issues</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">

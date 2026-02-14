@@ -265,3 +265,91 @@ No automated tests exist in this repo. No test changes were required.
 - Keyboard Escape handler retained on sidebar.
 - Tooltip content that was previously hidden behind hover is now **more accessible** as visible inline text.
 - No ARIA labels were removed.
+
+---
+
+## Canvas Aesthetic Simulation Pass
+
+> Date: 2026-02-13
+> Purpose: Make layouts and interaction patterns feel like what a Canvas App actually delivers on screen. Summary strips replace stat card grids, command bars consolidate primary actions, table density reduced, hover interactions removed, elevation minimized.
+
+### 29. `src/app/pages/Dashboard.tsx` (Aesthetic Simulation)
+- **Edit 1:** Replaced 2-column stat card grid (4 Card components) with horizontal summary strip (`flex divide-x divide-border` in single container).
+  - Rationale: Canvas Apps use label rows inside a horizontal container, not individual card controls for summary stats.
+- **Edit 2:** Added command bar below header with "View All Surveys" and "Run Analysis" buttons.
+  - Rationale: Canvas screens have a command bar at the top for primary actions.
+- **Edit 3:** Removed duplicate "View All" button from Review Queue card header and "View Analysis" button from Species Concern card.
+  - Rationale: Actions consolidated to command bar.
+- **Edit 4:** Flattened species-of-concern card — replaced `border-destructive/20 bg-destructive/[0.02]` with standard `border border-border`.
+  - Rationale: Canvas containers don't use decorative colored borders.
+- **Edit 5:** Removed `shadow-sm` from all Card classNames.
+- **Edit 6:** Changed review/waters sections from side-by-side to stacked vertical with `space-y-6`.
+
+### 30. `src/app/pages/DataEntryDashboard.tsx` (Aesthetic Simulation)
+- **Edit 1:** Replaced stat card grid (3 stat cards + 1 action card) with summary strip (3 inline stat cells).
+  - Rationale: Summary strip is more Canvas-faithful than a grid of cards.
+- **Edit 2:** Added command bar with Upload Survey Data button and assignment context text.
+  - Rationale: Upload action moved from card grid to command bar.
+- **Edit 3:** Removed role scope info banner (moved to command bar context).
+- **Edit 4:** Removed `Info` import (unused after banner removal).
+- **Edit 5:** Removed `shadow-sm` from all Card classNames.
+
+### 31. `src/app/pages/SeniorBiologistDashboard.tsx` (Aesthetic Simulation)
+- **Edit 1:** Replaced 2-column stat card grid with horizontal summary strip (4 inline stat cells).
+- **Edit 2:** Flattened waters-requiring-attention card — replaced `border-destructive/20 bg-destructive/[0.02]` with standard `border border-border`.
+- **Edit 3:** Removed `shadow-sm` from all Card classNames.
+
+### 32. `src/app/pages/Validation.tsx` (Aesthetic Simulation)
+- **Edit 1:** Replaced 2-column stat card grid with horizontal summary strip (4 inline stat cells with icons).
+- **Edit 2:** Removed hover backgrounds from validation data table rows (`bg-destructive/[0.02] hover:bg-destructive/[0.04]` → `bg-destructive/[0.03]`).
+- **Edit 3:** Removed `shadow-sm` from all Card classNames.
+
+### 33. `src/app/pages/WaterProfile.tsx` (Aesthetic Simulation)
+- **Edit 1:** Replaced biologist-view stat card grid with summary strip.
+- **Edit 2:** Replaced data-entry-view stat card grid with summary strip.
+- **Edit 3:** Flattened management notes card — replaced `border-warning/20 bg-warning/[0.02]` with standard `border border-border`.
+- **Edit 4:** Removed `hover:bg-muted/20` from survey card items and station buttons.
+- **Edit 5:** Removed `shadow-sm` from all Card classNames.
+
+### 34. `src/app/pages/ActivityFeed.tsx` (Aesthetic Simulation)
+- **Edit 1:** Increased survey row padding from `p-4` to `px-4 py-5`.
+  - Rationale: Canvas gallery rows have larger template heights than typical web table rows.
+- **Edit 2:** Removed `shadow-sm` from all Card classNames.
+
+### 35. `src/app/pages/QueryBuilder.tsx` (Aesthetic Simulation)
+- **Edit:** Removed `hover:text-destructive hover:bg-destructive/10` from condition remove button.
+  - Rationale: No hover states in Canvas Apps.
+- **Edit 2:** Removed `shadow-sm` from all Card classNames.
+
+### 36. `src/app/pages/SurveyUpload.tsx` (Aesthetic Simulation)
+- **Edit:** Removed `shadow-sm` from all Card classNames (5 occurrences).
+
+### 37. `src/app/pages/Insights.tsx` (Aesthetic Simulation)
+- **Edit:** Removed `shadow-sm` from all Card classNames (7 occurrences).
+
+### 38. `src/app/pages/WaterSelect.tsx` (Aesthetic Simulation)
+- **Edit 1:** Removed `hover:bg-muted/20` from water list items.
+- **Edit 2:** Removed `shadow-sm` from Card className.
+
+### 39. `src/app/components/CollapsibleSidebar.tsx` (Aesthetic Simulation)
+- **Edit:** Removed `hover:bg-white/10 hover:text-white` from inactive nav links.
+  - Rationale: No hover states in Canvas Apps. Nav items now static `text-white/60`.
+
+### 40. `src/app/components/Navigation.tsx` (Aesthetic Simulation)
+- **Edit:** Removed `hover:bg-muted/50` from nav links.
+
+### 41. `src/app/components/Breadcrumb.tsx` (Aesthetic Simulation)
+- **Edit:** Changed `hover:text-foreground` to always-visible `text-primary underline visited:text-primary`.
+  - Rationale: Links must be visually identifiable without hover. Canvas Apps don't have hover states.
+
+### 42. `src/app/components/ui/table.tsx` (Aesthetic Simulation)
+- **Edit 1:** TableRow — removed `hover:bg-muted/50` and `transition-colors`.
+- **Edit 2:** TableHead — increased height `h-10` → `h-12`, padding `px-2` → `px-3`.
+- **Edit 3:** TableCell — increased padding `p-2` → `px-3 py-3`.
+  - Rationale: Canvas gallery rows have larger row heights. No hover states.
+
+### 43. `src/app/components/ui/card.tsx` (Aesthetic Simulation)
+- **Edit 1:** Changed `rounded-xl` → `rounded-lg` (12px → 8px radius).
+  - Rationale: Canvas containers use 4-8px corner radius.
+- **Edit 2:** Changed `shadow-sm` → `shadow-[0_1px_2px_rgba(0,0,0,0.04)]` (matches `--shadow-1` token).
+  - Rationale: Minimal elevation to match Canvas DropShadow.Light.

@@ -61,7 +61,7 @@ export default function SurveyUpload() {
             <div className="space-y-8">
               {/* Upload Area */}
               <div>
-                <Card className="border border-border shadow-sm">
+                <Card className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <CardTitle className="text-[16px]">Select Survey File</CardTitle>
                     <p className="text-[12px] text-muted-foreground mt-1">
@@ -106,7 +106,7 @@ export default function SurveyUpload() {
               
               {/* Info Panel */}
               <div className="space-y-6">
-                <Card className="border border-border shadow-sm">
+                <Card className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <CardTitle className="text-[16px]">Supported Protocol Types</CardTitle>
                     <p className="text-[12px] text-muted-foreground mt-1">
@@ -135,7 +135,7 @@ export default function SurveyUpload() {
                   </CardContent>
                 </Card>
                 
-                <Card className="border border-border shadow-sm">
+                <Card className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <CardTitle className="text-[16px]">Download Templates</CardTitle>
                   </CardHeader>
@@ -158,7 +158,7 @@ export default function SurveyUpload() {
             <div className="space-y-8">
               {/* Auto-Detected Metadata */}
               <div className="space-y-6">
-                <Card className="border border-border shadow-sm">
+                <Card className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <div className="flex items-center gap-2">
                       <CheckCircle2 className="w-5 h-5 text-success" />
@@ -240,7 +240,7 @@ export default function SurveyUpload() {
               
               {/* Validation Summary */}
               <div className="space-y-6">
-                <Card className="border border-border shadow-sm">
+                <Card className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <CardTitle className="text-[16px]">Validation Summary</CardTitle>
                     <p className="text-[12px] text-muted-foreground mt-1">

@@ -45,7 +45,7 @@ export function Navigation() {
                     flex items-center gap-3 px-3 py-2.5 rounded text-[13px]
                     ${isActive 
                       ? 'bg-primary text-primary-foreground font-medium' 
-                      : 'text-foreground hover:bg-muted/50'
+                      : 'text-foreground'
                     }
                   `}
                 >

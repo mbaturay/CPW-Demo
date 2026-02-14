@@ -141,7 +141,7 @@ export function CollapsibleSidebar({
                       flex items-center h-10 rounded
                       ${isActive
                         ? 'bg-white/20 text-white font-medium'
-                        : 'text-white/60 hover:bg-white/10 hover:text-white'
+                        : 'text-white/60'
                       }
                     `}
                   >

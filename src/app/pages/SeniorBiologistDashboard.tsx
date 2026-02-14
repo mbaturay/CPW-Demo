@@ -81,60 +81,34 @@ export default function SeniorBiologistDashboard() {
             </div>
           </div>
           
-          {/* Statewide Summary Cards */}
-          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Total Waters Monitored
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">118</div>
-                <p className="text-[11px] text-muted-foreground">Across 5 regions, 702 surveys YTD</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Waters Flagged for Review
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">7</div>
-                <p className="text-[11px] text-destructive">Population declines require analysis</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Federal Reporting Readiness
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">82%</div>
-                <p className="text-[11px] text-muted-foreground">Avg. completion across 4 requirements</p>
-              </CardContent>
-            </Card>
-            
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Data Quality Score
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="text-[28px] font-semibold text-foreground mb-1">96%</div>
-                <p className="text-[11px] text-success">Validation rate across all surveys</p>
-              </CardContent>
-            </Card>
+          {/* CANVAS-AESTHETIC: Summary strip replaces stat card grid */}
+          <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Waters Monitored</p>
+                <p className="text-[24px] font-semibold text-foreground">118</p>
+                <p className="text-[11px] text-muted-foreground mt-1">5 regions, 702 surveys YTD</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Flagged for Review</p>
+                <p className="text-[24px] font-semibold text-foreground">7</p>
+                <p className="text-[11px] text-destructive mt-1">Declines require analysis</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Federal Readiness</p>
+                <p className="text-[24px] font-semibold text-foreground">82%</p>
+                <p className="text-[11px] text-muted-foreground mt-1">Avg. across 4 requirements</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Data Quality</p>
+                <p className="text-[24px] font-semibold text-foreground">96%</p>
+                <p className="text-[11px] text-success mt-1">Validation rate</p>
+              </div>
+            </div>
           </div>
           
           {/* Regional Performance Comparison */}
-          <Card className="border border-border shadow-sm">
+          <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
@@ -170,7 +144,7 @@ export default function SeniorBiologistDashboard() {
           {/* CANVAS-ALIGNMENT: Stacked vertical (was 2-col side-by-side) */}
           <div className="space-y-6">
             {/* Cross-Water Population Trends */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <div className="flex items-center justify-between">
                   <div>
@@ -222,7 +196,7 @@ export default function SeniorBiologistDashboard() {
             </Card>
             
             {/* Federal Reporting Compliance */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <div>
                   <CardTitle className="text-[16px]">Federal Reporting Compliance</CardTitle>
@@ -273,8 +247,9 @@ export default function SeniorBiologistDashboard() {
           </div>
           
           {/* Waters Requiring Attention */}
-          <Card className="border border-destructive/20 bg-destructive/[0.02] shadow-sm">
-            <CardHeader className="border-b border-destructive/10">
+          {/* CANVAS-AESTHETIC: Removed decorative colored border — standard card */}
+          <Card className="border border-border" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <CardHeader className="border-b border-border/50">
               <div className="flex items-start justify-between">
                 <div>
                   <CardTitle className="text-[16px] text-foreground flex items-center gap-2">

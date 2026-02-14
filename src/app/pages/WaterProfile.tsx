@@ -146,67 +146,37 @@ export default function WaterProfile() {
                 </p>
               </div>
 
-              {/* Survey Activity Status Section */}
+              {/* CANVAS-AESTHETIC: Summary strip for data entry survey status */}
               <div>
-                <h2 className="text-[18px] font-semibold text-foreground mb-4">Survey Activity Status</h2>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <Card className="border border-border shadow-sm">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-[13px] text-muted-foreground mb-2">Uploaded</p>
-                          <p className="text-[32px] font-semibold text-foreground leading-none">{deUploaded}</p>
-                          <p className="text-[12px] text-muted-foreground mt-2">surveys submitted</p>
-                        </div>
-                        <CheckCircle2 className="w-5 h-5 text-success mt-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border border-border shadow-sm">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-[13px] text-muted-foreground mb-2">Pending Validation</p>
-                          <p className="text-[32px] font-semibold text-foreground leading-none">{dePending}</p>
-                          <p className="text-[12px] text-muted-foreground mt-2">awaiting data quality check</p>
-                        </div>
-                        <Clock className="w-5 h-5 text-warning mt-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border border-border shadow-sm">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-[13px] text-muted-foreground mb-2">Returned for Correction</p>
-                          <p className="text-[32px] font-semibold text-foreground leading-none">{deReturned}</p>
-                          <p className="text-[12px] text-muted-foreground mt-2">requiring revision</p>
-                        </div>
-                        <AlertTriangle className="w-5 h-5 text-destructive mt-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
-
-                  <Card className="border border-border shadow-sm">
-                    <CardContent className="pt-6">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <p className="text-[13px] text-muted-foreground mb-2">Awaiting Biologist Approval</p>
-                          <p className="text-[32px] font-semibold text-foreground leading-none">{deApproval}</p>
-                          <p className="text-[12px] text-muted-foreground mt-2">under supervisor review</p>
-                        </div>
-                        <Clock className="w-5 h-5 text-primary mt-1" />
-                      </div>
-                    </CardContent>
-                  </Card>
+                <h2 className="text-[16px] font-semibold text-foreground mb-4">Survey Activity Status</h2>
+                <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+                  <div className="flex divide-x divide-border">
+                    <div className="flex-1 px-6 py-5">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Uploaded</p>
+                      <p className="text-[24px] font-semibold text-foreground">{deUploaded}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">surveys submitted</p>
+                    </div>
+                    <div className="flex-1 px-6 py-5">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Pending Validation</p>
+                      <p className="text-[24px] font-semibold text-foreground">{dePending}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">awaiting quality check</p>
+                    </div>
+                    <div className="flex-1 px-6 py-5">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Returned</p>
+                      <p className="text-[24px] font-semibold text-foreground">{deReturned}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">requiring revision</p>
+                    </div>
+                    <div className="flex-1 px-6 py-5">
+                      <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Awaiting Approval</p>
+                      <p className="text-[24px] font-semibold text-foreground">{deApproval}</p>
+                      <p className="text-[11px] text-muted-foreground mt-1">under supervisor review</p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
               {/* Recent Surveys - Keep this for Data Entry */}
-              <Card className="border border-border shadow-sm">
+              <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <div className="flex items-center justify-between">
                     <div>
@@ -222,7 +192,7 @@ export default function WaterProfile() {
                     {recentSurveys.map((survey) => (
                       <div
                         key={survey.id}
-                        className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20"
+                        className="flex items-center justify-between p-4 border border-border/50 rounded bg-white"
                       >
                         <div className="flex items-center gap-4">
                           <FileText className="w-4 h-4 text-muted-foreground" />
@@ -249,72 +219,42 @@ export default function WaterProfile() {
             <>
               {/* Area Biologist & Senior Biologist: Full Analytics View */}
 
-          {/* Summary Cards */}
-          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Current Population
+          {/* CANVAS-AESTHETIC: Summary strip replaces stat card grid */}
+          <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Current Population</p>
+                <p className="text-[24px] font-semibold text-foreground">
+                  {latestTrendPoint?.popEstimate?.toLocaleString() ?? `${latestTrendPoint?.cpue ?? '—'}`}
                 </p>
-              </CardHeader>
-              <CardContent>
-                <div className="flex items-end justify-between">
-                  <div>
-                    <p className="text-[28px] font-semibold leading-none text-foreground">
-                      {latestTrendPoint?.popEstimate?.toLocaleString() ?? `${latestTrendPoint?.cpue ?? '—'} CPUE`}
-                    </p>
-                    <p className={`text-[12px] flex items-center gap-1 mt-2 ${trendDirection === 'up' ? 'text-success' : 'text-destructive'}`}>
-                      {trendDirection === 'up' ? <TrendingUp className="w-3.5 h-3.5" /> : <TrendingDown className="w-3.5 h-3.5" />}
-                      {trendDirection === 'up' ? 'Stable trend' : 'Declining trend'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Primary Species
+                <p className={`text-[11px] flex items-center gap-1 mt-1 ${trendDirection === 'up' ? 'text-success' : 'text-destructive'}`}>
+                  {trendDirection === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                  {trendDirection === 'up' ? 'Stable trend' : 'Declining trend'}
                 </p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[28px] font-semibold leading-none text-foreground">{primaryCode}</p>
-                <p className="text-[12px] text-muted-foreground mt-2">{primarySpeciesInfo?.common ?? primaryCode}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Last Survey
-                </p>
-              </CardHeader>
-              <CardContent>
-                <p className="text-[28px] font-semibold leading-none text-foreground">{lastSurveyFormatted}</p>
-                <p className="text-[12px] text-muted-foreground mt-2">{lastSurveyYear}</p>
-              </CardContent>
-            </Card>
-
-            <Card className="border border-border shadow-sm">
-              <CardHeader className="pb-2">
-                <p className="text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Water Status
-                </p>
-              </CardHeader>
-              <CardContent>
-                <div className="inline-flex px-2 py-1 bg-success/10 text-success rounded text-[11px] font-medium">
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Primary Species</p>
+                <p className="text-[24px] font-semibold text-foreground">{primaryCode}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{primarySpeciesInfo?.common ?? primaryCode}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Last Survey</p>
+                <p className="text-[24px] font-semibold text-foreground">{lastSurveyFormatted}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{lastSurveyYear}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Water Status</p>
+                <div className="inline-flex px-2 py-1 bg-success/10 text-success rounded text-[11px] font-medium mt-1">
                   Active Monitoring
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           </div>
 
           {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
           <div className="space-y-6">
             {/* CPUE Trend Chart */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[16px]">CPUE Trend</CardTitle>
                 <p className="text-[12px] text-muted-foreground mt-1">
@@ -352,7 +292,7 @@ export default function WaterProfile() {
             </Card>
 
             {/* Species Composition */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[16px]">Species Composition</CardTitle>
                 <p className="text-[12px] text-muted-foreground mt-1">
@@ -388,7 +328,7 @@ export default function WaterProfile() {
           {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
           <div className="space-y-6">
             {/* Recent Surveys */}
-            <Card className="border border-border shadow-sm">
+            <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <div className="flex items-center justify-between">
                   <div>
@@ -410,7 +350,7 @@ export default function WaterProfile() {
                     <Link
                       key={survey.id}
                       to={`/validation?surveyId=${survey.id}`}
-                      className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20"
+                      className="flex items-center justify-between p-4 border border-border/50 rounded bg-white"
                     >
                       <div className="flex items-center gap-4">
                         <FileText className="w-4 h-4 text-muted-foreground" />
@@ -440,7 +380,7 @@ export default function WaterProfile() {
                 {water.stations.map((station) => (
                   <button
                     key={station.id}
-                    className="px-4 py-2 border border-border rounded bg-white hover:bg-muted/20 text-[13px] font-mono font-medium text-foreground"
+                    className="px-4 py-2 border border-border rounded bg-white text-[13px] font-mono font-medium text-foreground"
                   >
                     {station.id}
                   </button>
@@ -450,8 +390,9 @@ export default function WaterProfile() {
           </div>
 
           {/* Management Notes */}
-          <Card className="border border-warning/20 bg-warning/[0.02] shadow-sm">
-            <CardHeader className="border-b border-warning/10">
+          {/* CANVAS-AESTHETIC: Removed decorative colored border — standard card */}
+          <Card className="border border-border" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <CardHeader className="border-b border-border/50">
               <div className="flex items-start gap-3">
                 <AlertTriangle className="w-5 h-5 text-warning mt-0.5" />
                 <div>
