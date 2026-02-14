@@ -222,7 +222,7 @@ export default function WaterProfile() {
                     {recentSurveys.map((survey) => (
                       <div
                         key={survey.id}
-                        className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20 transition-colors"
+                        className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20"
                       >
                         <div className="flex items-center gap-4">
                           <FileText className="w-4 h-4 text-muted-foreground" />
@@ -323,12 +323,7 @@ export default function WaterProfile() {
                 <div className="h-[280px] min-h-[280px]">
                   <ResponsiveContainer width="100%" height="100%" minHeight={280}>
                     <ComposedChart data={activityData}>
-                      <defs>
-                        <linearGradient id="cpueGradient" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="0%" stopColor="#1B365D" stopOpacity={0.15} />
-                          <stop offset="100%" stopColor="#1B365D" stopOpacity={0.02} />
-                        </linearGradient>
-                      </defs>
+                      {/* POWERAPPS-ALIGNMENT: Removed linearGradient; flat fill used instead */}
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                       <XAxis
                         dataKey="year"
@@ -349,10 +344,11 @@ export default function WaterProfile() {
                           fontSize: '13px'
                         }}
                       />
+                      {/* POWERAPPS-ALIGNMENT: Replaced gradient fill with flat fill */}
                       <Area
                         type="monotone"
                         dataKey="cpue"
-                        fill="url(#cpueGradient)"
+                        fill="rgba(27, 54, 93, 0.08)"
                         stroke="none"
                       />
                       <Line
@@ -441,7 +437,7 @@ export default function WaterProfile() {
                     <Link
                       key={survey.id}
                       to={`/validation?surveyId=${survey.id}`}
-                      className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20 transition-colors"
+                      className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20"
                     >
                       <div className="flex items-center gap-4">
                         <FileText className="w-4 h-4 text-muted-foreground" />
@@ -471,7 +467,7 @@ export default function WaterProfile() {
                 {water.stations.map((station) => (
                   <button
                     key={station.id}
-                    className="px-4 py-2 border border-border rounded bg-white hover:bg-muted/20 transition-colors text-[13px] font-mono font-medium text-foreground"
+                    className="px-4 py-2 border border-border rounded bg-white hover:bg-muted/20 text-[13px] font-mono font-medium text-foreground"
                   >
                     {station.id}
                   </button>

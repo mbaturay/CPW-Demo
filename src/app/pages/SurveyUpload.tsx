@@ -10,25 +10,10 @@ import { WaterBanner } from '../components/WaterBanner';
 export default function SurveyUpload() {
   const { role } = useRole();
   const [uploaded, setUploaded] = useState(false);
-  const [dragActive, setDragActive] = useState(false);
-  
-  const handleDrag = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (e.type === "dragenter" || e.type === "dragover") {
-      setDragActive(true);
-    } else if (e.type === "dragleave") {
-      setDragActive(false);
-    }
-  };
-  
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setDragActive(false);
-    setUploaded(true);
-  };
-  
+
+  /* POWERAPPS-ALIGNMENT: Removed drag-and-drop handlers.
+     Power Apps uses Attachments control (click-to-browse only).
+     Drag/drop is not reliably supported in Canvas Apps. */
   const handleFileSelect = () => {
     setUploaded(true);
   };
@@ -84,23 +69,14 @@ export default function SurveyUpload() {
                     </p>
                   </CardHeader>
                   <CardContent className="pt-6">
+                    {/* POWERAPPS-ALIGNMENT: Replaced drag-drop zone with click-only upload area */}
                     <div
-                      className={`
-                        border-2 border-dashed rounded p-12 text-center transition-colors
-                        ${dragActive 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/50 bg-muted/20'
-                        }
-                      `}
-                      onDragEnter={handleDrag}
-                      onDragLeave={handleDrag}
-                      onDragOver={handleDrag}
-                      onDrop={handleDrop}
+                      className="border-2 border-dashed rounded p-12 text-center border-border bg-muted/20"
                     >
                       <Upload className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                      <h3 className="text-[16px] font-medium mb-2">Drag & Drop Survey File</h3>
+                      <h3 className="text-[16px] font-medium mb-2">Upload Survey File</h3>
                       <p className="text-[13px] text-muted-foreground mb-6">
-                        or click to browse your files
+                        Click below to browse your files
                       </p>
                       <Button onClick={handleFileSelect}>
                         <FileSpreadsheet className="w-4 h-4 mr-2" />

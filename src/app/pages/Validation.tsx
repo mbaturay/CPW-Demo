@@ -5,12 +5,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { AlertCircle, CheckCircle2, Info, RotateCw, Save, HelpCircle } from 'lucide-react';
 import { Switch } from '../components/ui/switch';
 import { Label } from '../components/ui/label';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '../components/ui/tooltip';
+/* POWERAPPS-ALIGNMENT: Removed hover-only Tooltip imports.
+   Tooltip content is now shown as visible inline text (click-first parity). */
 import { WaterBanner } from '../components/WaterBanner';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
@@ -262,22 +258,11 @@ export default function Validation() {
               <div className="px-3 py-1.5 bg-primary text-primary-foreground rounded text-[12px] font-medium">
                 Protocol: {surveyProtocol}
               </div>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <button className="text-muted-foreground hover:text-foreground">
-                      <HelpCircle className="w-4 h-4" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent className="max-w-xs">
-                    <p className="text-[12px]">
-                      Population estimates calculated using Two-Pass Removal with Zippin's depletion method.
-                      This protocol requires exactly 2 passes through the sampling reach.
-                      Removal efficiency calculated from first and second pass catch rates.
-                    </p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
+              {/* POWERAPPS-ALIGNMENT: Replaced hover tooltip with visible helper text */}
+              <HelpCircle className="w-4 h-4 text-muted-foreground" />
+              <span className="text-[11px] text-muted-foreground max-w-xs">
+                Zippin's depletion method — 2 passes required.
+              </span>
               <span className="text-[12px] text-muted-foreground">
                 {waterName} — {surveyStation} • {surveyDate}
               </span>
@@ -406,35 +391,28 @@ export default function Validation() {
                                   Valid
                                 </span>
                               )}
+                              {/* POWERAPPS-ALIGNMENT: Replaced hover tooltips with visible inline text */}
                               {item.status === 'warning' && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span className="flex items-center gap-1.5 text-warning text-[12px] cursor-help">
-                                        <AlertCircle className="w-3.5 h-3.5" />
-                                        Warning
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p className="text-[12px]">{item.error}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="flex items-center gap-1.5 text-warning text-[12px]">
+                                    <AlertCircle className="w-3.5 h-3.5" />
+                                    Warning
+                                  </span>
+                                  {item.error && (
+                                    <span className="text-[10px] text-muted-foreground">{item.error}</span>
+                                  )}
+                                </div>
                               )}
                               {item.status === 'error' && (
-                                <TooltipProvider>
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <span className="flex items-center gap-1.5 text-destructive text-[12px] cursor-help">
-                                        <AlertCircle className="w-3.5 h-3.5" />
-                                        Error
-                                      </span>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p className="text-[12px]">{item.error}</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                </TooltipProvider>
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="flex items-center gap-1.5 text-destructive text-[12px]">
+                                    <AlertCircle className="w-3.5 h-3.5" />
+                                    Error
+                                  </span>
+                                  {item.error && (
+                                    <span className="text-[10px] text-muted-foreground">{item.error}</span>
+                                  )}
+                                </div>
                               )}
                             </TableCell>
                           </TableRow>
@@ -461,7 +439,8 @@ export default function Validation() {
 
             {/* Issues Panel */}
             <div>
-              <Card className="border border-border shadow-sm sticky top-6">
+              {/* POWERAPPS-ALIGNMENT: Removed sticky positioning (not supported in Power Apps) */}
+              <Card className="border border-border shadow-sm">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Validation Issues</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">

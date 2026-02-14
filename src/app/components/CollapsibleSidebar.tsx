@@ -1,4 +1,4 @@
-import { useRef, useState, useCallback, useEffect } from 'react';
+import { useRef, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router';
 import { Home, Upload, CheckSquare, Search, BarChart3, Waves } from 'lucide-react';
 import { useRole } from '../context/RoleContext';
@@ -24,18 +24,8 @@ export const navItems: NavItem[] = [
   { key: 'insights', to: '/insights', icon: BarChart3, label: 'Insights', roles: ['area-biologist', 'senior-biologist'] },
 ];
 
-// ── Hover-media detection ───────────────────────────────────────────
-function useCanHover() {
-  const [canHover, setCanHover] = useState(true);
-  useEffect(() => {
-    const mq = window.matchMedia('(hover: hover)');
-    setCanHover(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setCanHover(e.matches);
-    mq.addEventListener('change', handler);
-    return () => mq.removeEventListener('change', handler);
-  }, []);
-  return canHover;
-}
+/* POWERAPPS-ALIGNMENT: Removed hover-media detection. Power Apps is click-first;
+   sidebar now toggles on click instead of hover. */
 
 // ── Component ───────────────────────────────────────────────────────
 interface CollapsibleSidebarProps {
@@ -53,35 +43,15 @@ export function CollapsibleSidebar({
 }: CollapsibleSidebarProps) {
   const location = useLocation();
   const { role } = useRole();
-  const canHover = useCanHover();
 
+  /* POWERAPPS-ALIGNMENT: Sidebar is now click-to-toggle (no hover expand).
+     Power Apps navigation uses click-first interaction. */
   const [expanded, setExpanded] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const navRef = useRef<HTMLDivElement>(null);
 
   const filtered = (items ?? navItems).filter((item) =>
     item.roles.includes(role),
   );
-
-  // ── Debounced open / close ────────────────────────────────────────
-  const clearTimer = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-  }, []);
-
-  const openSoon = useCallback(() => {
-    clearTimer();
-    timerRef.current = setTimeout(() => setExpanded(true), DEBOUNCE_MS);
-  }, [clearTimer]);
-
-  const closeSoon = useCallback(() => {
-    clearTimer();
-    timerRef.current = setTimeout(() => setExpanded(false), DEBOUNCE_MS);
-  }, [clearTimer]);
-
-  useEffect(() => () => clearTimer(), [clearTimer]);
 
   // ── Keyboard: Escape closes ───────────────────────────────────────
   const handleKeyDown = useCallback(
@@ -94,39 +64,15 @@ export function CollapsibleSidebar({
     [],
   );
 
-  // ── Handlers ──────────────────────────────────────────────────────
-  const hoverHandlers = canHover
-    ? { onMouseEnter: openSoon, onMouseLeave: closeSoon }
-    : {};
-
-  const focusHandlers = {
-    onFocus: openSoon,
-    onBlur: (e: React.FocusEvent) => {
-      if (!navRef.current?.contains(e.relatedTarget as Node)) {
-        closeSoon();
-      }
-    },
-  };
-
-  // Touch: tap link when collapsed → expand instead of navigate
-  const handleLinkClick = useCallback(
+  // Click: toggle sidebar expand/collapse
+  const handleToggleClick = useCallback(
     (e: React.MouseEvent) => {
-      if (!canHover && !expanded) {
-        e.preventDefault();
-        setExpanded(true);
+      if (!(e.target as HTMLElement).closest('a')) {
+        setExpanded((prev) => !prev);
       }
     },
-    [canHover, expanded],
+    [],
   );
-
-  // Touch: tap non-link area → toggle
-  const handleContainerClick = !canHover
-    ? (e: React.MouseEvent) => {
-        if (!(e.target as HTMLElement).closest('a')) {
-          setExpanded((prev) => !prev);
-        }
-      }
-    : undefined;
 
   const isLeft = position === 'left';
   const fixedSide = isLeft ? 'left-0' : 'right-0';
@@ -139,16 +85,14 @@ export function CollapsibleSidebar({
       ref={navRef}
       role="navigation"
       aria-label="Main navigation"
-      className={`fixed top-0 ${fixedSide} h-screen z-50 overflow-hidden ${
-        expanded ? 'shadow-lg' : ''
-      }`}
+      /* POWERAPPS-ALIGNMENT: Removed animated width transition and shadow-lg.
+         Immediate show/hide matches Power Apps container behavior. */
+      className={`fixed top-0 ${fixedSide} h-screen z-50 overflow-hidden`}
       style={{
         width: expanded ? EXPANDED_W : COLLAPSED_W,
-        transition: 'width 200ms cubic-bezier(0.4, 0, 0.2, 1)',
+        boxShadow: expanded ? '0 1px 2px rgba(0,0,0,0.04)' : 'none',
       }}
-      {...hoverHandlers}
-      {...focusHandlers}
-      onClick={handleContainerClick}
+      onClick={handleToggleClick}
       onKeyDown={handleKeyDown}
     >
       <div
@@ -158,8 +102,9 @@ export function CollapsibleSidebar({
         {/* Branding */}
         <div className="h-14 shrink-0 flex items-center border-b border-white/15">
           <div className="w-16 shrink-0 flex items-center justify-center">
+            {/* POWERAPPS-ALIGNMENT: Removed transition-opacity animation */}
             <span
-              className={`text-[14px] font-semibold text-white tracking-tight transition-opacity duration-200 ${
+              className={`text-[14px] font-semibold text-white tracking-tight ${
                 expanded ? 'opacity-0' : 'opacity-100'
               }`}
             >
@@ -192,9 +137,8 @@ export function CollapsibleSidebar({
                     to={item.to}
                     aria-label={label}
                     title={!expanded ? label : undefined}
-                    onClick={handleLinkClick}
                     className={`
-                      flex items-center h-10 rounded transition-colors
+                      flex items-center h-10 rounded
                       ${isActive
                         ? 'bg-white/20 text-white font-medium'
                         : 'text-white/60 hover:bg-white/10 hover:text-white'
@@ -217,8 +161,9 @@ export function CollapsibleSidebar({
         {/* Footer */}
         <div className="mt-auto shrink-0 border-t border-white/12 py-3 flex">
           <div className="w-16 shrink-0 flex items-center justify-center">
+            {/* POWERAPPS-ALIGNMENT: Removed transition-opacity animation */}
             <span
-              className={`text-[9px] text-white/40 font-mono transition-opacity duration-200 ${
+              className={`text-[9px] text-white/40 font-mono ${
                 expanded ? 'opacity-0' : 'opacity-100'
               }`}
             >

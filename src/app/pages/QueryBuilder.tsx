@@ -384,7 +384,8 @@ export default function QueryBuilder() {
             
             {/* Live Results Preview */}
             <div className="lg:col-span-1">
-              <Card className="border border-border shadow-sm sticky top-6">
+              {/* POWERAPPS-ALIGNMENT: Removed sticky positioning (not supported in Power Apps) */}
+              <Card className="border border-border shadow-sm">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Live Results</CardTitle>
                   <p className="text-[12px] text-muted-foreground mt-1">

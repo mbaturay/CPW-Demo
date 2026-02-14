@@ -52,7 +52,7 @@ export default function WaterSelect() {
                     <Link
                       key={water.id}
                       to={`/water/profile?waterId=${water.id}`}
-                      className="flex items-center justify-between py-4 px-2 hover:bg-muted/20 -mx-2 px-4 transition-colors rounded"
+                      className="flex items-center justify-between py-4 px-2 hover:bg-muted/20 -mx-2 px-4 rounded"
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center">

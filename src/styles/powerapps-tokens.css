@@ -1,0 +1,42 @@
+/*
+ * Power Apps Platform Alignment Tokens
+ *
+ * These CSS variables enforce Power Apps-compatible visual constraints:
+ * - 8px spacing grid
+ * - Minimal elevation (flat design)
+ * - System font stack (Segoe UI first, matching Power Apps runtime)
+ * - No gradients, minimal shadows
+ */
+
+:root {
+  /* ── Spacing: 8px grid ─────────────────────────────────────────────── */
+  --space-1: 8px;
+  --space-2: 16px;
+  --space-3: 24px;
+  --space-4: 32px;
+  --space-5: 40px;
+  --space-6: 48px;
+  --space-8: 64px;
+
+  /* ── Elevation: flat / minimal ─────────────────────────────────────── */
+  --shadow-none: none;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+
+  /* ── Font stack: Segoe UI (Power Apps native) ──────────────────────── */
+  --font-system: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
+
+  /* ── Color tokens (mirrors theme.css, kept here for Power Apps mapping) */
+  --pa-primary: #1B365D;
+  --pa-secondary: #2F6F73;
+  --pa-accent-steel: #5B7C99;
+  --pa-accent-gold: #B8860B;
+  --pa-success: #1A6B50;
+  --pa-warning: #92690A;
+  --pa-destructive: #9F1B1B;
+  --pa-background: #F5F6F4;
+  --pa-card: #ffffff;
+  --pa-border: #D9D6D0;
+  --pa-muted: #E8E6E1;
+  --pa-text: #1E293B;
+  --pa-text-muted: #64748B;
+}

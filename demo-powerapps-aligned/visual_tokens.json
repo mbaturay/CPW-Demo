@@ -1,0 +1,39 @@
+{
+  "description": "Power Apps-aligned visual tokens for the ADAMAS demo. These values map to the CSS custom properties in src/styles/powerapps-tokens.css and match Power Apps canvas app defaults.",
+  "fonts": {
+    "system": "'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif"
+  },
+  "colors": {
+    "primary": "#1B365D",
+    "secondary": "#2F6F73",
+    "accentSteel": "#5B7C99",
+    "accentGold": "#B8860B",
+    "success": "#1A6B50",
+    "warning": "#92690A",
+    "destructive": "#9F1B1B",
+    "background": "#F5F6F4",
+    "card": "#ffffff",
+    "border": "#D9D6D0",
+    "muted": "#E8E6E1",
+    "text": "#1E293B",
+    "textMuted": "#64748B"
+  },
+  "spacing": {
+    "space1": "8px",
+    "space2": "16px",
+    "space3": "24px",
+    "space4": "32px",
+    "space5": "40px",
+    "space6": "48px",
+    "space8": "64px"
+  },
+  "elevation": {
+    "none": "none",
+    "minimal": "0 1px 2px rgba(0,0,0,0.04)"
+  },
+  "radius": {
+    "sm": "6px",
+    "md": "8px",
+    "lg": "10px"
+  }
+}

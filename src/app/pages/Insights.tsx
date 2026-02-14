@@ -360,7 +360,8 @@ export default function Insights() {
                           border: '1px solid #E2E8F0',
                           borderRadius: '6px',
                           fontSize: '13px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                          /* POWERAPPS-ALIGNMENT: Removed deep shadow */
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
                         }}
                       />
                       <Legend
@@ -414,7 +415,8 @@ export default function Insights() {
                           border: '1px solid #E2E8F0',
                           borderRadius: '6px',
                           fontSize: '13px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                          /* POWERAPPS-ALIGNMENT: Removed deep shadow */
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
                         }}
                       />
                       <Legend
@@ -508,7 +510,8 @@ export default function Insights() {
                           border: '1px solid #E2E8F0',
                           borderRadius: '6px',
                           fontSize: '13px',
-                          boxShadow: '0 2px 8px rgba(0,0,0,0.06)'
+                          /* POWERAPPS-ALIGNMENT: Removed deep shadow */
+                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
                         }}
                         cursor={{ fill: '#1B365D', opacity: 0.1 }}
                       />

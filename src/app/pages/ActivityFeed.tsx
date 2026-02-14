@@ -197,7 +197,7 @@ export default function ActivityFeed() {
               return (
                 <Card key={water.waterId} className="border border-border shadow-sm">
                   <CardHeader
-                    className="border-b border-border/50 cursor-pointer hover:bg-muted/20 transition-colors"
+                    className="border-b border-border/50 cursor-pointer hover:bg-muted/20"
                     onClick={() => toggleWater(water.waterId)}
                   >
                     <div className="flex items-center justify-between">
@@ -236,7 +236,7 @@ export default function ActivityFeed() {
                         {water.items.map((survey) => (
                           <div
                             key={survey.id}
-                            className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20 transition-colors"
+                            className="flex items-center justify-between p-4 border border-border/50 rounded bg-white hover:bg-muted/20"
                           >
                             <div className="flex items-center gap-6">
                               <div>
