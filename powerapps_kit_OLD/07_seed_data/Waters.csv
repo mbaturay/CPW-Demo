@@ -1,0 +1,8 @@
+WaterId,Name,Region,HUC12,YearsActiveStart,YearsActiveEnd,PrimarySpecies
+south-platte,South Platte Basin,Northeast,140100010101,1998,2025,"BNT,RBT,WHS"
+cache-la-poudre,Cache la Poudre River,Northeast,101900070203,2004,2025,"CTT,BNT,CRD"
+st-vrain,St. Vrain Creek,Northeast,101900050104,2009,2025,"RBT,BNT,WHS"
+big-thompson,Big Thompson River,Northeast,101900060201,2006,2025,"RBT,MWF,WHS"
+boyd-lake,"Boyd Lake (Reservoir)",Northeast,101900060305,2012,2025,"LMB,WHS,CRD"
+blue-river,Blue River,Comparison,140100020101,1995,2025,"RBT,BNT,MWF"
+colorado-river,"Colorado River (Middle)",Comparison,140100010204,1990,2025,"BNT,MWF,WHS"

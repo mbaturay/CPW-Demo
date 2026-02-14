@@ -1,0 +1,16 @@
+StationId,Name,WaterId,RiverMile,Latitude,Longitude
+SP-01,Deckers,south-platte,62,39.255,-105.221
+SP-03,Waterton Canyon,south-platte,25,39.488,-105.103
+SP-04,Chatfield Reach,south-platte,18,39.54,-105.065
+PDR-01,Mishawaka,cache-la-poudre,70,40.688,-105.309
+PDR-02,Gateway,cache-la-poudre,52,40.68,-105.21
+SV-01,Lyons,st-vrain,34,40.224,-105.271
+SV-02,Longmont Reach,st-vrain,18,40.167,-105.101
+BT-01,Drake,big-thompson,43,40.416,-105.28
+BT-02,Loveland Reach,big-thompson,12,40.394,-105.076
+BL-01,North Shore,boyd-lake,,40.42,-105.01
+BL-02,Dam Area,boyd-lake,,40.41,-105.0
+BR-01,Silverthorne,blue-river,22,39.624,-106.073
+BR-02,Green Mountain Reach,blue-river,8,39.87,-106.33
+CR-01,Kremmling,colorado-river,84,40.06,-106.38
+CR-02,Glenwood Reach,colorado-river,32,39.55,-107.33

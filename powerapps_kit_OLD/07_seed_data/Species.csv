@@ -1,0 +1,8 @@
+Code,CommonName,ScientificName,LengthMinMm,LengthMaxMm,WeightMinG,WeightMaxG
+BNT,Brown Trout,Salmo trutta,80,750,5,6000
+RBT,Rainbow Trout,Oncorhynchus mykiss,80,800,5,7000
+CTT,Cutthroat Trout,Oncorhynchus clarkii,70,650,4,4500
+MWF,Mountain Whitefish,Prosopium williamsoni,90,600,8,2800
+WHS,White Sucker,Catostomus commersonii,120,700,20,3500
+CRD,Creek Chub,Semotilus atromaculatus,40,220,1,200
+LMB,Largemouth Bass,Micropterus salmoides,80,650,5,5500

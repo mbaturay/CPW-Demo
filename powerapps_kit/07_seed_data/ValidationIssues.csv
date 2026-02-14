@@ -1,0 +1,13 @@
+SurveyId,Severity,Code,Message,Row,Field,Suggestion
+SVY-2026-NE-0101,Warning,LENGTH_OUT_OF_RANGE,"Young of year detected (134mm CTT) — Consider exclusion flag for population analysis.",7,length_mm,Flag young-of-year or exclude from depletion estimate.
+SVY-2026-NE-0102,Error,SPECIES_CODE_INVALID,"Species code ""RNTR"" not recognized in CPW reference database.",4,species_code,"Did you mean ""RBT"" (Rainbow Trout) or ""CTT"" (Cutthroat Trout)?"
+SVY-2026-NE-0102,Error,LENGTH_OUT_OF_RANGE,Length 892mm exceeds biological maximum for Rainbow Trout (max 800mm).,7,length_mm,Check measurement units (mm) and transcription.
+SVY-2026-NE-0102,Warning,LENGTH_OUT_OF_RANGE,"Young of year detected (145mm CTT) — Consider exclusion flag for population analysis.",9,length_mm,Flag young-of-year or exclude from depletion estimate.
+SVY-2025-SP-0006,Error,WEIGHT_LENGTH_IMPLAUSIBLE,Weight appears implausible relative to length for Brown Trout.,17,weight_g,Verify scale entry or units (g).
+SVY-2025-SP-0006,Error,LENGTH_OUT_OF_RANGE,Length exceeds plausible range for Rainbow Trout.,41,length_mm,Check measurement units (mm) and transcription.
+SVY-2025-SP-0006,Warning,MISSING_REQUIRED_FIELD,Water temperature missing for station metadata (recommended).,,water_temp_c,Add station conditions if available.
+SVY-2025-PDR-0012,Error,PROTOCOL_MISMATCH,Mark-Recapture protocol selected but recapture flag missing on all records.,,,Confirm protocol or mark recapture fields.
+SVY-2025-PDR-0012,Warning,MISSING_REQUIRED_FIELD,HUC12 not populated in submission metadata.,,huc12,Select HUC12 from water profile metadata.
+SVY-2025-PDR-0012,Warning,SPECIES_CODE_INVALID,"Species code 'CUT' not recognized. Did you mean 'CTT'?",6,species_code,"Use lookup codes (CTT, BNT, RBT...)."
+SVY-2025-BT-0009,Warning,STATION_INVALID,Station coordinates are outside expected station reach boundary (minor).,,,Confirm station selection or GPS rounding.
+SVY-2025-BT-0009,Warning,MISSING_REQUIRED_FIELD,Effort duration missing; CPUE will be estimated using default effort.,,effort_minutes,Enter electrofishing effort minutes for best CPUE accuracy.
