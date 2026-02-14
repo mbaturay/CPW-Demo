@@ -453,3 +453,55 @@ Tailwind utility classes (`text-sm`, `text-xs`) are overridden via `@theme` in t
 - Summary strips: stat numbers (28px) do not overflow containers.
 - Validation table: 10 rows render cleanly with increased padding.
 - Hierarchy preserved: titles (26px) > sections (18px) > body (14px) > helpers (12px).
+
+---
+
+## Typography Scale Pass (v2)
+
+> Date: 2026-02-13
+> Purpose: Lift baseline (body/label) typography one more step for Canvas readability.
+> Headings, titles, and stat numbers are NOT changed — only text ≤ 14px source.
+
+### 51. `src/styles/theme.css` (Typography v2)
+- **Edit 1:** `@theme` overrides bumped:
+  - `--text-xs`: 13px → **14px** (+1)
+  - `--text-sm`: 15px → **16px** (+1)
+  - Added `--text-base: 17px` (+1 from Tailwind default 16px)
+- **Edit 2:** CSS attribute-selector block restructured into two sections:
+  - **Body/labels (source ≤ 14px):** each bumped +1px from v1 (now +2 total from original).
+    `text-[9px]→11, [10]→12, [11]→13, [12]→14, [13]→15, [14]→16`
+  - **Headings/stats (source ≥ 16px):** unchanged from v1.
+    `text-[16px]→18, [18]→20, [22]→26, [24]→28`
+
+### 52. `src/styles/powerapps-tokens.css` (Typography v2)
+- **Edit:** Updated `--typo-*` documentation tokens to reflect v2 values:
+  - `--typo-helper`: 12→**13px**, `--typo-label`: 13→**14px**,
+    `--typo-body-sm`: 14→**15px**, `--typo-body`: 15→**16px**.
+  - Section/title/stat tokens unchanged.
+
+### v1 → v2 diff (body/labels only)
+
+| Element | v1 | v2 | Delta |
+|---|---|---|---|
+| Helper text (`text-[11px]`) | 12px | **13px** | +1 |
+| Small labels (`text-[12px]`) | 13px | **14px** | +1 |
+| Body text (`text-[13px]`) | 14px | **15px** | +1 |
+| Body/nav text (`text-[14px]`) | 15px | **16px** | +1 |
+| Tailwind `text-xs` | 13px | **14px** | +1 |
+| Tailwind `text-sm` | 15px | **16px** | +1 |
+| Tailwind `text-base` | 16px | **17px** | +1 |
+
+### Unchanged from v1
+
+| Element | Size |
+|---|---|
+| Page titles (`text-[22px]`) | 26px |
+| Stat numbers (`text-[24px]`) | 28px |
+| Section headers (`text-[16px]`) | 18px |
+| Branding/subtitle (`text-[18px]`) | 20px |
+
+### Regression checks
+- TopNav: 6 nav items fit at 1366px, no wrapping.
+- RoleFloater: compact, no overlap.
+- Validation table: rows readable, not overly tall.
+- Hierarchy preserved: titles (26) > sections (18) > body (15–16) > helpers (13).

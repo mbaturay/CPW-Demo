@@ -130,11 +130,13 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* ── Typography scale: Canvas feel (B) ─────────────────────────── */
-  --text-xs: 13px;
+  /* ── Typography scale: Canvas feel (B v2) ───────────────────────── */
+  --text-xs: 14px;
   --text-xs--line-height: 1.55;
-  --text-sm: 15px;
+  --text-sm: 16px;
   --text-sm--line-height: 1.55;
+  --text-base: 17px;
+  --text-base--line-height: 1.55;
 }
 
 @layer base {
@@ -200,17 +202,20 @@
   }
 }
 
-/* ── Typography Scale: Canvas Feel (B) ──────────────────────────────
-   Centralized font-size bumps for all text-[Xpx] Tailwind utilities.
-   Applied via CSS attribute selectors so zero JSX files need editing.
-   Hierarchy preserved: titles (+4) > sections (+2) > body/labels (+1).
+/* ── Typography Scale: Canvas Feel (B v2) ───────────────────────────
+   Body & labels (source ≤ 14px): bumped +2px from original.
+   Headings & stats (source ≥ 16px): unchanged from v1 pass.
    ──────────────────────────────────────────────────────────────────── */
-[class*="text-[9px]"]  { font-size: 10px !important; }
-[class*="text-[10px]"] { font-size: 11px !important; }
-[class*="text-[11px]"] { font-size: 12px !important; }
-[class*="text-[12px]"] { font-size: 13px !important; }
-[class*="text-[13px]"] { font-size: 14px !important; }
-[class*="text-[14px]"] { font-size: 15px !important; }
+
+/* Body / labels — +2px from original source value */
+[class*="text-[9px]"]  { font-size: 11px !important; }
+[class*="text-[10px]"] { font-size: 12px !important; }
+[class*="text-[11px]"] { font-size: 13px !important; }
+[class*="text-[12px]"] { font-size: 14px !important; }
+[class*="text-[13px]"] { font-size: 15px !important; }
+[class*="text-[14px]"] { font-size: 16px !important; }
+
+/* Headings / stats — unchanged (already at target) */
 [class*="text-[16px]"] { font-size: 18px !important; }
 [class*="text-[18px]"] { font-size: 20px !important; }
 [class*="text-[22px]"] { font-size: 26px !important; }

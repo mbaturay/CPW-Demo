@@ -25,18 +25,18 @@
   /* ── Font stack: Segoe UI (Power Apps native) ──────────────────────── */
   --font-system: 'Segoe UI', system-ui, -apple-system, 'Helvetica Neue', Arial, sans-serif;
 
-  /* ── Typography scale (Canvas B: noticeable increase) ─────────────── */
+  /* ── Typography scale (Canvas B v2) ───────────────────────────────── */
   /* Applied centrally via CSS overrides in theme.css.
-     Old → New mapping:
-       text-[9px]  → 10px   text-[10px] → 11px   text-[11px] → 12px
-       text-[12px] → 13px   text-[13px] → 14px   text-[14px] → 15px
-       text-[16px] → 18px   text-[18px] → 20px
-       text-[22px] → 26px   text-[24px] → 28px
-       text-sm (14px) → 15px   text-xs (12px) → 13px              */
-  --typo-helper: 12px;
-  --typo-label: 13px;
-  --typo-body-sm: 14px;
-  --typo-body: 15px;
+     Body/labels bumped +2px from original; headings/stats +2-4px (v1).
+       text-[9px]  → 11   text-[10px] → 12   text-[11px] → 13
+       text-[12px] → 14   text-[13px] → 15   text-[14px] → 16
+       text-[16px] → 18   text-[18px] → 20   (unchanged from v1)
+       text-[22px] → 26   text-[24px] → 28   (unchanged from v1)
+       text-xs → 14px   text-sm → 16px   text-base → 17px          */
+  --typo-helper: 13px;
+  --typo-label: 14px;
+  --typo-body-sm: 15px;
+  --typo-body: 16px;
   --typo-section: 18px;
   --typo-subtitle: 20px;
   --typo-title: 26px;
