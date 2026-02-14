@@ -112,6 +112,45 @@
 
 ---
 
+---
+
+## Chart Simplification Pass
+
+> Date: 2026-02-13
+> Purpose: Tighten chart UX so the React demo does not imply Power Apps chart capabilities that cannot be reproduced.
+
+### 14. `src/app/pages/Insights.tsx` (Chart Simplification)
+- **Edit 1:** Removed `Legend` and `Tooltip` from Recharts imports.
+  - Rationale: Power Apps Chart control does not support interactive legends or custom tooltips.
+- **Edit 2:** Removed `compareMode` state and compare mode toggle UI (Single Water / Compare Waters buttons).
+  - Rationale: Multi-series compare mode is not reproducible in Power Apps.
+- **Edit 3:** Removed compare mode data preparation (`spTrend`, `brTrend`, `crTrend`, `compareYears`, `compareData`, `getDelta` function, first/last point variables).
+  - Rationale: Dead code after removing compare mode.
+- **Edit 4:** Simplified chart subtitle — removed `compareMode` conditional.
+  - Rationale: No compare mode means no conditional text.
+- **Edit 5:** Replaced multi-series/single-series ternary chart with single-series LineChart only. Removed Legend, Tooltip, custom dot/activeDot. Set `dot={false}`, `strokeWidth={2}`.
+  - Rationale: Power Apps Chart control shows simple lines without markers or tooltips.
+- **Edit 6:** Removed compare mode analysis banner ("Multi-Basin Analysis Mode").
+  - Rationale: Compare mode removed.
+- **Edit 7:** Removed delta analysis section (3-basin comparison cards).
+  - Rationale: Compare mode removed.
+- **Edit 8:** Removed Tooltip and rounded bar corners (`radius={[4, 4, 0, 0]}`) from length-frequency BarChart.
+  - Rationale: Power Apps Chart control does not support custom tooltips or rounded bar corners.
+
+### 15. `src/app/pages/WaterProfile.tsx` (Chart Simplification)
+- **Edit 1:** Replaced `ComposedChart` and `Area` imports with `LineChart` import. Removed `Tooltip` import.
+  - Rationale: Power Apps Chart control does not support composed charts or area fills.
+- **Edit 2:** Replaced ComposedChart (Line + Area + custom dot renderer + Tooltip + activeDot) with simple LineChart. Set `dot={false}`.
+  - Rationale: Custom dot renderers and area fills are not reproducible in Power Apps.
+
+### 16. `src/app/pages/SeniorBiologistDashboard.tsx` (Chart Simplification)
+- **Edit 1:** Removed `Tooltip` import.
+  - Rationale: Custom tooltips not available in Power Apps Chart control.
+- **Edit 2:** Removed Tooltip component and `radius={[4, 4, 0, 0]}` from Bar.
+  - Rationale: Rounded bar corners and interactive tooltips not reproducible.
+
+---
+
 ## Copy Changes
 
 No user-facing copy was changed except:

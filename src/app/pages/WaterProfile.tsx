@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { WaterBanner } from '../components/WaterBanner';
-import { Area, ComposedChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { TrendingUp, TrendingDown, AlertTriangle, FileText, CheckCircle2, Clock } from 'lucide-react';
 import { Link, Navigate, useSearchParams } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
@@ -321,9 +321,9 @@ export default function WaterProfile() {
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="h-[280px] min-h-[280px]">
+                  {/* POWERAPPS-ALIGNMENT: Replaced ComposedChart with simple LineChart; removed Area, custom dot renderer, Tooltip, activeDot */}
                   <ResponsiveContainer width="100%" height="100%" minHeight={280}>
-                    <ComposedChart data={activityData}>
-                      {/* POWERAPPS-ALIGNMENT: Removed linearGradient; flat fill used instead */}
+                    <LineChart data={activityData}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
                       <XAxis
                         dataKey="year"
@@ -336,44 +336,14 @@ export default function WaterProfile() {
                         tick={{ fill: '#64748B', fontSize: 11 }}
                         axisLine={{ stroke: '#E2E8F0' }}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'white',
-                          border: '1px solid #E2E8F0',
-                          borderRadius: '6px',
-                          fontSize: '13px'
-                        }}
-                      />
-                      {/* POWERAPPS-ALIGNMENT: Replaced gradient fill with flat fill */}
-                      <Area
-                        type="monotone"
-                        dataKey="cpue"
-                        fill="rgba(27, 54, 93, 0.08)"
-                        stroke="none"
-                      />
                       <Line
                         type="monotone"
                         dataKey="cpue"
                         stroke="#1B365D"
                         strokeWidth={2}
-                        dot={(props: { cx: number; cy: number; index: number }) => {
-                          const { cx, cy, index } = props;
-                          const isLast = index === activityData.length - 1;
-                          return (
-                            <circle
-                              key={index}
-                              cx={cx}
-                              cy={cy}
-                              r={isLast ? 5 : 3}
-                              fill={isLast ? '#1B365D' : 'white'}
-                              stroke="#1B365D"
-                              strokeWidth={2}
-                            />
-                          );
-                        }}
-                        activeDot={{ r: 5, fill: '#1B365D', stroke: 'white', strokeWidth: 2 }}
+                        dot={false}
                       />
-                    </ComposedChart>
+                    </LineChart>
                   </ResponsiveContainer>
                 </div>
               </CardContent>

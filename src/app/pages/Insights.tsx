@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { FileSpreadsheet, TrendingUp, Info, BarChart3 } from 'lucide-react';
-import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { WaterBanner } from '../components/WaterBanner';
 import { RoleIndicator } from '../components/RoleIndicator';
 import { useRole } from '../context/RoleContext';
@@ -15,7 +15,6 @@ export default function Insights() {
   const { role } = useRole();
   const { surveys } = useDemo();
   const [metric, setMetric] = useState('population');
-  const [compareMode, setCompareMode] = useState(false);
   const [searchParams] = useSearchParams();
   const waterId = searchParams.get('waterId') || 'south-platte';
 
@@ -53,38 +52,6 @@ export default function Insights() {
   const biomassChange = latestPoint && prevPoint
     ? ((latestPoint.biomassKg - prevPoint.biomassKg) / prevPoint.biomassKg * 100).toFixed(1)
     : null;
-
-  // Compare mode: load south-platte, blue-river, colorado-river trends
-  const spTrend = getTrendForWater('south-platte');
-  const brTrend = getTrendForWater('blue-river');
-  const crTrend = getTrendForWater('colorado-river');
-
-  // Build compare data: align by year using the primary water's years
-  const compareYears = spTrend?.overall.map(p => p.year) ?? [];
-  const compareData = compareYears.map(year => {
-    const sp = spTrend?.overall.find(p => p.year === year);
-    const br = brTrend?.overall.find(p => p.year === year);
-    const cr = crTrend?.overall.find(p => p.year === year);
-    return {
-      year: String(year),
-      southPlatte: sp?.popEstimate ?? sp?.cpue ?? 0,
-      blueRiver: br?.popEstimate ?? br?.cpue ?? 0,
-      coloradoRiver: cr?.popEstimate ?? cr?.cpue ?? 0,
-    };
-  });
-
-  // Delta analysis for compare mode
-  const spFirst = spTrend?.overall[0];
-  const spLast = spTrend?.overall[spTrend.overall.length - 1];
-  const brFirst = brTrend?.overall[0];
-  const brLast = brTrend?.overall[brTrend.overall.length - 1];
-  const crFirst = crTrend?.overall[0];
-  const crLast = crTrend?.overall[crTrend.overall.length - 1];
-
-  const getDelta = (first: { cpue: number } | undefined, last: { cpue: number } | undefined) => {
-    if (!first || !last) return '—';
-    return `${Math.round(((last.cpue - first.cpue) / first.cpue) * 100)}%`;
-  };
 
   // Length-frequency data (not in world.ts — representative distribution)
   const lengthFreqData = [
@@ -285,38 +252,11 @@ export default function Insights() {
                 <div>
                   <CardTitle className="text-[18px]">Multi-Year Population Trend</CardTitle>
                   <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
-                    {compareMode && role === 'senior-biologist' ? (
-                      <>Comparing population trends across <span className="font-medium text-foreground">3 basins</span> — Strategic multi-basin analysis enabled</>
-                    ) : (
-                      <>Based on <span className="font-medium text-foreground">{waterSurveys.length} surveys</span> conducted between{' '}
-                      <span className="font-medium text-foreground">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols</>
-                    )}
+                    Based on <span className="font-medium text-foreground">{waterSurveys.length} surveys</span> conducted between{' '}
+                    <span className="font-medium text-foreground">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols
                   </p>
                 </div>
                 <div className="flex items-center gap-3">
-                  {role === 'senior-biologist' && (
-                    <div className="flex items-center gap-2 px-3 py-1.5 border border-border rounded bg-muted/20">
-                      <span className="text-[12px] text-muted-foreground">View:</span>
-                      <div className="flex gap-1">
-                        <button
-                          onClick={() => setCompareMode(false)}
-                          className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                            !compareMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          Single Water
-                        </button>
-                        <button
-                          onClick={() => setCompareMode(true)}
-                          className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                            compareMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
-                          }`}
-                        >
-                          Compare Waters
-                        </button>
-                      </div>
-                    </div>
-                  )}
                   <Select value={metric} onValueChange={setMetric}>
                     <SelectTrigger className="w-[200px] text-[13px]">
                       <SelectValue />
@@ -331,133 +271,33 @@ export default function Insights() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              {compareMode && role === 'senior-biologist' && (
-                <div className="mb-4 px-3 py-2 bg-primary/5 border border-primary/20 rounded">
-                  <p className="text-[11px] text-muted-foreground">
-                    <span className="font-medium text-primary">Multi-Basin Analysis Mode</span> — Statewide comparison enabled for strategic decision-making
-                  </p>
-                </div>
-              )}
+              {/* POWERAPPS-ALIGNMENT: Single-series chart only; removed compare mode, Legend, Tooltip, custom dots */}
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  {compareMode && role === 'senior-biologist' ? (
-                    <LineChart data={compareData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                      <XAxis
-                        dataKey="year"
-                        stroke="#64748B"
-                        tick={{ fill: '#64748B', fontSize: 12 }}
-                        axisLine={{ stroke: '#E2E8F0' }}
-                      />
-                      <YAxis
-                        stroke="#64748B"
-                        tick={{ fill: '#64748B', fontSize: 12 }}
-                        axisLine={{ stroke: '#E2E8F0' }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'white',
-                          border: '1px solid #E2E8F0',
-                          borderRadius: '6px',
-                          fontSize: '13px',
-                          /* POWERAPPS-ALIGNMENT: Removed deep shadow */
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                        }}
-                      />
-                      <Legend
-                        wrapperStyle={{ fontSize: '13px', paddingTop: '16px' }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="southPlatte"
-                        name="South Platte Basin"
-                        stroke="#1B365D"
-                        strokeWidth={3}
-                        dot={{ fill: '#1B365D', r: 5, strokeWidth: 2, stroke: 'white' }}
-                        activeDot={{ r: 7 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="coloradoRiver"
-                        name="Colorado River"
-                        stroke="#2F6F73"
-                        strokeWidth={3}
-                        dot={{ fill: '#2F6F73', r: 5, strokeWidth: 2, stroke: 'white' }}
-                        activeDot={{ r: 7 }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey="blueRiver"
-                        name="Blue River"
-                        stroke="#5B7C99"
-                        strokeWidth={3}
-                        dot={{ fill: '#5B7C99', r: 5, strokeWidth: 2, stroke: 'white' }}
-                        activeDot={{ r: 7 }}
-                      />
-                    </LineChart>
-                  ) : (
-                    <LineChart data={trendData}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                      <XAxis
-                        dataKey="year"
-                        stroke="#64748B"
-                        tick={{ fill: '#64748B', fontSize: 12 }}
-                        axisLine={{ stroke: '#E2E8F0' }}
-                      />
-                      <YAxis
-                        stroke="#64748B"
-                        tick={{ fill: '#64748B', fontSize: 12 }}
-                        axisLine={{ stroke: '#E2E8F0' }}
-                      />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'white',
-                          border: '1px solid #E2E8F0',
-                          borderRadius: '6px',
-                          fontSize: '13px',
-                          /* POWERAPPS-ALIGNMENT: Removed deep shadow */
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                        }}
-                      />
-                      <Legend
-                        wrapperStyle={{ fontSize: '13px', paddingTop: '16px' }}
-                      />
-                      <Line
-                        type="monotone"
-                        dataKey={metricInfo.key}
-                        name={metricInfo.name}
-                        stroke={metricInfo.color}
-                        strokeWidth={3}
-                        dot={{ fill: metricInfo.color, r: 5, strokeWidth: 2, stroke: 'white' }}
-                        activeDot={{ r: 7 }}
-                      />
-                    </LineChart>
-                  )}
+                  <LineChart data={trendData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                    <XAxis
+                      dataKey="year"
+                      stroke="#64748B"
+                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      axisLine={{ stroke: '#E2E8F0' }}
+                    />
+                    <YAxis
+                      stroke="#64748B"
+                      tick={{ fill: '#64748B', fontSize: 12 }}
+                      axisLine={{ stroke: '#E2E8F0' }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey={metricInfo.key}
+                      name={metricInfo.name}
+                      stroke={metricInfo.color}
+                      strokeWidth={2}
+                      dot={false}
+                    />
+                  </LineChart>
                 </ResponsiveContainer>
               </div>
-
-              {compareMode && role === 'senior-biologist' && (
-                <div className="mt-6 p-4 border border-primary/20 bg-primary/5 rounded">
-                  <h4 className="text-[12px] font-medium text-foreground mb-3">Statewide Delta Analysis</h4>
-                  <div className="grid grid-cols-3 gap-4">
-                    <div className="text-center p-3 border border-border/50 rounded bg-white">
-                      <p className="text-[11px] text-muted-foreground mb-1">Colorado River</p>
-                      <p className="text-[20px] font-semibold text-success">+{getDelta(crFirst, crLast)}</p>
-                      <p className="text-[10px] text-muted-foreground">vs. {crFirst?.year ?? '—'} baseline</p>
-                    </div>
-                    <div className="text-center p-3 border border-border/50 rounded bg-white">
-                      <p className="text-[11px] text-muted-foreground mb-1">South Platte Basin</p>
-                      <p className="text-[20px] font-semibold text-success">+{getDelta(spFirst, spLast)}</p>
-                      <p className="text-[10px] text-muted-foreground">vs. {spFirst?.year ?? '—'} baseline</p>
-                    </div>
-                    <div className="text-center p-3 border border-border/50 rounded bg-white">
-                      <p className="text-[11px] text-muted-foreground mb-1">Blue River</p>
-                      <p className="text-[20px] font-semibold text-success">+{getDelta(brFirst, brLast)}</p>
-                      <p className="text-[10px] text-muted-foreground">vs. {brFirst?.year ?? '—'} baseline</p>
-                    </div>
-                  </div>
-                </div>
-              )}
 
               <div className="mt-6 p-4 border border-border/50 bg-muted/20 rounded flex items-start gap-3">
                 <Info className="w-4 h-4 text-muted-foreground mt-0.5 flex-shrink-0" />
@@ -504,18 +344,8 @@ export default function Insights() {
                         label={{ value: 'Count', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }}
                         axisLine={{ stroke: '#E2E8F0' }}
                       />
-                      <Tooltip
-                        contentStyle={{
-                          backgroundColor: 'white',
-                          border: '1px solid #E2E8F0',
-                          borderRadius: '6px',
-                          fontSize: '13px',
-                          /* POWERAPPS-ALIGNMENT: Removed deep shadow */
-                          boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-                        }}
-                        cursor={{ fill: '#1B365D', opacity: 0.1 }}
-                      />
-                      <Bar dataKey="count" fill="#1B365D" radius={[4, 4, 0, 0]} />
+                      {/* POWERAPPS-ALIGNMENT: Removed Tooltip and rounded bar corners */}
+                      <Bar dataKey="count" fill="#1B365D" />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>

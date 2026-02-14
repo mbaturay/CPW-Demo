@@ -6,9 +6,9 @@ Features in this demo that cannot be fully reproduced in a Canvas Power App, or 
 
 | File Path | Feature | Suggested Power Apps Fallback | Notes |
 |---|---|---|---|
-| `src/app/pages/Insights.tsx` | Recharts LineChart, BarChart (interactive multi-series, compare mode) | Use Power Apps Chart control (limited to single series) or embed a Power BI tile | Power Apps native chart control supports bar/line/pie but lacks multi-series overlays, custom tooltips, and legend interactivity |
-| `src/app/pages/WaterProfile.tsx` | Recharts ComposedChart (Line + Area overlay with custom dot renderer) | Use Power Apps Chart control with single line series | Custom dot rendering and area fills not available natively |
-| `src/app/pages/SeniorBiologistDashboard.tsx` | Recharts BarChart (interactive regional comparison) | Use Power Apps Chart control or embed Power BI | Single-series bar chart is reproducible; interactive tooltip is not |
+| `src/app/pages/Insights.tsx` | Recharts LineChart, BarChart (retained for visual reference) | Use Power Apps Chart control (single series) or embed Power BI tile | Charts simplified to single-series, no tooltips/legends/custom dots — closer to PA Chart control capability |
+| `src/app/pages/WaterProfile.tsx` | Recharts LineChart (retained for visual reference) | Use Power Apps Chart control with single line series | Simplified from ComposedChart to plain LineChart; no area fill, custom dots, or tooltips |
+| `src/app/pages/SeniorBiologistDashboard.tsx` | Recharts BarChart (retained for visual reference) | Use Power Apps Chart control or embed Power BI | Simplified: removed tooltip and rounded corners; single-series bar is PA-reproducible |
 | `src/app/pages/QueryBuilder.tsx` | Visual query builder with dynamic condition add/remove | Build with repeating gallery of dropdown rows + add/remove buttons | Complex but achievable; requires careful gallery management |
 | `src/app/components/StationViz.tsx` | SVG-based station position visualization | Use static Image control with pre-rendered map, or embed a Power Apps Map control (premium) | SVG rendering not available in Canvas Apps |
 

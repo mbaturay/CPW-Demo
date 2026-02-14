@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { AlertTriangle, FileSpreadsheet, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
 import { Link } from 'react-router';
 import { RoleIndicator } from '../components/RoleIndicator';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
 export default function SeniorBiologistDashboard() {
   const [regionFilter, setRegionFilter] = useState('statewide');
@@ -158,15 +158,8 @@ export default function SeniorBiologistDashboard() {
                       tick={{ fill: '#64748B', fontSize: 11 }}
                       axisLine={{ stroke: '#E2E8F0' }}
                     />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'white', 
-                        border: '1px solid #E2E8F0',
-                        borderRadius: '6px',
-                        fontSize: '13px'
-                      }}
-                    />
-                    <Bar dataKey="surveys" fill="#1B365D" radius={[4, 4, 0, 0]} name="Total Surveys" />
+                    {/* POWERAPPS-ALIGNMENT: Removed Tooltip and rounded bar corners */}
+                    <Bar dataKey="surveys" fill="#1B365D" name="Total Surveys" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
