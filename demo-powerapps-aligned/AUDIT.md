@@ -393,3 +393,63 @@ No automated tests exist in this repo. No test changes were required.
 - `RoleIndicator.tsx` file retained (no longer imported by any page).
 - All routing, role-based display logic, and business logic unchanged.
 - ARIA labels preserved on navigation.
+
+---
+
+## Typography Scale Pass
+
+> Date: 2026-02-13
+> Purpose: Increase typography scale globally to a noticeably larger, Canvas-app-like feel (option B). Centralized via CSS overrides — zero JSX files touched for font sizes.
+
+### Approach
+
+The codebase uses 470+ hardcoded `text-[Xpx]` Tailwind arbitrary values across 18 files.
+Instead of editing each one, CSS attribute selectors in `theme.css` remap all sizes centrally.
+Tailwind utility classes (`text-sm`, `text-xs`) are overridden via `@theme` in the same file.
+
+### 48. `src/styles/powerapps-tokens.css` (Typography Scale)
+- **Edit:** Added `--typo-*` CSS custom properties documenting the scale mapping.
+  - `--typo-helper: 12px` (was 11px), `--typo-label: 13px` (was 12px),
+    `--typo-body-sm: 14px` (was 13px), `--typo-body: 15px` (was 14px),
+    `--typo-section: 18px` (was 16px), `--typo-subtitle: 20px` (was 18px),
+    `--typo-title: 26px` (was 22px), `--typo-stat: 28px` (was 24px).
+
+### 49. `src/styles/theme.css` (Typography Scale)
+- **Edit 1:** Added `--text-xs: 13px` and `--text-sm: 15px` to `@theme inline` block.
+  - Rationale: Bumps Tailwind `text-xs` (12→13) and `text-sm` (14→15) globally.
+    Affects button.tsx, table.tsx, and all components using these utility classes.
+- **Edit 2:** Added 10-line CSS override block using `[class*="text-[Xpx]"]` attribute selectors:
+  - `text-[9px]→10, [10]→11, [11]→12, [12]→13, [13]→14, [14]→15` (+1px each)
+  - `text-[16px]→18, [18]→20` (+2px each, section headers)
+  - `text-[22px]→26, [24]→28` (+4px each, titles and stat numbers)
+  - Uses `!important` to override Tailwind's JIT-generated utilities.
+  - Covers all 470 occurrences across 18 files without touching any JSX.
+- **Edit 3:** Updated `@layer base` line-heights from `1.5` to `1.55` for h1-h4, label, button, input.
+
+### 50. `src/app/components/ui/table.tsx` (Typography Scale)
+- **Edit:** Bumped TableCell padding from `py-3` (12px) to `py-3.5` (14px).
+  - Rationale: Slightly more row height to accommodate larger text (+1px from text-sm bump).
+
+### Old vs New sizes
+
+| Element | Old | New | Delta |
+|---|---|---|---|
+| Page titles (`text-[22px]`) | 22px | 26px | +4 |
+| Stat numbers (`text-[24px]`) | 24px | 28px | +4 |
+| Section headers (`text-[16px]`) | 16px | 18px | +2 |
+| Branding/subtitle (`text-[18px]`) | 18px | 20px | +2 |
+| Body text (`text-[13px]`) | 13px | 14px | +1 |
+| Body/nav text (`text-[14px]`) | 14px | 15px | +1 |
+| Small labels (`text-[12px]`) | 12px | 13px | +1 |
+| Helper text (`text-[11px]`) | 11px | 12px | +1 |
+| Tailwind `text-sm` | 14px | 15px | +1 |
+| Tailwind `text-xs` | 12px | 13px | +1 |
+| Base line-height | 1.5 | 1.55 | +0.05 |
+| Table cell padding | py-3 (12px) | py-3.5 (14px) | +2px |
+
+### Regression checks
+- TopNav: 6 nav items fit at 1366px with no wrapping.
+- RoleFloater: stays compact, no overlap with page headers.
+- Summary strips: stat numbers (28px) do not overflow containers.
+- Validation table: 10 rows render cleanly with increased padding.
+- Hierarchy preserved: titles (26px) > sections (18px) > body (14px) > helpers (12px).
