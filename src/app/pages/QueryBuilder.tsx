@@ -72,16 +72,16 @@ export default function QueryBuilder() {
                   <div className="flex gap-1">
                     <button
                       onClick={() => setAdvancedMode(false)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                        !advancedMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                      className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                        !advancedMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
                       }`}
                     >
                       Standard
                     </button>
                     <button
                       onClick={() => setAdvancedMode(true)}
-                      className={`px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
-                        advancedMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground hover:text-foreground'
+                      className={`px-2 py-0.5 rounded text-[11px] font-medium ${
+                        advancedMode ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
                       }`}
                     >
                       Advanced

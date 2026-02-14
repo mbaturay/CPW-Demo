@@ -151,6 +151,47 @@
 
 ---
 
+---
+
+## Feasibility Audit Pass
+
+> Date: 2026-02-13
+> Purpose: Practical Power Apps build feasibility audit. Identify remaining non-portable patterns, rate screens by risk, and clean up stragglers.
+
+### Remaining non-portables found and fixed
+
+#### 17. `src/app/pages/QueryBuilder.tsx` (Feasibility Cleanup)
+- **Edit 1:** Removed `transition-colors` from Standard/Advanced mode toggle buttons (2 occurrences, lines 75, 83).
+  - Rationale: CSS transitions not supported in Power Apps.
+- **Edit 2:** Removed `hover:text-foreground` from inactive toggle button states.
+  - Rationale: Hover color changes are cosmetic; simplifies to static styling.
+
+#### 18. `src/app/components/Navigation.tsx` (Feasibility Cleanup)
+- **Edit:** Removed `transition-colors` from nav link className (line 45).
+  - Rationale: CSS transitions not supported in Power Apps.
+
+#### 19. `src/app/components/ui/card.tsx` (Feasibility Cleanup)
+- **Edit:** Removed `transition-shadow duration-150 hover:shadow-md` from Card base className (line 10).
+  - Rationale: Shadow transitions not supported in Power Apps. This change affects **every Card on every screen**, removing a non-portable hover animation from the entire app.
+
+### Non-portables noted but not fixed (library code)
+
+The following `transition-*` and `animate-*` patterns exist in shadcn/ui library components (`src/app/components/ui/`). These are **not fixed** because:
+- They are generic UI library code, not app-level code
+- In Power Apps, these controls are replaced by native equivalents (Dropdown, Dialog, Toggle, etc.)
+- Modifying 20+ library files would be disproportionate for no demo benefit
+
+Affected ui/ files: `select.tsx`, `dialog.tsx`, `accordion.tsx`, `button.tsx`, `input.tsx`, `textarea.tsx`, `sidebar.tsx`, `sheet.tsx`, `popover.tsx`, `hover-card.tsx`, `navigation-menu.tsx`, `breadcrumb.tsx`, `table.tsx`, `badge.tsx`, `toggle.tsx`, `checkbox.tsx`, `radio-group.tsx`, `slider.tsx`, `scroll-area.tsx`, `alert-dialog.tsx`, `context-menu.tsx`, `dropdown-menu.tsx`, `menubar.tsx`, `tabs.tsx`, `progress.tsx`, `skeleton.tsx`, `tooltip.tsx`, `input-otp.tsx`.
+
+### Deliverables created
+
+| File | Purpose |
+|---|---|
+| `demo-powerapps-aligned/FEASIBILITY_AUDIT.md` | Screen-by-screen risk ratings, top 10 risks, MVP subset |
+| `demo-powerapps-aligned/POWERAPPS_PATTERN_MAP.md` | Maps each React screen to PA controls and key formulas |
+
+---
+
 ## Copy Changes
 
 No user-facing copy was changed except:
