@@ -193,22 +193,25 @@ export default function Dashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </div>
 
+          {/* 2-column: Active Stations (map) + Waters in Region (table) */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Active Survey Stations Map Preview */}
-            <Card className="border border-border">
+            <Card className="border border-border h-auto md:h-[480px] flex flex-col">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[16px]">Active Survey Stations</CardTitle>
                 <p className="text-[12px] text-muted-foreground mt-1">Current field season locations</p>
               </CardHeader>
-              <CardContent className="pt-6">
-                <div className="aspect-square">
+              <CardContent className="pt-6 flex-1 min-h-0 flex flex-col">
+                <div className="flex-1 min-h-0 overflow-hidden">
                   <StationViz
                     stations={neStations}
                     title="Survey Stations — Northeast Region"
                   />
                 </div>
 
-                <div className="mt-6 space-y-3">
+                <div className="mt-4 space-y-3 shrink-0">
                   <div className="flex items-center justify-between text-[13px]">
                     <span className="text-muted-foreground">Active Regions</span>
                     <span className="font-mono text-foreground">1</span>
@@ -224,47 +227,47 @@ export default function Dashboard() {
                 </div>
               </CardContent>
             </Card>
-          </div>
 
-          {/* Waters in Northeast Region */}
-          <Card className="border border-border">
-            <CardHeader className="border-b border-border/50">
-              <CardTitle className="text-[16px]">Waters in Northeast Region</CardTitle>
-              <p className="text-[12px] text-muted-foreground mt-1">
-                Active water bodies under regional management
-              </p>
-            </CardHeader>
-            <CardContent className="pt-6">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-[12px]">Water Name</TableHead>
-                    <TableHead className="text-[12px]">Active Surveys</TableHead>
-                    <TableHead className="text-[12px]">Last Survey Date</TableHead>
-                    <TableHead className="text-[12px]">Status Summary</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {watersInRegion.map((water) => (
-                    <TableRow key={water.id}>
-                      <TableCell className="text-[13px]">
-                        <Link to={`/water/profile?waterId=${water.id}`} className="text-primary underline visited:text-primary font-medium">
-                          {water.name}
-                        </Link>
-                      </TableCell>
-                      <TableCell className="text-[13px] font-mono">{water.activeSurveys}</TableCell>
-                      <TableCell className="text-[12px] text-muted-foreground">{water.lastSurvey}</TableCell>
-                      <TableCell>
-                        <span className="inline-flex px-2 py-0.5 bg-success/10 text-success rounded text-[11px] font-medium">
-                          {water.status}
-                        </span>
-                      </TableCell>
+            {/* Waters in Northeast Region */}
+            <Card className="border border-border h-auto md:h-[480px] flex flex-col">
+              <CardHeader className="border-b border-border/50">
+                <CardTitle className="text-[16px]">Waters in Northeast Region</CardTitle>
+                <p className="text-[12px] text-muted-foreground mt-1">
+                  Active water bodies under regional management
+                </p>
+              </CardHeader>
+              <CardContent className="pt-6 flex-1 min-h-0 overflow-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead className="text-[12px]">Water Name</TableHead>
+                      <TableHead className="text-[12px]">Active Surveys</TableHead>
+                      <TableHead className="text-[12px]">Last Survey Date</TableHead>
+                      <TableHead className="text-[12px]">Status Summary</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {watersInRegion.map((water) => (
+                      <TableRow key={water.id}>
+                        <TableCell className="text-[13px]">
+                          <Link to={`/water/profile?waterId=${water.id}`} className="text-primary underline visited:text-primary font-medium">
+                            {water.name}
+                          </Link>
+                        </TableCell>
+                        <TableCell className="text-[13px] font-mono">{water.activeSurveys}</TableCell>
+                        <TableCell className="text-[12px] text-muted-foreground">{water.lastSurvey}</TableCell>
+                        <TableCell>
+                          <span className="inline-flex px-2 py-0.5 bg-success/10 text-success rounded text-[11px] font-medium">
+                            {water.status}
+                          </span>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          </div>
 
           {/* Species of Concern Activity Panel */}
           {/* CANVAS-AESTHETIC: Removed decorative colored border — standard card */}
