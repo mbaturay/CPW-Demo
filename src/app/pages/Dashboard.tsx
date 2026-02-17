@@ -195,39 +195,8 @@ export default function Dashboard() {
             </Card>
           </div>
 
-          {/* 2-column: Active Stations (map) + Waters in Region (table) */}
+          {/* 2-column: Waters in Region (table) + Active Stations (map) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Active Survey Stations Map Preview */}
-            <Card className="border border-border h-auto md:h-[480px] flex flex-col">
-              <CardHeader className="border-b border-border/50">
-                <CardTitle className="text-[16px]">Active Survey Stations</CardTitle>
-                <p className="text-[12px] text-muted-foreground mt-1">Current field season locations</p>
-              </CardHeader>
-              <CardContent className="pt-6 flex-1 min-h-0 flex flex-col">
-                <div className="flex-1 min-h-0 overflow-hidden">
-                  <StationViz
-                    stations={neStations}
-                    title="Survey Stations — Northeast Region"
-                  />
-                </div>
-
-                <div className="mt-4 space-y-3 shrink-0">
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Active Regions</span>
-                    <span className="font-mono text-foreground">1</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Water Bodies</span>
-                    <span className="font-mono text-foreground">{neWaters.length}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-muted-foreground">Survey Stations</span>
-                    <span className="font-mono text-foreground">{totalStations}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
             {/* Waters in Northeast Region */}
             <Card className="border border-border h-auto md:h-[480px] flex flex-col">
               <CardHeader className="border-b border-border/50">
@@ -265,6 +234,37 @@ export default function Dashboard() {
                     ))}
                   </TableBody>
                 </Table>
+              </CardContent>
+            </Card>
+
+            {/* Active Survey Stations Map Preview */}
+            <Card className="border border-border h-auto md:h-[480px] flex flex-col">
+              <CardHeader className="border-b border-border/50">
+                <CardTitle className="text-[16px]">Active Survey Stations</CardTitle>
+                <p className="text-[12px] text-muted-foreground mt-1">Current field season locations</p>
+              </CardHeader>
+              <CardContent className="pt-6 flex-1 min-h-0 flex flex-col">
+                <div className="flex-1 min-h-0 overflow-hidden">
+                  <StationViz
+                    stations={neStations}
+                    title="Survey Stations — Northeast Region"
+                  />
+                </div>
+
+                <div className="mt-4 space-y-3 shrink-0">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-muted-foreground">Active Regions</span>
+                    <span className="font-mono text-foreground">1</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-muted-foreground">Water Bodies</span>
+                    <span className="font-mono text-foreground">{neWaters.length}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-muted-foreground">Survey Stations</span>
+                    <span className="font-mono text-foreground">{totalStations}</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
