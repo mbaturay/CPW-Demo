@@ -1,14 +1,14 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { FileSpreadsheet, TrendingUp, Info, BarChart3, ArrowLeft } from 'lucide-react';
+import { FileSpreadsheet, TrendingUp, Info, BarChart3, ArrowLeft, ChevronDown } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
-import { WaterBanner } from '../components/WaterBanner';
+import { StationViz } from '../components/StationViz';
 
 import { useRole } from '../context/RoleContext';
 import { Link, useSearchParams, useNavigate } from 'react-router';
-import { getWaterById, getTrendForWater, getFishRecords } from '../data/world';
+import { waters, getWaterById, getTrendForWater, getFishRecords } from '../data/world';
 import type { Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
 import {
@@ -69,18 +69,28 @@ export default function Insights() {
 
   // ── Default waterId-based params ──
   const navigate = useNavigate();
-  const waterIdParam = searchParams.get('waterId');
+  const waterIdParam = searchParams.get('waterId');  // from Water Profile → locked
+  const basinParam = searchParams.get('basin');       // from dropdown / explore → explore mode
+
+  const isDatasetLocked = !!(selectedIdsParam || qParam || waterIdParam);
+
   const waterId = useMemo(() => {
     if (waterIdParam) return waterIdParam;
+    if (basinParam) return basinParam;
     try { return sessionStorage.getItem('cpw:lastWaterId') ?? 'south-platte'; } catch { return 'south-platte'; }
-  }, [waterIdParam]);
+  }, [waterIdParam, basinParam]);
 
-  // If resolved from sessionStorage (no URL param), push waterId into URL so refresh/share works
+  // If resolved from sessionStorage (no URL param), push basin into URL so refresh/share works
   useEffect(() => {
-    if (!waterIdParam && !selectedIdsParam && !qParam && waterId !== 'south-platte') {
-      navigate(`/insights?waterId=${waterId}`, { replace: true });
+    if (!waterIdParam && !basinParam && !selectedIdsParam && !qParam && waterId !== 'south-platte') {
+      navigate(`/insights?basin=${waterId}`, { replace: true });
     }
-  }, [waterIdParam, selectedIdsParam, qParam, waterId, navigate]);
+  }, [waterIdParam, basinParam, selectedIdsParam, qParam, waterId, navigate]);
+
+  // Basin dropdown handler (explore mode only)
+  const handleBasinChange = (newBasinId: string) => {
+    navigate(`/insights?basin=${newBasinId}`, { replace: true });
+  };
 
   // ────────────────────────────────────────────────────
   // SELECTION-BASED: Empty state
@@ -244,19 +254,21 @@ export default function Insights() {
                   Save Analysis
                 </Button>
               </div>
-
             </div>
           </div>
         </div>
       </header>
 
-      <WaterBanner
+      <InsightsWaterBanner
         waterName={waterName}
         region={waterRegion}
         watershed={waterHuc}
         stations={waterStations}
         totalSurveys={waterSurveys.length}
         yearsActive={waterYears}
+        isLocked={isDatasetLocked}
+        selectedWaterId={waterId}
+        onBasinChange={handleBasinChange}
       />
 
       {/* Regional Scope Strip for Area Biologist */}
@@ -861,6 +873,148 @@ function QueryAnalysisView({ result, role }: { result: QueryResult; role: string
             </CardContent>
           </Card>
 
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ────────────────────────────────────────────────────
+// InsightsWaterBanner — inline basin selector in title
+// ────────────────────────────────────────────────────
+function InsightsWaterBanner({
+  waterName,
+  region,
+  watershed,
+  stations,
+  totalSurveys,
+  yearsActive,
+  isLocked,
+  selectedWaterId,
+  onBasinChange,
+}: {
+  waterName: string;
+  region: string;
+  watershed: string;
+  stations: import('../data/world').Station[];
+  totalSurveys: number;
+  yearsActive: string;
+  isLocked: boolean;
+  selectedWaterId: string;
+  onBasinChange: (id: string) => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: MouseEvent) => {
+      if (
+        dropdownRef.current && !dropdownRef.current.contains(e.target as Node) &&
+        triggerRef.current && !triggerRef.current.contains(e.target as Node)
+      ) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, [open]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') { setOpen(false); triggerRef.current?.focus(); }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [open]);
+
+  const handleSelect = useCallback((id: string) => {
+    setOpen(false);
+    onBasinChange(id);
+  }, [onBasinChange]);
+
+  return (
+    <div className="bg-white border-b border-border/70">
+      <div className="px-8 py-8">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="flex items-start justify-between gap-8">
+            <div className="flex gap-4 flex-1">
+              <div className="w-1 shrink-0 rounded-full bg-primary" />
+              <div className="relative">
+                {/* Basin title — clickable in explore mode */}
+                {!isLocked ? (
+                  <button
+                    ref={triggerRef}
+                    type="button"
+                    onClick={() => setOpen(prev => !prev)}
+                    className="flex items-center gap-2 text-left rounded-md px-1 -ml-1 py-0.5 hover:bg-muted/40 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    aria-expanded={open}
+                    aria-haspopup="listbox"
+                  >
+                    <h2 className="text-[24px] font-semibold text-foreground">{waterName}</h2>
+                    <ChevronDown
+                      className={`w-5 h-5 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+                    />
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-[24px] font-semibold text-foreground">{waterName}</h2>
+                    <span className="inline-flex px-2 py-0.5 rounded bg-muted text-[11px] text-muted-foreground whitespace-nowrap">
+                      {selectedWaterId ? 'From Water Profile' : 'Dataset locked'}
+                    </span>
+                  </div>
+                )}
+
+                {/* Inline dropdown panel */}
+                {open && !isLocked && (
+                  <div
+                    ref={dropdownRef}
+                    className="absolute top-full left-0 mt-1 z-50 w-72 bg-white border border-border rounded-md py-1 max-h-64 overflow-y-auto"
+                    style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.08)' }}
+                    role="listbox"
+                  >
+                    {waters.map(w => (
+                      <button
+                        key={w.id}
+                        type="button"
+                        role="option"
+                        aria-selected={w.id === selectedWaterId}
+                        onClick={() => handleSelect(w.id)}
+                        className={`w-full text-left px-4 py-2.5 text-[13px] transition-colors cursor-pointer ${
+                          w.id === selectedWaterId
+                            ? 'bg-primary/5 text-primary font-medium'
+                            : 'text-foreground hover:bg-muted/40'
+                        }`}
+                      >
+                        {w.name}
+                        <span className="text-[11px] text-muted-foreground ml-2">{w.region}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                <p className="text-[14px] text-muted-foreground mt-3">
+                  <span className="font-medium text-foreground">Region:</span> {region} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Watershed:</span> {watershed} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Stations:</span> {stations.length} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Total Surveys:</span> {totalSurveys} <span className="mx-3 text-border">|</span>
+                  <span className="font-medium text-foreground">Years Active:</span> {yearsActive}
+                </p>
+              </div>
+            </div>
+
+            <div className="w-64 h-40 flex-shrink-0 overflow-hidden">
+              <StationViz
+                stations={stations}
+                title={`Survey Stations — ${waterName}`}
+              />
+            </div>
+          </div>
         </div>
       </div>
     </div>
