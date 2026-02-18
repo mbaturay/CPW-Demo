@@ -1,16 +1,53 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
-import { BarChart3 } from 'lucide-react';
-import { Link, useNavigate } from 'react-router';
+import { BarChart3, Info } from 'lucide-react';
+import { Link, useNavigate, useSearchParams } from 'react-router';
 
 import { waters, getWaterById } from '../data/world';
-import type { SurveyStatus } from '../data/world';
+import type { SurveyStatus, Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
+import { useRole } from '../context/RoleContext';
+import type { UserRole } from '../context/RoleContext';
+
+const SCOPE_LABELS: Record<string, string> = {
+  statewide: 'Statewide',
+  northeast: 'Northeast Region',
+  southeast: 'Southeast Region',
+  northwest: 'Northwest Region',
+  southwest: 'Southwest Region',
+  central: 'Central Region',
+};
+const SCOPE_TO_REGION: Record<string, string | null> = {
+  statewide: null,
+  northeast: 'Northeast',
+  southeast: 'Southeast',
+  northwest: 'Northwest',
+  southwest: 'Southwest',
+  central: 'Central',
+};
+
+/** Return the default scope for a given role. */
+function getDefaultScope(role: UserRole): string {
+  switch (role) {
+    case 'senior-biologist':
+      return 'statewide';
+    default:
+      return 'northeast';
+  }
+}
+
+/** Count surveys matching a scope (region filter). */
+function countSurveysForScope(scope: string, allSurveys: Survey[]): number {
+  const region = SCOPE_TO_REGION[scope];
+  if (region === null) return allSurveys.length; // statewide
+  const ids = new Set(waters.filter(w => w.region === region).map(w => w.id));
+  return allSurveys.filter(s => ids.has(s.waterId)).length;
+}
 
 type StatusFilter = 'all' | 'pending' | 'approved' | 'flagged' | 'draft';
 
@@ -45,13 +82,48 @@ function getPrimaryAction(status: SurveyStatus): string {
 export default function ActivityFeed() {
   const { surveys } = useDemo();
   const navigate = useNavigate();
-  const neWaters = waters.filter(w => w.region === 'Northeast');
-  const neWaterIds = useMemo(() => new Set(neWaters.map(w => w.id)), [neWaters]);
+  const { role } = useRole();
+  const [searchParams] = useSearchParams();
 
-  // All NE surveys (no status filtering)
-  const allNeSurveys = useMemo(
-    () => surveys.filter(s => neWaterIds.has(s.waterId)).sort((a, b) => (a.date < b.date ? 1 : -1)),
-    [surveys, neWaterIds],
+  // --- Initial-load scope resolution with auto-fallback ---
+  const isInitialLoad = useRef(true);
+  const [scopeRelaxedFrom, setScopeRelaxedFrom] = useState<string | null>(null);
+
+  const requestedScope = searchParams.get('scope') ?? getDefaultScope(role);
+
+  // Determine effective scope: auto-relax to statewide on initial load if 0 results
+  const effectiveScope = useMemo(() => {
+    if (!isInitialLoad.current) return requestedScope;
+    if (countSurveysForScope(requestedScope, surveys) > 0) return requestedScope;
+    // Requested scope is empty — fallback to statewide
+    return 'statewide';
+  }, [requestedScope, surveys]);
+
+  // Track whether we relaxed (runs once on mount)
+  useEffect(() => {
+    if (isInitialLoad.current) {
+      if (effectiveScope !== requestedScope) {
+        setScopeRelaxedFrom(SCOPE_LABELS[requestedScope] ?? requestedScope);
+      }
+      isInitialLoad.current = false;
+    }
+  }, [effectiveScope, requestedScope]);
+
+  const scope = effectiveScope;
+  const scopeLabel = SCOPE_LABELS[scope] ?? 'Northeast Region';
+  const regionFilter_ = SCOPE_TO_REGION[scope];
+
+  // Scope-aware water list
+  const scopeWaters = useMemo(() => {
+    if (regionFilter_ === null) return waters; // statewide — all waters
+    return waters.filter(w => w.region === regionFilter_);
+  }, [regionFilter_]);
+  const scopeWaterIds = useMemo(() => new Set(scopeWaters.map(w => w.id)), [scopeWaters]);
+
+  // All surveys within scope
+  const allScopeSurveys = useMemo(
+    () => surveys.filter(s => scopeWaterIds.has(s.waterId)).sort((a, b) => (a.date < b.date ? 1 : -1)),
+    [surveys, scopeWaterIds],
   );
 
   // Filter state
@@ -64,13 +136,13 @@ export default function ActivityFeed() {
 
   // Derive filtered list
   const filtered = useMemo(() => {
-    return allNeSurveys.filter(s => {
+    return allScopeSurveys.filter(s => {
       if (waterFilter !== 'all' && s.waterId !== waterFilter) return false;
       if (!matchesStatusFilter(s.status, statusFilter)) return false;
       if (dateFrom && s.date < dateFrom) return false;
       return true;
     });
-  }, [allNeSurveys, waterFilter, statusFilter, dateFrom]);
+  }, [allScopeSurveys, waterFilter, statusFilter, dateFrom]);
 
   // Prune selection when filters change — remove IDs no longer in visible set
   const filteredIds = useMemo(() => new Set(filtered.map(s => s.id)), [filtered]);
@@ -156,7 +228,7 @@ export default function ActivityFeed() {
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[22px] font-semibold text-primary">All Survey Activity — Northeast Region</h1>
+              <h1 className="text-[22px] font-semibold text-primary">All Survey Activity — {scopeLabel}</h1>
               <p className="text-[13px] text-muted-foreground mt-1">
                 {filtered.length} survey{filtered.length !== 1 ? 's' : ''} matching current filters
               </p>
@@ -170,13 +242,24 @@ export default function ActivityFeed() {
       <div className="bg-muted/20 border-b border-border px-8 py-3">
         <div className="max-w-[1280px] mx-auto">
           <p className="text-[12px] text-muted-foreground">
-            <span className="font-medium text-foreground">Regional Scope Active</span> — Northeast Basin
+            <span className="font-medium text-foreground">Regional Scope Active</span> — {scopeLabel}
           </p>
         </div>
       </div>
 
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-6">
+
+          {/* Auto-relaxation notice */}
+          {scopeRelaxedFrom && (
+            <div className="flex items-start gap-2 px-4 py-3 rounded border border-blue-200 bg-blue-50 text-[13px] text-blue-800">
+              <Info className="w-4 h-4 mt-0.5 shrink-0" />
+              <p>
+                No surveys found for <span className="font-medium">{scopeRelaxedFrom}</span>.
+                Showing <span className="font-medium">{scopeLabel}</span> instead.
+              </p>
+            </div>
+          )}
 
           {/* Filters */}
           <Card className="border border-border">
@@ -196,7 +279,7 @@ export default function ActivityFeed() {
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All Waters</SelectItem>
-                      {neWaters.map(w => (
+                      {scopeWaters.map(w => (
                         <SelectItem key={w.id} value={w.id}>{w.name}</SelectItem>
                       ))}
                     </SelectContent>

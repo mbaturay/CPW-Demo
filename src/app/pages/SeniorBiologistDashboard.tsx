@@ -1,39 +1,111 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../components/ui/table';
-import { AlertTriangle, FileSpreadsheet, BarChart3, TrendingUp, TrendingDown } from 'lucide-react';
+import { AlertTriangle, FileSpreadsheet, BarChart3, TrendingUp, TrendingDown, ClipboardList } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 
+// ── Scope-keyed mocked data ──────────────────────────────────────
+
+type ScopeKPIs = {
+  label: string;
+  waters: number;
+  surveysYtd: number;
+  regionsNote: string;
+  flagged: number;
+  flaggedNote: string;
+  federalReadiness: number;
+  dataQuality: number;
+  dataQualityNote: string;
+};
+
+const SCOPE_KPIS: Record<string, ScopeKPIs> = {
+  statewide: { label: 'Statewide', waters: 118, surveysYtd: 702, regionsNote: '5 regions, 702 surveys YTD', flagged: 7, flaggedNote: 'Declines require analysis', federalReadiness: 82, dataQuality: 96, dataQualityNote: 'Validation rate' },
+  northeast: { label: 'Northeast Region', waters: 23, surveysYtd: 147, regionsNote: '1 region, 147 surveys YTD', flagged: 2, flaggedNote: 'Protocol concerns', federalReadiness: 88, dataQuality: 94, dataQualityNote: 'Validation rate' },
+  southeast: { label: 'Southeast Region', waters: 18, surveysYtd: 112, regionsNote: '1 region, 112 surveys YTD', flagged: 1, flaggedNote: 'Data quality review', federalReadiness: 79, dataQuality: 89, dataQualityNote: 'Validation rate' },
+  northwest: { label: 'Northwest Region', waters: 31, surveysYtd: 189, regionsNote: '1 region, 189 surveys YTD', flagged: 3, flaggedNote: 'Population declines noted', federalReadiness: 76, dataQuality: 87, dataQualityNote: 'Validation rate' },
+  southwest: { label: 'Southwest Region', waters: 27, surveysYtd: 156, regionsNote: '1 region, 156 surveys YTD', flagged: 1, flaggedNote: 'Range shift flagged', federalReadiness: 84, dataQuality: 91, dataQualityNote: 'Validation rate' },
+  central:   { label: 'Central Region', waters: 19, surveysYtd: 98, regionsNote: '1 region, 98 surveys YTD', flagged: 0, flaggedNote: 'None', federalReadiness: 91, dataQuality: 96, dataQualityNote: 'Highest statewide' },
+};
+
+const SCOPE_CHART: Record<string, { region: string; surveys: number }[]> = {
+  statewide: [
+    { region: 'Northeast', surveys: 147 },
+    { region: 'Southeast', surveys: 112 },
+    { region: 'Northwest', surveys: 189 },
+    { region: 'Southwest', surveys: 156 },
+    { region: 'Central', surveys: 98 },
+  ],
+  northeast: [
+    { region: 'S. Platte', surveys: 52 },
+    { region: 'Poudre', surveys: 38 },
+    { region: 'St. Vrain', surveys: 24 },
+    { region: 'Big Thompson', surveys: 19 },
+    { region: 'Boyd Lake', surveys: 14 },
+  ],
+  southeast: [
+    { region: 'Arkansas', surveys: 41 },
+    { region: 'Purgatoire', surveys: 28 },
+    { region: 'Huerfano', surveys: 22 },
+    { region: 'Fountain Cr', surveys: 21 },
+  ],
+  northwest: [
+    { region: 'Colorado R.', surveys: 56 },
+    { region: 'Blue River', surveys: 38 },
+    { region: 'Eagle R.', surveys: 34 },
+    { region: 'Roaring Fork', surveys: 32 },
+    { region: 'Yampa', surveys: 29 },
+  ],
+  southwest: [
+    { region: 'Gunnison', surveys: 44 },
+    { region: 'San Juan', surveys: 36 },
+    { region: 'Dolores', surveys: 28 },
+    { region: 'Animas', surveys: 26 },
+    { region: 'Uncompahgre', surveys: 22 },
+  ],
+  central: [
+    { region: 'Clear Cr.', surveys: 28 },
+    { region: 'Bear Cr.', surveys: 22 },
+    { region: 'S. Platte (C)', surveys: 21 },
+    { region: 'Chatfield', surveys: 27 },
+  ],
+};
+
+// ── Component ────────────────────────────────────────────────────
+
 export default function SeniorBiologistDashboard() {
   const [regionFilter, setRegionFilter] = useState('statewide');
-  
-  const regionalData = [
-    { region: 'Northeast', waters: 23, surveys: 147, compliance: 94 },
-    { region: 'Southeast', waters: 18, surveys: 112, compliance: 89 },
-    { region: 'Northwest', waters: 31, surveys: 189, compliance: 87 },
-    { region: 'Southwest', waters: 27, surveys: 156, compliance: 91 },
-    { region: 'Central', waters: 19, surveys: 98, compliance: 96 },
-  ];
-  
-  const crossWaterTrends = [
-    { water: 'South Platte Basin', region: 'Northeast', trend: '+8%', population: 3812, status: 'Stable' },
-    { water: 'Arkansas River', region: 'Southeast', trend: '-4%', population: 2456, status: 'Declining' },
-    { water: 'Blue River', region: 'Northwest', trend: '-12%', population: 1834, status: 'Concern' },
-    { water: 'Colorado River', region: 'Northwest', trend: '+3%', population: 4123, status: 'Stable' },
-    { water: 'Cache la Poudre', region: 'Northeast', trend: '+6%', population: 2987, status: 'Stable' },
-  ];
-  
+
+  const kpis = SCOPE_KPIS[regionFilter] ?? SCOPE_KPIS.statewide;
+  const chartData = SCOPE_CHART[regionFilter] ?? SCOPE_CHART.statewide;
+  const chartLabel = regionFilter === 'statewide'
+    ? 'Survey activity and compliance metrics by region'
+    : `Water body survey breakdown — ${kpis.label}`;
+
+  const crossWaterTrends = useMemo(() => {
+    const all = [
+      { water: 'South Platte Basin', region: 'Northeast', trend: '+8%', population: 3812, status: 'Stable' as const },
+      { water: 'Arkansas River', region: 'Southeast', trend: '-4%', population: 2456, status: 'Declining' as const },
+      { water: 'Blue River', region: 'Northwest', trend: '-12%', population: 1834, status: 'Concern' as const },
+      { water: 'Colorado River', region: 'Northwest', trend: '+3%', population: 4123, status: 'Stable' as const },
+      { water: 'Cache la Poudre', region: 'Northeast', trend: '+6%', population: 2987, status: 'Stable' as const },
+      { water: 'Gunnison River', region: 'Southwest', trend: '-2%', population: 2105, status: 'Declining' as const },
+      { water: 'Clear Creek', region: 'Central', trend: '+5%', population: 1456, status: 'Stable' as const },
+    ];
+    if (regionFilter === 'statewide') return all;
+    const regionLabel = SCOPE_KPIS[regionFilter]?.label.replace(' Region', '') ?? '';
+    return all.filter(w => w.region === regionLabel);
+  }, [regionFilter]);
+
   const federalReporting = [
     { requirement: 'Annual Species Inventory', deadline: 'Mar 31, 2026', progress: 87, status: 'On Track' },
     { requirement: 'Endangered Species Monitoring', deadline: 'Apr 15, 2026', progress: 94, status: 'On Track' },
     { requirement: 'Water Quality Impact Assessment', deadline: 'May 1, 2026', progress: 67, status: 'Needs Attention' },
     { requirement: 'Population Trend Analysis', deadline: 'Jun 30, 2026', progress: 45, status: 'In Progress' },
   ];
-  
+
   return (
     <div className="min-h-screen bg-background">
       <header className="bg-white border-b border-border px-8 py-6">
@@ -43,15 +115,23 @@ export default function SeniorBiologistDashboard() {
               <h1 className="text-[22px] font-semibold text-primary">Statewide Water Intelligence Overview</h1>
               <p className="text-[13px] text-muted-foreground mt-1">Strategic cross-water analysis and federal reporting dashboard</p>
             </div>
-
           </div>
         </div>
       </header>
-      
+
+      {/* Analysis Scope Active strip */}
+      <div className="bg-muted/20 border-b border-border px-8 py-3">
+        <div className="max-w-[1280px] mx-auto">
+          <p className="text-[12px] text-muted-foreground">
+            <span className="font-medium text-foreground">Analysis Scope Active</span> — {kpis.label}
+          </p>
+        </div>
+      </div>
+
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-8">
-          
-          {/* Regional Filter Bar */}
+
+          {/* Filter Bar */}
           <div className="flex items-center justify-between bg-muted/20 border border-border rounded px-4 py-3">
             <div className="flex items-center gap-4">
               <span className="text-[13px] font-medium text-foreground">Analysis Scope:</span>
@@ -70,9 +150,15 @@ export default function SeniorBiologistDashboard() {
               </Select>
             </div>
             <div className="flex gap-3">
+              <Link to={`/activity-feed?scope=${regionFilter}`}>
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <ClipboardList className="w-4 h-4 mr-2" />
+                  Browse Surveys
+                </Button>
+              </Link>
               <Button variant="outline" size="sm" className="text-[13px]">
                 <FileSpreadsheet className="w-4 h-4 mr-2" />
-                Export Statewide Report
+                Export Report
               </Button>
               <Button variant="outline" size="sm" className="text-[13px]">
                 <BarChart3 className="w-4 h-4 mr-2" />
@@ -80,76 +166,78 @@ export default function SeniorBiologistDashboard() {
               </Button>
             </div>
           </div>
-          
-          {/* CANVAS-AESTHETIC: Summary strip replaces stat card grid */}
+
+          {/* KPI Summary Strip — scope-reactive */}
           <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
             <div className="flex divide-x divide-border">
               <div className="flex-1 px-6 py-5">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Waters Monitored</p>
-                <p className="text-[24px] font-semibold text-foreground">118</p>
-                <p className="text-[11px] text-muted-foreground mt-1">5 regions, 702 surveys YTD</p>
+                <p className="text-[24px] font-semibold text-foreground">{kpis.waters}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{kpis.regionsNote}</p>
               </div>
               <div className="flex-1 px-6 py-5">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Flagged for Review</p>
-                <p className="text-[24px] font-semibold text-foreground">7</p>
-                <p className="text-[11px] text-destructive mt-1">Declines require analysis</p>
+                <p className="text-[24px] font-semibold text-foreground">{kpis.flagged}</p>
+                <p className={`text-[11px] mt-1 ${kpis.flagged > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>{kpis.flaggedNote}</p>
               </div>
               <div className="flex-1 px-6 py-5">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Federal Readiness</p>
-                <p className="text-[24px] font-semibold text-foreground">82%</p>
+                <p className="text-[24px] font-semibold text-foreground">{kpis.federalReadiness}%</p>
                 <p className="text-[11px] text-muted-foreground mt-1">Avg. across 4 requirements</p>
               </div>
               <div className="flex-1 px-6 py-5">
                 <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Data Quality</p>
-                <p className="text-[24px] font-semibold text-foreground">96%</p>
-                <p className="text-[11px] text-success mt-1">Validation rate</p>
+                <p className="text-[24px] font-semibold text-foreground">{kpis.dataQuality}%</p>
+                <p className={`text-[11px] mt-1 ${kpis.dataQuality >= 95 ? 'text-success' : 'text-muted-foreground'}`}>{kpis.dataQualityNote}</p>
               </div>
             </div>
           </div>
-          
-          {/* Regional Performance Comparison */}
+
+          {/* Regional Performance Comparison — scope-reactive chart */}
           <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <div className="flex items-center justify-between">
                 <div>
-                  <CardTitle className="text-[16px]">Regional Performance Comparison</CardTitle>
-                  <p className="text-[12px] text-muted-foreground mt-1">Survey activity and compliance metrics by region</p>
+                  <CardTitle className="text-[16px]">
+                    {regionFilter === 'statewide' ? 'Regional Performance Comparison' : `${kpis.label} — Water Breakdown`}
+                  </CardTitle>
+                  <p className="text-[12px] text-muted-foreground mt-1">{chartLabel}</p>
                 </div>
               </div>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="h-[280px]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={regionalData}>
+                  <BarChart data={chartData}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
-                    <XAxis 
-                      dataKey="region" 
+                    <XAxis
+                      dataKey="region"
                       stroke="#64748B"
                       tick={{ fill: '#64748B', fontSize: 11 }}
                       axisLine={{ stroke: '#E2E8F0' }}
                     />
-                    <YAxis 
+                    <YAxis
                       stroke="#64748B"
                       tick={{ fill: '#64748B', fontSize: 11 }}
                       axisLine={{ stroke: '#E2E8F0' }}
                     />
-                    {/* POWERAPPS-ALIGNMENT: Removed Tooltip and rounded bar corners */}
                     <Bar dataKey="surveys" fill="#1B365D" name="Total Surveys" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             </CardContent>
           </Card>
-          
-          {/* CANVAS-ALIGNMENT: Stacked vertical (was 2-col side-by-side) */}
+
+          {/* Cross-Water Population Trends — scope-filtered */}
           <div className="space-y-6">
-            {/* Cross-Water Population Trends */}
             <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <div className="flex items-center justify-between">
                   <div>
                     <CardTitle className="text-[16px]">Cross-Water Population Trends</CardTitle>
-                    <p className="text-[12px] text-muted-foreground mt-1">Multi-basin comparative analysis</p>
+                    <p className="text-[12px] text-muted-foreground mt-1">
+                      {regionFilter === 'statewide' ? 'Multi-basin comparative analysis' : `Trend data — ${kpis.label}`}
+                    </p>
                   </div>
                   <Link to="/query">
                     <Button variant="outline" size="sm" className="text-[12px]">
@@ -159,42 +247,46 @@ export default function SeniorBiologistDashboard() {
                 </div>
               </CardHeader>
               <CardContent className="pt-6">
-                <div className="space-y-4">
-                  {crossWaterTrends.map((water, idx) => (
-                    <div key={idx} className="flex items-center justify-between pb-3 border-b border-border/50 last:border-0 last:pb-0">
-                      <div className="flex-1">
-                        <p className="text-[13px] font-medium text-foreground">{water.water}</p>
-                        <p className="text-[11px] text-muted-foreground mt-0.5">{water.region} • Pop: {water.population.toLocaleString()}</p>
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <div className={`flex items-center gap-1 text-[12px] font-medium ${
-                          water.trend.startsWith('+') ? 'text-success' : 'text-destructive'
-                        }`}>
-                          {water.trend.startsWith('+') ? (
-                            <TrendingUp className="w-3.5 h-3.5" />
-                          ) : (
-                            <TrendingDown className="w-3.5 h-3.5" />
-                          )}
-                          {water.trend}
+                {crossWaterTrends.length === 0 ? (
+                  <p className="text-[13px] text-muted-foreground py-4 text-center">No trend data available for this scope.</p>
+                ) : (
+                  <div className="space-y-4">
+                    {crossWaterTrends.map((water, idx) => (
+                      <div key={idx} className="flex items-center justify-between pb-3 border-b border-border/50 last:border-0 last:pb-0">
+                        <div className="flex-1">
+                          <p className="text-[13px] font-medium text-foreground">{water.water}</p>
+                          <p className="text-[11px] text-muted-foreground mt-0.5">{water.region} • Pop: {water.population.toLocaleString()}</p>
                         </div>
-                        <span className={`
-                          inline-flex px-2 py-0.5 rounded text-[10px] font-medium
-                          ${water.status === 'Stable' 
-                            ? 'bg-success/10 text-success' 
-                            : water.status === 'Declining'
-                            ? 'bg-warning/10 text-warning'
-                            : 'bg-destructive/10 text-destructive'
-                          }
-                        `}>
-                          {water.status}
-                        </span>
+                        <div className="flex items-center gap-3">
+                          <div className={`flex items-center gap-1 text-[12px] font-medium ${
+                            water.trend.startsWith('+') ? 'text-success' : 'text-destructive'
+                          }`}>
+                            {water.trend.startsWith('+') ? (
+                              <TrendingUp className="w-3.5 h-3.5" />
+                            ) : (
+                              <TrendingDown className="w-3.5 h-3.5" />
+                            )}
+                            {water.trend}
+                          </div>
+                          <span className={`
+                            inline-flex px-2 py-0.5 rounded text-[10px] font-medium
+                            ${water.status === 'Stable'
+                              ? 'bg-success/10 text-success'
+                              : water.status === 'Declining'
+                              ? 'bg-warning/10 text-warning'
+                              : 'bg-destructive/10 text-destructive'
+                            }
+                          `}>
+                            {water.status}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                  ))}
-                </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
-            
+
             {/* Federal Reporting Compliance */}
             <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
@@ -214,8 +306,8 @@ export default function SeniorBiologistDashboard() {
                         </div>
                         <span className={`
                           inline-flex px-2 py-0.5 rounded text-[10px] font-medium
-                          ${report.status === 'On Track' 
-                            ? 'bg-success/10 text-success' 
+                          ${report.status === 'On Track'
+                            ? 'bg-success/10 text-success'
                             : report.status === 'Needs Attention'
                             ? 'bg-warning/10 text-warning'
                             : 'bg-muted/50 text-muted-foreground'
@@ -226,7 +318,7 @@ export default function SeniorBiologistDashboard() {
                       </div>
                       <div className="flex items-center gap-3">
                         <div className="flex-1 h-2 bg-muted rounded overflow-hidden">
-                          <div 
+                          <div
                             className={`h-full ${
                               report.progress >= 85 ? 'bg-success' :
                               report.progress >= 70 ? 'bg-warning' :
@@ -245,9 +337,8 @@ export default function SeniorBiologistDashboard() {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Waters Requiring Attention */}
-          {/* CANVAS-AESTHETIC: Removed decorative colored border — standard card */}
           <Card className="border border-border" style={{ boxShadow: 'var(--shadow-1)' }}>
             <CardHeader className="border-b border-border/50">
               <div className="flex items-start justify-between">
@@ -266,7 +357,6 @@ export default function SeniorBiologistDashboard() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              {/* CANVAS-ALIGNMENT: Stacked items (was 3-col grid) */}
               <div className="space-y-4">
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
@@ -279,7 +369,7 @@ export default function SeniorBiologistDashboard() {
                     Cutthroat population showing significant decrease across 8 surveys
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Arkansas River — SE</span>
@@ -291,7 +381,7 @@ export default function SeniorBiologistDashboard() {
                     3 recent surveys flagged for protocol compliance review
                   </p>
                 </div>
-                
+
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-foreground">Gunnison River — SW</span>
@@ -306,7 +396,7 @@ export default function SeniorBiologistDashboard() {
               </div>
             </CardContent>
           </Card>
-          
+
         </div>
       </div>
     </div>
