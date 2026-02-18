@@ -50,6 +50,15 @@ export default function Insights() {
   const selectedIdsParam = searchParams.get('selectedSurveyIds');
   const modeParam = searchParams.get('mode');
 
+  // Build a contextual "Back to Surveys" URL that preserves water context + selection
+  const backToSurveysUrl = useMemo(() => {
+    const params = new URLSearchParams();
+    if (waterIdParam) params.set('waterId', waterIdParam);
+    if (selectedIdsParam) params.set('selected', selectedIdsParam);
+    const qs = params.toString();
+    return `/activity-feed${qs ? `?${qs}` : ''}`;
+  }, [waterIdParam, selectedIdsParam]);
+
   // ── Query-state param (from QueryBuilder) ──
   const qParam = searchParams.get('q');
 
@@ -110,7 +119,7 @@ export default function Insights() {
             <p className="text-[13px] text-muted-foreground mb-6">
               The selected survey IDs could not be matched in the current dataset.
             </p>
-            <Link to="/activity-feed">
+            <Link to={backToSurveysUrl}>
               <Button variant="outline" className="text-[13px]">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to All Survey Activity
@@ -126,14 +135,14 @@ export default function Insights() {
   // SELECTION-BASED: Compare mode (exactly 2 surveys)
   // ────────────────────────────────────────────────────
   if (selectedSurveys && modeParam === 'compare' && selectedSurveys.length === 2) {
-    return <CompareView surveys={selectedSurveys} role={role} />;
+    return <CompareView surveys={selectedSurveys} role={role} backUrl={backToSurveysUrl} />;
   }
 
   // ────────────────────────────────────────────────────
   // SELECTION-BASED: Aggregate mode (>2 surveys)
   // ────────────────────────────────────────────────────
   if (selectedSurveys && selectedSurveys.length > 0) {
-    return <AggregateView surveys={selectedSurveys} role={role} />;
+    return <AggregateView surveys={selectedSurveys} role={role} backUrl={backToSurveysUrl} />;
   }
 
   // ────────────────────────────────────────────────────
@@ -1025,7 +1034,7 @@ function InsightsWaterBanner({
 // ────────────────────────────────────────────────────
 // Compare View — Side-by-side (exactly 2 surveys)
 // ────────────────────────────────────────────────────
-function CompareView({ surveys, role }: { surveys: Survey[]; role: string }) {
+function CompareView({ surveys, role, backUrl }: { surveys: Survey[]; role: string; backUrl: string }) {
   const [a, b] = surveys;
   const waterA = getWaterById(a.waterId);
   const waterB = getWaterById(b.waterId);
@@ -1123,7 +1132,7 @@ function CompareView({ surveys, role }: { surveys: Survey[]; role: string }) {
                   Export to Excel
                 </Button>
               )}
-              <Link to="/activity-feed">
+              <Link to={backUrl}>
                 <Button variant="outline" size="sm" className="text-[13px]">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Surveys
@@ -1187,7 +1196,7 @@ function CompareView({ surveys, role }: { surveys: Survey[]; role: string }) {
 // ────────────────────────────────────────────────────
 // Aggregate View — Summary across >2 surveys
 // ────────────────────────────────────────────────────
-function AggregateView({ surveys: selectedSurveys, role }: { surveys: Survey[]; role: string }) {
+function AggregateView({ surveys: selectedSurveys, role, backUrl }: { surveys: Survey[]; role: string; backUrl: string }) {
   const waterIds = [...new Set(selectedSurveys.map(s => s.waterId))];
   const waterNames = waterIds.map(id => getWaterById(id)?.name ?? id);
   const dates = selectedSurveys.map(s => s.date).sort();
@@ -1238,7 +1247,7 @@ function AggregateView({ surveys: selectedSurveys, role }: { surveys: Survey[]; 
                   Export to Excel
                 </Button>
               )}
-              <Link to="/activity-feed">
+              <Link to={backUrl}>
                 <Button variant="outline" size="sm" className="text-[13px]">
                   <ArrowLeft className="w-4 h-4 mr-2" />
                   Back to Surveys

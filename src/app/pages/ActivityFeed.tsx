@@ -85,8 +85,9 @@ export default function ActivityFeed() {
   const { role } = useRole();
   const [searchParams] = useSearchParams();
 
-  // --- Water context from Water Profile navigation ---
+  // --- Read all query params upfront to avoid TDZ issues ---
   const waterIdParam = searchParams.get('waterId');
+  const selectedParam = searchParams.get('selected');
   const [waterContext, setWaterContext] = useState<{ id: string; name: string } | null>(() => {
     if (!waterIdParam) return null;
     const w = getWaterById(waterIdParam);
@@ -129,15 +130,23 @@ export default function ActivityFeed() {
     return 'statewide';
   }, [requestedScope, surveys, waterContext]);
 
-  // Track whether we relaxed (runs once on mount)
+  // Track whether we relaxed + clean up `selected` param (runs once on mount)
   useEffect(() => {
     if (isInitialLoad.current) {
       if (!waterContext && effectiveScope !== requestedScope) {
         setScopeRelaxedFrom(SCOPE_LABELS[requestedScope] ?? requestedScope);
       }
       isInitialLoad.current = false;
+
+      // Strip the `selected` param from URL after rehydrating (keep other params)
+      if (selectedParam) {
+        const next = new URLSearchParams(searchParams);
+        next.delete('selected');
+        const qs = next.toString();
+        navigate(`/activity-feed${qs ? `?${qs}` : ''}`, { replace: true });
+      }
     }
-  }, [effectiveScope, requestedScope, waterContext]);
+  }, [effectiveScope, requestedScope, waterContext, selectedParam, searchParams, navigate]);
 
   const scope = effectiveScope;
   const scopeLabel = SCOPE_LABELS[scope] ?? 'Northeast Region';
@@ -170,8 +179,12 @@ export default function ActivityFeed() {
     navigate(`/activity-feed${next.toString() ? `?${next}` : ''}`, { replace: true });
   };
 
-  // Selection state
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  // Selection state — rehydrate from URL param when returning from Insights
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => {
+    if (!selectedParam) return new Set();
+    return new Set(selectedParam.split(',').filter(Boolean));
+  });
+  const [selectionRestored, setSelectionRestored] = useState(!!selectedParam);
 
   // Derive filtered list
   const filtered = useMemo(() => {
@@ -225,11 +238,13 @@ export default function ActivityFeed() {
     return 'indeterminate';
   };
 
-  // Navigate to Insights with selected survey IDs
+  // Navigate to Insights with selected survey IDs + water context
   const handleAnalyze = () => {
     const ids = Array.from(selectedIds).join(',');
     const mode = selectedIds.size === 2 ? 'compare' : 'aggregate';
-    navigate(`/insights?selectedSurveyIds=${ids}&mode=${mode}`);
+    const params = new URLSearchParams({ selectedSurveyIds: ids, mode });
+    if (waterContext) params.set('waterId', waterContext.id);
+    navigate(`/insights?${params}`);
   };
 
   // POWERAPPS-ALIGNMENT: Removed collapsible accordion state.
@@ -482,13 +497,16 @@ export default function ActivityFeed() {
           <div className="max-w-[1280px] mx-auto px-8 py-3 flex items-center justify-between">
             <p className="text-[13px] text-foreground">
               <span className="font-semibold">{selectedIds.size}</span> survey{selectedIds.size !== 1 ? 's' : ''} selected
+              {selectionRestored && (
+                <span className="text-muted-foreground ml-2">(restored)</span>
+              )}
             </p>
             <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="sm"
                 className="text-[12px]"
-                onClick={() => setSelectedIds(new Set())}
+                onClick={() => { setSelectedIds(new Set()); setSelectionRestored(false); }}
               >
                 Clear
               </Button>
