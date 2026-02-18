@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router';
 import { useRole } from '../context/RoleContext';
 import { navItems } from './navConfig';
 
-export function RightNavRail() {
+export function LeftNavRail() {
   const location = useLocation();
   const { role } = useRole();
 
@@ -17,7 +17,7 @@ export function RightNavRail() {
     <nav
       role="navigation"
       aria-label="Main navigation"
-      className="fixed right-0 top-14 bottom-0 w-16 z-40 bg-[#2d333b] border-l border-[#444c56] flex flex-col items-center pt-4 gap-1"
+      className="fixed left-0 top-14 bottom-0 w-16 z-40 bg-[#2d333b] border-r border-[#444c56] flex flex-col items-center pt-4 gap-1"
     >
       {filtered.map((item) => {
         const Icon = item.icon;
@@ -44,10 +44,10 @@ export function RightNavRail() {
           >
             <Icon className="w-5 h-5" />
 
-            {/* Tooltip — appears to the left of the rail */}
+            {/* Tooltip — appears to the right of the rail */}
             <span
               className="
-                pointer-events-none absolute right-full mr-3 px-2.5 py-1.5 rounded-md
+                pointer-events-none absolute left-full ml-3 px-2.5 py-1.5 rounded-md
                 bg-slate-900 text-white text-xs font-medium whitespace-nowrap
                 opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100
                 transition-opacity duration-150
@@ -57,9 +57,9 @@ export function RightNavRail() {
               {label}
             </span>
 
-            {/* Active indicator bar on left edge */}
+            {/* Active indicator bar on right edge (facing content) */}
             {isActive && (
-              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-sm bg-white" />
+              <span className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-l-sm bg-white" />
             )}
           </Link>
         );
