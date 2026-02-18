@@ -18,13 +18,17 @@ export default function WaterProfile() {
   const waterId = searchParams.get('waterId');
   if (!waterId) return <Navigate to="/water" replace />;
 
-  // Persist last-viewed water for context-aware nav
-  useEffect(() => {
-    try { sessionStorage.setItem('cpw:lastWaterId', waterId); } catch { /* noop */ }
-  }, [waterId]);
-
   // Load water data from world.ts
   const water = getWaterById(waterId);
+
+  // Persist last-viewed water for context-aware nav (used by LeftNavRail)
+  useEffect(() => {
+    try {
+      sessionStorage.setItem('cpw:lastWaterId', waterId);
+      sessionStorage.setItem('cpw:lastWaterName', water?.name ?? '');
+    } catch { /* noop */ }
+  }, [waterId, water?.name]);
+
   if (!water) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -343,11 +347,18 @@ export default function WaterProfile() {
                       Latest field data collections
                     </p>
                   </div>
-                  <Link to={`/insights?waterId=${waterId}`}>
-                    <Button variant="outline" size="sm" className="text-[13px]">
-                      View All Analytics
-                    </Button>
-                  </Link>
+                  <div className="flex gap-2">
+                    <Link to={`/activity-feed?waterId=${waterId}`}>
+                      <Button variant="outline" size="sm" className="text-[13px]">
+                        View Surveys
+                      </Button>
+                    </Link>
+                    <Link to={`/insights?waterId=${waterId}`}>
+                      <Button variant="outline" size="sm" className="text-[13px]">
+                        View All Analytics
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="pt-6">

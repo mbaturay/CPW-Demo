@@ -15,6 +15,33 @@ export function LeftNavRail() {
       ? location.pathname === '/'
       : location.pathname === to || location.pathname.startsWith(to + '/');
 
+  // Contextual navigation: when viewing a Water Profile, the Surveys link
+  // pre-filters to the active water via query param.
+  const onWaterProfile = location.pathname === '/water/profile';
+  const activeWaterContext = onWaterProfile
+    ? (() => {
+        try {
+          const id = sessionStorage.getItem('cpw:lastWaterId');
+          const name = sessionStorage.getItem('cpw:lastWaterName');
+          return id ? { id, name: name ?? '' } : null;
+        } catch { return null; }
+      })()
+    : null;
+
+  const getItemHref = (item: typeof filtered[number]) => {
+    if (item.key === 'surveys' && activeWaterContext) {
+      return `/activity-feed?waterId=${activeWaterContext.id}`;
+    }
+    return item.to;
+  };
+
+  const getItemTooltip = (item: typeof filtered[number], label: string) => {
+    if (item.key === 'surveys' && activeWaterContext) {
+      return `${label} — ${activeWaterContext.name || 'current water'}`;
+    }
+    return label;
+  };
+
   return (
     <nav
       role="navigation"
@@ -42,12 +69,14 @@ export function LeftNavRail() {
           role === 'data-entry' && item.dataEntryLabel
             ? item.dataEntryLabel
             : item.label;
+        const href = getItemHref(item);
+        const tooltip = getItemTooltip(item, label);
 
         return (
           <Link
             key={item.key}
-            to={item.to}
-            aria-label={label}
+            to={href}
+            aria-label={tooltip}
             className={`
               group relative flex items-center h-11 mx-2.5 rounded-lg
               transition-colors duration-100
@@ -88,7 +117,7 @@ export function LeftNavRail() {
                 }
               `}
             >
-              {label}
+              {tooltip}
             </span>
 
             {/* Active indicator bar */}

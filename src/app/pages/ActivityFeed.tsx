@@ -5,7 +5,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
-import { BarChart3, Info } from 'lucide-react';
+import { BarChart3, Info, X } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 
 import { waters, getWaterById } from '../data/world';
@@ -85,29 +85,59 @@ export default function ActivityFeed() {
   const { role } = useRole();
   const [searchParams] = useSearchParams();
 
+  // --- Water context from Water Profile navigation ---
+  const waterIdParam = searchParams.get('waterId');
+  const [waterContext, setWaterContext] = useState<{ id: string; name: string } | null>(() => {
+    if (!waterIdParam) return null;
+    const w = getWaterById(waterIdParam);
+    return w ? { id: w.id, name: w.name } : null;
+  });
+
+  // Sync water context when URL param changes (handles in-app navigation when
+  // the component is already mounted — useState initialisers only run on mount)
+  const prevWaterIdParam = useRef(waterIdParam);
+  useEffect(() => {
+    if (waterIdParam === prevWaterIdParam.current) return;
+    prevWaterIdParam.current = waterIdParam;
+    if (waterIdParam) {
+      const w = getWaterById(waterIdParam);
+      if (w) {
+        setWaterContext({ id: w.id, name: w.name });
+        setWaterFilter(w.id);
+        return;
+      }
+    }
+    // waterId removed or unrecognised — clear context but keep user's filter
+    setWaterContext(null);
+  }, [waterIdParam]);
+
   // --- Initial-load scope resolution with auto-fallback ---
   const isInitialLoad = useRef(true);
   const [scopeRelaxedFrom, setScopeRelaxedFrom] = useState<string | null>(null);
 
-  const requestedScope = searchParams.get('scope') ?? getDefaultScope(role);
+  // When water context is active, force statewide scope so the water is always visible
+  const requestedScope = waterContext
+    ? 'statewide'
+    : (searchParams.get('scope') ?? getDefaultScope(role));
 
   // Determine effective scope: auto-relax to statewide on initial load if 0 results
   const effectiveScope = useMemo(() => {
+    if (waterContext) return 'statewide'; // water context always uses statewide
     if (!isInitialLoad.current) return requestedScope;
     if (countSurveysForScope(requestedScope, surveys) > 0) return requestedScope;
     // Requested scope is empty — fallback to statewide
     return 'statewide';
-  }, [requestedScope, surveys]);
+  }, [requestedScope, surveys, waterContext]);
 
   // Track whether we relaxed (runs once on mount)
   useEffect(() => {
     if (isInitialLoad.current) {
-      if (effectiveScope !== requestedScope) {
+      if (!waterContext && effectiveScope !== requestedScope) {
         setScopeRelaxedFrom(SCOPE_LABELS[requestedScope] ?? requestedScope);
       }
       isInitialLoad.current = false;
     }
-  }, [effectiveScope, requestedScope]);
+  }, [effectiveScope, requestedScope, waterContext]);
 
   const scope = effectiveScope;
   const scopeLabel = SCOPE_LABELS[scope] ?? 'Northeast Region';
@@ -126,10 +156,19 @@ export default function ActivityFeed() {
     [surveys, scopeWaterIds],
   );
 
-  // Filter state
-  const [waterFilter, setWaterFilter] = useState('all');
+  // Filter state — initialise water filter from context param
+  const [waterFilter, setWaterFilter] = useState(() => waterContext?.id ?? 'all');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [dateFrom, setDateFrom] = useState('');
+
+  // Clear water context: reset filter + strip waterId from URL
+  const clearWaterContext = () => {
+    setWaterContext(null);
+    setWaterFilter('all');
+    const next = new URLSearchParams(searchParams);
+    next.delete('waterId');
+    navigate(`/activity-feed${next.toString() ? `?${next}` : ''}`, { replace: true });
+  };
 
   // Selection state
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
@@ -249,6 +288,23 @@ export default function ActivityFeed() {
 
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-6">
+
+          {/* Water Profile context chip */}
+          {waterContext && (
+            <div className="flex items-center gap-2 px-4 py-2.5 rounded border border-primary/20 bg-primary/[0.04] text-[13px] text-foreground">
+              <span>
+                Filtered from Water Profile: <span className="font-medium text-primary">{waterContext.name}</span>
+              </span>
+              <button
+                onClick={clearWaterContext}
+                className="ml-auto inline-flex items-center gap-1 text-[12px] text-muted-foreground hover:text-foreground transition-colors"
+                aria-label="Clear water filter"
+              >
+                <X className="w-3.5 h-3.5" />
+                Clear
+              </button>
+            </div>
+          )}
 
           {/* Auto-relaxation notice */}
           {scopeRelaxedFrom && (
