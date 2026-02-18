@@ -505,3 +505,46 @@ Tailwind utility classes (`text-sm`, `text-xs`) are overridden via `@theme` in t
 - RoleFloater: compact, no overlap.
 - Validation table: rows readable, not overly tall.
 - Hierarchy preserved: titles (26) > sections (18) > body (15–16) > helpers (13).
+
+---
+
+### 53. `src/app/pages/QueryBuilder.tsx` (2-Column Layout + Progressive Disclosure)
+
+**Before:** All-vertical stacked layout — Query Filters card, Visual Query Builder card (always visible), action buttons (Clear All / Run Analysis link), Live Results card at bottom.
+
+**After:**
+- 2-column desktop layout via `.qb-layout` / `.qb-filters` / `.qb-results` flex classes
+- Left column (flex: 5): Basic Filters card + collapsed Advanced Conditions accordion
+- Right column (flex: 3, sticky): Live Results with hero survey count, stats, species bars, "Open full analysis" CTA
+- Visual Query Builder moved into Radix accordion titled "Advanced conditions (optional)", collapsed by default
+- All basic filters converted from uncontrolled (`defaultValue`) to controlled state for live-update responsiveness
+- Debounced "Updating…" overlay (400ms) on Live Results when any filter changes — `useEffect` with `isFirstRender` guard skips initial mount
+- "Run Analysis" replaced by "Open full analysis" button navigating to `/insights?waterId={selectedWater}` with `ChevronRight` icon
+- 0-match empty state: button disabled + "No matching surveys — adjust filters" helper text
+- "Preview updates automatically" subtitle under Live Results header
+- Mobile: stacks vertically at ≤900px via `@media` query, removes sticky
+
+| Import | Added |
+|---|---|
+| `useEffect, useRef` | React hooks for debounce |
+| `Accordion, AccordionItem, AccordionTrigger, AccordionContent` | Radix accordion |
+| `Loader2, ChevronRight` | lucide-react icons |
+
+| Import | Removed |
+|---|---|
+| `Play` | lucide-react (was used by "Run Analysis") |
+
+### 54. `src/styles/theme.css` (QueryBuilder Layout Classes)
+
+Added `.qb-layout`, `.qb-filters`, `.qb-results` CSS classes:
+- `.qb-layout`: `display: flex; flex-direction: row; gap: 24px; align-items: flex-start`
+- `.qb-filters`: `flex: 5; min-width: 0`
+- `.qb-results`: `flex: 3; min-width: 0; position: sticky; top: 24px; align-self: flex-start`
+- `@media (max-width: 900px)`: stacks vertically, removes sticky
+
+### Regression checks
+- Build: `vite build` clean, no TS errors
+- Screenshot: `query-builder-2col.png` and `query-builder-2col-full.png` captured
+- All existing query logic and role behavior preserved (area-biologist NE scope, senior-biologist Standard/Advanced toggle)
+- Accordion collapse/expand functional, condition chips and builder preserved inside
+- Live Results sticky positioning works on desktop, degrades gracefully on mobile

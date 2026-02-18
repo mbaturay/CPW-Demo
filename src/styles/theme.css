@@ -220,3 +220,33 @@
 [class*="text-[18px]"] { font-size: 20px !important; }
 [class*="text-[22px]"] { font-size: 26px !important; }
 [class*="text-[24px]"] { font-size: 28px !important; }
+
+/* ── QueryBuilder 2-column layout ──────────────────────────────── */
+.qb-layout {
+  display: flex;
+  flex-direction: row;
+  gap: 24px;
+  align-items: flex-start;
+}
+.qb-filters {
+  flex: 5;
+  min-width: 0;
+}
+.qb-results {
+  flex: 3;
+  min-width: 0;
+  position: sticky;
+  top: 24px;
+  align-self: flex-start;
+}
+@media (max-width: 900px) {
+  .qb-layout {
+    flex-direction: column;
+  }
+  .qb-filters,
+  .qb-results {
+    flex: none;
+    width: 100%;
+    position: static;
+  }
+}
