@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
@@ -7,11 +7,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Switch } from '../components/ui/switch';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '../components/ui/accordion';
 import { Plus, X, ChevronRight, Loader2 } from 'lucide-react';
-import { Link } from 'react-router';
+import { useNavigate } from 'react-router';
 
 import { useRole } from '../context/RoleContext';
 import { waters, species as allSpecies } from '../data/world';
 import { useDemo } from '../context/DemoContext';
+import {
+  runCrossSurveyQuery,
+  encodeQueryState,
+  defaultQueryState,
+  type QueryState,
+  type QueryResult,
+} from '../../lib/crossSurveyQuery';
 
 type Condition = {
   id: string;
@@ -23,23 +30,40 @@ type Condition = {
 export default function QueryBuilder() {
   const { role } = useRole();
   const { surveys } = useDemo();
+  const navigate = useNavigate();
+
   const [conditions, setConditions] = useState<Condition[]>([
     { id: '1', field: 'species', operator: 'equals', value: 'Brown Trout' },
     { id: '2', field: 'region', operator: 'equals', value: 'Northeast' },
     { id: '3', field: 'year', operator: 'greater-equal', value: '2018' }
   ]);
-  const [excludeYOY, setExcludeYOY] = useState(true);
-  const [unit, setUnit] = useState<'mm' | 'inches'>('mm');
+  const [excludeYOY, setExcludeYOY] = useState(defaultQueryState.excludeYOY);
+  const [unit, setUnit] = useState<'mm' | 'inches'>(defaultQueryState.unit);
   const [advancedMode, setAdvancedMode] = useState(false);
 
-  // Controlled filter state for live updates
-  const [selectedWater, setSelectedWater] = useState('south-platte');
-  const [selectedSpecies, setSelectedSpecies] = useState('bnt');
-  const [selectedRegion, setSelectedRegion] = useState('ne');
-  const [selectedProtocol, setSelectedProtocol] = useState('two-pass');
+  // Controlled filter state
+  const [selectedWater, setSelectedWater] = useState(defaultQueryState.water);
+  const [selectedSpecies, setSelectedSpecies] = useState(defaultQueryState.species);
+  const [selectedRegion, setSelectedRegion] = useState(defaultQueryState.region);
+  const [selectedProtocol, setSelectedProtocol] = useState(defaultQueryState.protocol);
+  const [dateFrom, setDateFrom] = useState(defaultQueryState.dateFrom);
+  const [dateTo, setDateTo] = useState(defaultQueryState.dateTo);
 
-  // Debounce "Updating..." indicator
+  // Build current QueryState
+  const queryState: QueryState = useMemo(() => ({
+    water: selectedWater,
+    species: selectedSpecies,
+    region: selectedRegion,
+    protocol: selectedProtocol,
+    dateFrom,
+    dateTo,
+    excludeYOY,
+    unit,
+  }), [selectedWater, selectedSpecies, selectedRegion, selectedProtocol, dateFrom, dateTo, excludeYOY, unit]);
+
+  // Debounced query results
   const [isUpdating, setIsUpdating] = useState(false);
+  const [results, setResults] = useState<QueryResult>(() => runCrossSurveyQuery(surveys, queryState));
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
   const isFirstRender = useRef(true);
 
@@ -50,21 +74,29 @@ export default function QueryBuilder() {
     }
     setIsUpdating(true);
     if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => setIsUpdating(false), 400);
+    debounceRef.current = setTimeout(() => {
+      setResults(runCrossSurveyQuery(surveys, queryState));
+      setIsUpdating(false);
+    }, 400);
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
-  }, [selectedWater, selectedSpecies, selectedRegion, selectedProtocol, excludeYOY, unit, conditions]);
+  }, [queryState, surveys]);
 
-  // Derive water list: NE waters for area biologist, all for senior
+  // Derive water options: NE for area biologist, all for senior
   const waterOptions = role === 'area-biologist'
     ? waters.filter(w => w.region === 'Northeast')
     : waters;
 
-  // Derive live results from surveys
-  const neWaterIds = new Set(waters.filter(w => w.region === 'Northeast').map(w => w.id));
-  const matchingSurveys = surveys.filter(s => neWaterIds.has(s.waterId));
-  const totalFishRecords = matchingSurveys.reduce((sum, s) => sum + s.fishCount, 0);
-  const matchingWaters = new Set(matchingSurveys.map(s => s.waterId)).size;
+  const { matchingSurveys, aggregates } = results;
   const hasResults = matchingSurveys.length > 0;
+
+  // Species distribution bar colors
+  const speciesBarColors = ['bg-primary', 'bg-secondary', 'bg-[#5B7C99]', 'bg-muted-foreground'];
+
+  // Navigate to Insights with encoded query state
+  const handleOpenAnalysis = () => {
+    const encoded = encodeQueryState(queryState);
+    navigate(`/insights?q=${encoded}`);
+  };
 
   const addCondition = () => {
     setConditions([
@@ -83,7 +115,7 @@ export default function QueryBuilder() {
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-[22px] font-semibold text-primary">Cross-Survey Analysis</h1>
+              <h1 className="text-[22px] font-semibold text-primary">Cross-Survey Query</h1>
               <p className="text-[13px] text-muted-foreground mt-1">
                 Analyze multi-year population trends across waters and species
               </p>
@@ -213,13 +245,15 @@ export default function QueryBuilder() {
                       <Input
                         id="date-start"
                         type="date"
-                        defaultValue="2018-01-01"
+                        value={dateFrom}
+                        onChange={(e) => setDateFrom(e.target.value)}
                         className="text-[12px]"
                       />
                       <Input
                         id="date-end"
                         type="date"
-                        defaultValue="2025-12-31"
+                        value={dateTo}
+                        onChange={(e) => setDateTo(e.target.value)}
                         className="text-[12px]"
                       />
                     </div>
@@ -429,80 +463,61 @@ export default function QueryBuilder() {
                   <div className="space-y-3">
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Fish Records</span>
-                      <span className="font-mono text-foreground font-medium">{totalFishRecords.toLocaleString()}</span>
+                      <span className="font-mono text-foreground font-medium">{aggregates.totalFishCount.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Water Bodies</span>
-                      <span className="font-mono text-foreground font-medium">{matchingWaters}</span>
+                      <span className="font-mono text-foreground font-medium">{aggregates.uniqueWaters}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Date Range</span>
-                      <span className="font-mono text-foreground font-medium">2021-2025</span>
+                      <span className="font-mono text-foreground font-medium">{aggregates.dateRange}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Regions</span>
-                      <span className="font-mono text-foreground font-medium">1</span>
+                      <span className="font-mono text-foreground font-medium">{aggregates.regions}</span>
                     </div>
                   </div>
 
+                  {/* Species Distribution — data-driven */}
                   <div className="pt-4 border-t border-border">
                     <h4 className="text-[12px] uppercase tracking-wide text-muted-foreground mb-3">
                       Species Distribution
                     </h4>
-                    <div className="space-y-2.5">
-                      <div>
-                        <div className="flex justify-between text-[12px] mb-1">
-                          <span className="text-muted-foreground">Brown Trout</span>
-                          <span className="font-mono text-foreground">6,234</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded overflow-hidden">
-                          <div className="h-full bg-primary w-[51%]"></div>
-                        </div>
+                    {aggregates.speciesDistribution.length === 0 ? (
+                      <p className="text-[12px] text-muted-foreground italic">No species data for current filters</p>
+                    ) : (
+                      <div className="space-y-2.5">
+                        {aggregates.speciesDistribution.map((sp, i) => (
+                          <div key={sp.code}>
+                            <div className="flex justify-between text-[12px] mb-1">
+                              <span className="text-muted-foreground">{sp.name}</span>
+                              <span className="font-mono text-foreground">
+                                {sp.count} survey{sp.count !== 1 ? 's' : ''}
+                              </span>
+                            </div>
+                            <div className="h-1.5 bg-muted rounded overflow-hidden">
+                              <div
+                                className={`h-full ${speciesBarColors[Math.min(i, speciesBarColors.length - 1)]}`}
+                                style={{ width: `${sp.pct}%` }}
+                              ></div>
+                            </div>
+                          </div>
+                        ))}
                       </div>
-
-                      <div>
-                        <div className="flex justify-between text-[12px] mb-1">
-                          <span className="text-muted-foreground">Rainbow Trout</span>
-                          <span className="font-mono text-foreground">3,891</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded overflow-hidden">
-                          <div className="h-full bg-secondary w-[32%]"></div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-[12px] mb-1">
-                          <span className="text-muted-foreground">Cutthroat Trout</span>
-                          <span className="font-mono text-foreground">1,456</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded overflow-hidden">
-                          <div className="h-full bg-[#5B7C99] w-[12%]"></div>
-                        </div>
-                      </div>
-
-                      <div>
-                        <div className="flex justify-between text-[12px] mb-1">
-                          <span className="text-muted-foreground">Other</span>
-                          <span className="font-mono text-foreground">723</span>
-                        </div>
-                        <div className="h-1.5 bg-muted rounded overflow-hidden">
-                          <div className="h-full bg-muted-foreground w-[5%]"></div>
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
 
                   {/* Open full analysis CTA */}
                   <div className="pt-4 border-t border-border">
-                    <Link to={`/insights?waterId=${selectedWater}`}>
-                      <Button
-                        className="w-full text-[13px]"
-                        disabled={!hasResults}
-                      >
-                        Open full analysis
-                        <ChevronRight className="w-4 h-4 ml-2" />
-                      </Button>
-                    </Link>
+                    <Button
+                      className="w-full text-[13px]"
+                      disabled={!hasResults}
+                      onClick={handleOpenAnalysis}
+                    >
+                      Open full analysis
+                      <ChevronRight className="w-4 h-4 ml-2" />
+                    </Button>
                     {!hasResults && (
                       <p className="text-[11px] text-muted-foreground text-center mt-2">
                         No matching surveys — adjust filters

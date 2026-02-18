@@ -11,6 +11,12 @@ import { Link, useSearchParams } from 'react-router';
 import { getWaterById, getTrendForWater, getFishRecords } from '../data/world';
 import type { Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
+import {
+  decodeQueryState,
+  runCrossSurveyQuery,
+  computeFishStats,
+  type QueryResult,
+} from '../../lib/crossSurveyQuery';
 
 /** Derive per-species stats from fish records */
 function buildSpeciesBreakdown(surveyId: string) {
@@ -44,11 +50,22 @@ export default function Insights() {
   const selectedIdsParam = searchParams.get('selectedSurveyIds');
   const modeParam = searchParams.get('mode');
 
+  // ── Query-state param (from QueryBuilder) ──
+  const qParam = searchParams.get('q');
+
   const selectedSurveys = useMemo(() => {
     if (!selectedIdsParam) return null;
     const ids = selectedIdsParam.split(',');
     return surveys.filter(s => ids.includes(s.id));
   }, [selectedIdsParam, surveys]);
+
+  // ── Decode query state and run query ──
+  const queryResult: QueryResult | null = useMemo(() => {
+    if (!qParam) return null;
+    const qs = decodeQueryState(qParam);
+    if (!qs) return null;
+    return runCrossSurveyQuery(surveys, qs);
+  }, [qParam, surveys]);
 
   // ── Default waterId-based params ──
   const waterId = searchParams.get('waterId') || 'south-platte';
@@ -61,7 +78,7 @@ export default function Insights() {
       <div className="min-h-screen bg-background">
         <header className="bg-white border-b border-border px-8 py-6">
           <div className="max-w-[1280px] mx-auto">
-            <p className="text-lg font-semibold text-primary">Insights</p>
+            <p className="text-lg font-semibold text-primary">Cross-Survey Analysis</p>
             <p className="text-[13px] text-muted-foreground mt-1">Selection-based analysis</p>
           </div>
         </header>
@@ -95,6 +112,13 @@ export default function Insights() {
   // ────────────────────────────────────────────────────
   if (selectedSurveys && selectedSurveys.length > 0) {
     return <AggregateView surveys={selectedSurveys} role={role} />;
+  }
+
+  // ────────────────────────────────────────────────────
+  // QUERY-STATE MODE: Full analysis from QueryBuilder
+  // ────────────────────────────────────────────────────
+  if (queryResult) {
+    return <QueryAnalysisView result={queryResult} role={role} />;
   }
 
   // ────────────────────────────────────────────────────
@@ -135,16 +159,25 @@ export default function Insights() {
     ? ((latestPoint.biomassKg - prevPoint.biomassKg) / prevPoint.biomassKg * 100).toFixed(1)
     : null;
 
-  // Length-frequency data (not in world.ts — representative distribution)
-  const lengthFreqData = [
-    { length: '50-100', count: 234 },
-    { length: '100-150', count: 456 },
-    { length: '150-200', count: 892 },
-    { length: '200-250', count: 1245 },
-    { length: '250-300', count: 978 },
-    { length: '300-350', count: 567 },
-    { length: '350-400', count: 234 },
-    { length: '400+', count: 89 },
+  // Length-frequency from fish records for this water's surveys
+  const waterFishStats = useMemo(() => {
+    let allRecords: import('../data/world').FishRecord[] = [];
+    for (const s of waterSurveys) {
+      const recs = getFishRecords(s.id);
+      if (recs) allRecords = allRecords.concat(recs);
+    }
+    return computeFishStats(allRecords);
+  }, [waterSurveys]);
+
+  const lengthFreqData = waterFishStats?.lengthFrequency ?? [
+    { length: '50-100', count: 0 },
+    { length: '100-150', count: 0 },
+    { length: '150-200', count: 0 },
+    { length: '200-250', count: 0 },
+    { length: '250-300', count: 0 },
+    { length: '300-350', count: 0 },
+    { length: '350-400', count: 0 },
+    { length: '400+', count: 0 },
   ];
 
   const getMetricData = () => {
@@ -168,7 +201,7 @@ export default function Insights() {
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-lg font-semibold text-primary">Insights</p>
+              <p className="text-lg font-semibold text-primary">Cross-Survey Analysis</p>
               <p className="text-[13px] text-muted-foreground mt-1">
                 Multi-year ecological trend analysis based on validated survey data
               </p>
@@ -223,12 +256,11 @@ export default function Insights() {
           {/* Context Banner */}
           <div className="bg-muted/20 border border-border rounded px-4 py-3">
             <p className="text-[13px] text-foreground">
-              Based on <span className="font-semibold">{waterSurveys.length} surveys</span> conducted between <span className="font-semibold">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols.
+              Based on <span className="font-semibold">{waterSurveys.length} survey{waterSurveys.length !== 1 ? 's' : ''}</span> conducted between <span className="font-semibold">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols.
             </p>
           </div>
 
           {/* Summary Metric Cards */}
-          {/* CANVAS-ALIGNMENT: 2-col card grid (was 4-col) */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <Card className="border border-border">
               <CardHeader className="pb-2">
@@ -314,7 +346,9 @@ export default function Insights() {
               <CardContent>
                 <div className="flex items-end justify-between">
                   <div>
-                    <p className="text-[32px] font-semibold leading-none text-foreground">98.4</p>
+                    <p className="text-[32px] font-semibold leading-none text-foreground">
+                      {waterFishStats?.relativeWeightAvg ?? '—'}
+                    </p>
                     <p className="text-[12px] text-muted-foreground mt-2">
                       Condition index
                     </p>
@@ -335,7 +369,7 @@ export default function Insights() {
                 <div>
                   <CardTitle className="text-[18px]">Multi-Year Population Trend</CardTitle>
                   <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
-                    Based on <span className="font-medium text-foreground">{waterSurveys.length} surveys</span> conducted between{' '}
+                    Based on <span className="font-medium text-foreground">{waterSurveys.length} survey{waterSurveys.length !== 1 ? 's' : ''}</span> conducted between{' '}
                     <span className="font-medium text-foreground">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols
                   </p>
                 </div>
@@ -354,7 +388,6 @@ export default function Insights() {
               </div>
             </CardHeader>
             <CardContent className="pt-6">
-              {/* POWERAPPS-ALIGNMENT: Single-series chart only; removed compare mode, Legend, Tooltip, custom dots */}
               <div className="h-[400px]">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={trendData}>
@@ -400,14 +433,14 @@ export default function Insights() {
             </CardContent>
           </Card>
 
-          {/* CANVAS-ALIGNMENT: Stacked vertical (was 3-col side-by-side) */}
+          {/* Stacked vertical */}
           <div className="space-y-6">
             {/* Length-Frequency Histogram */}
             <Card className="border border-border">
               <CardHeader className="border-b border-border/50">
                 <CardTitle className="text-[18px]">Length-Frequency Distribution</CardTitle>
                 <p className="text-[11px] text-muted-foreground mt-1.5">
-                  Size structure analysis across all survey years
+                  Size structure analysis — {waterFishStats ? `${waterFishStats.sampleSize} fish records` : 'no fish-level data available'}
                 </p>
               </CardHeader>
               <CardContent className="pt-6">
@@ -428,7 +461,6 @@ export default function Insights() {
                         label={{ value: 'Count', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }}
                         axisLine={{ stroke: '#E2E8F0' }}
                       />
-                      {/* POWERAPPS-ALIGNMENT: Removed Tooltip and rounded bar corners */}
                       <Bar dataKey="count" fill="#1B365D" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -437,43 +469,46 @@ export default function Insights() {
                 <div className="mt-6 p-4 border border-border/50 bg-muted/20 rounded">
                   <p className="text-[11px] text-muted-foreground leading-relaxed">
                     <span className="font-medium text-foreground">Interpretation:</span>{' '}
-                    Distribution shows normal curve with peak at 200-250mm length class.
-                    Multiple age classes represented. Young of year (&lt;150mm) constitute 5.6% of sample and can be excluded from population estimates if required.
+                    {waterFishStats
+                      ? `Distribution based on ${waterFishStats.sampleSize} fish records. Peak at ${waterFishStats.meanLength}mm mean length.`
+                      : 'No fish-level records available for this water. Chart shows placeholder data.'
+                    }{' '}
+                    Young of year (&lt;150mm) can be excluded from population estimates if required.
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Statistical Summary & Map */}
+            {/* Statistical Summary */}
             <div className="space-y-6">
               <Card className="border border-border">
                 <CardHeader className="border-b border-border/50">
                   <CardTitle className="text-[16px]">Statistical Summary</CardTitle>
                   <p className="text-[11px] text-muted-foreground mt-1">
-                    Descriptive statistics
+                    Descriptive statistics{waterFishStats ? ` — ${waterFishStats.sampleSize} records` : ''}
                   </p>
                 </CardHeader>
                 <CardContent className="pt-6 space-y-4">
                   <div className="space-y-3">
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Mean Length</span>
-                      <span className="font-mono font-medium">234 mm</span>
+                      <span className="font-mono font-medium">{waterFishStats ? `${waterFishStats.meanLength} mm` : '—'}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Std Deviation</span>
-                      <span className="font-mono font-medium">45.3 mm</span>
+                      <span className="font-mono font-medium">{waterFishStats ? `${waterFishStats.stdDevLength} mm` : '—'}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Min Length</span>
-                      <span className="font-mono font-medium">67 mm</span>
+                      <span className="font-mono font-medium">{waterFishStats ? `${waterFishStats.minLength} mm` : '—'}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Max Length</span>
-                      <span className="font-mono font-medium">487 mm</span>
+                      <span className="font-mono font-medium">{waterFishStats ? `${waterFishStats.maxLength} mm` : '—'}</span>
                     </div>
                     <div className="flex justify-between text-[13px] p-2 border border-border/50 rounded bg-white">
                       <span className="text-muted-foreground">Sample Size</span>
-                      <span className="font-mono font-medium">4,695</span>
+                      <span className="font-mono font-medium">{waterFishStats ? waterFishStats.sampleSize.toLocaleString() : '—'}</span>
                     </div>
                   </div>
 
@@ -501,6 +536,306 @@ export default function Insights() {
 
             </div>
           </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ────────────────────────────────────────────────────
+// Query Analysis View — from QueryBuilder q= param
+// ────────────────────────────────────────────────────
+function QueryAnalysisView({ result, role }: { result: QueryResult; role: string }) {
+  const { matchingSurveys, aggregates, fishRecords } = result;
+  const stats = useMemo(() => computeFishStats(fishRecords), [fishRecords]);
+
+  const waterIds = [...new Set(matchingSurveys.map(s => s.waterId))];
+  const waterNames = waterIds.map(id => getWaterById(id)?.name ?? id);
+  const totalFish = matchingSurveys.reduce((sum, s) => sum + s.fishCount, 0);
+
+  // Species frequency: how many surveys detected each species
+  const speciesFreq = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of matchingSurveys) {
+      for (const sp of s.speciesDetected) {
+        map.set(sp, (map.get(sp) ?? 0) + 1);
+      }
+    }
+    return Array.from(map.entries())
+      .map(([species, count]) => ({ species, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [matchingSurveys]);
+
+  // Fish count per survey (for bar chart)
+  const fishCountData = matchingSurveys
+    .map(s => ({
+      id: s.id.replace(/^SVY-/, ''),
+      fishCount: s.fishCount,
+    }))
+    .sort((a, b) => b.fishCount - a.fishCount);
+
+  const lengthFreqData = stats?.lengthFrequency ?? [];
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-white border-b border-border px-8 py-6">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <p className="text-lg font-semibold text-primary">Cross-Survey Analysis</p>
+                <span className="inline-flex px-2 py-0.5 rounded bg-primary/10 text-primary text-[11px] font-medium">
+                  Query-based analysis
+                </span>
+              </div>
+              <p className="text-[13px] text-muted-foreground mt-1">
+                {matchingSurveys.length} survey{matchingSurveys.length !== 1 ? 's' : ''} matching query across {waterIds.length} water{waterIds.length !== 1 ? 's' : ''}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {role === 'senior-biologist' && (
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Export to Excel
+                </Button>
+              )}
+              <Link to="/query">
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Query
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="px-8 py-8">
+        <div className="max-w-[1280px] mx-auto space-y-8">
+
+          {/* Summary Strip */}
+          <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Surveys Matched</p>
+                <p className="text-[24px] font-semibold text-foreground">{matchingSurveys.length}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Waters</p>
+                <p className="text-[24px] font-semibold text-foreground">{aggregates.uniqueWaters}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{waterNames.join(', ')}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Total Fish</p>
+                <p className="text-[24px] font-semibold text-foreground">{totalFish.toLocaleString()}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Date Range</p>
+                <p className="text-[16px] font-semibold text-foreground mt-1">{aggregates.dateRange}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Summary Metric Cards (from fish records) */}
+          {stats && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <Card className="border border-border">
+                <CardHeader className="pb-2">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Mean Length</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[32px] font-semibold leading-none text-foreground">{stats.meanLength} mm</p>
+                  <p className="text-[12px] text-muted-foreground mt-2">±{stats.stdDevLength} mm std dev</p>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardHeader className="pb-2">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Mean Weight</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[32px] font-semibold leading-none text-foreground">{stats.meanWeight} g</p>
+                  <p className="text-[12px] text-muted-foreground mt-2">{stats.sampleSize} fish records</p>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardHeader className="pb-2">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Size Range</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[32px] font-semibold leading-none text-foreground">{stats.minLength}–{stats.maxLength}</p>
+                  <p className="text-[12px] text-muted-foreground mt-2">mm (min–max)</p>
+                </CardContent>
+              </Card>
+              <Card className="border border-border">
+                <CardHeader className="pb-2">
+                  <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Relative Weight Avg</p>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-[32px] font-semibold leading-none text-foreground">{stats.relativeWeightAvg ?? '—'}</p>
+                  <p className="text-[12px] text-muted-foreground mt-2">Wr index (baseline 100)</p>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
+          {/* Fish Count per Survey — Bar Chart */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Fish Count by Survey</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Total fish recorded per matching survey
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={fishCountData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      stroke="#64748B"
+                      tick={{ fill: '#64748B', fontSize: 11 }}
+                      axisLine={{ stroke: '#E2E8F0' }}
+                    />
+                    <YAxis
+                      dataKey="id"
+                      type="category"
+                      width={140}
+                      stroke="#64748B"
+                      tick={{ fill: '#64748B', fontSize: 10 }}
+                      axisLine={{ stroke: '#E2E8F0' }}
+                    />
+                    <Bar dataKey="fishCount" fill="#1B365D" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Length-Frequency (if fish records exist) */}
+          {stats && lengthFreqData.length > 0 && (
+            <Card className="border border-border">
+              <CardHeader className="border-b border-border/50">
+                <CardTitle className="text-[18px]">Length-Frequency Distribution</CardTitle>
+                <p className="text-[11px] text-muted-foreground mt-1.5">
+                  Size structure — {stats.sampleSize} fish records
+                </p>
+              </CardHeader>
+              <CardContent className="pt-6">
+                <div className="h-[340px]">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart data={lengthFreqData}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" vertical={false} />
+                      <XAxis
+                        dataKey="length"
+                        stroke="#64748B"
+                        tick={{ fill: '#64748B', fontSize: 11 }}
+                        label={{ value: 'Length (mm)', position: 'insideBottom', offset: -5, fill: '#64748B', fontSize: 11 }}
+                        axisLine={{ stroke: '#E2E8F0' }}
+                      />
+                      <YAxis
+                        stroke="#64748B"
+                        tick={{ fill: '#64748B', fontSize: 11 }}
+                        label={{ value: 'Count', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 11 }}
+                        axisLine={{ stroke: '#E2E8F0' }}
+                      />
+                      <Bar dataKey="count" fill="#1B365D" />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* Statistical Summary inline */}
+                <div className="mt-6 grid grid-cols-5 gap-3">
+                  <div className="p-3 border border-border/50 rounded bg-white text-center">
+                    <p className="text-[11px] text-muted-foreground">Mean</p>
+                    <p className="text-[16px] font-mono font-semibold">{stats.meanLength} mm</p>
+                  </div>
+                  <div className="p-3 border border-border/50 rounded bg-white text-center">
+                    <p className="text-[11px] text-muted-foreground">Std Dev</p>
+                    <p className="text-[16px] font-mono font-semibold">{stats.stdDevLength} mm</p>
+                  </div>
+                  <div className="p-3 border border-border/50 rounded bg-white text-center">
+                    <p className="text-[11px] text-muted-foreground">Min</p>
+                    <p className="text-[16px] font-mono font-semibold">{stats.minLength} mm</p>
+                  </div>
+                  <div className="p-3 border border-border/50 rounded bg-white text-center">
+                    <p className="text-[11px] text-muted-foreground">Max</p>
+                    <p className="text-[16px] font-mono font-semibold">{stats.maxLength} mm</p>
+                  </div>
+                  <div className="p-3 border border-border/50 rounded bg-white text-center">
+                    <p className="text-[11px] text-muted-foreground">N</p>
+                    <p className="text-[16px] font-mono font-semibold">{stats.sampleSize}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Species Frequency */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Species Detection Frequency</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Number of surveys in which each species was detected
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                {speciesFreq.map(({ species, count }) => (
+                  <div key={species}>
+                    <div className="flex justify-between text-[12px] mb-1">
+                      <span className="font-mono text-foreground">{species}</span>
+                      <span className="text-muted-foreground">
+                        {count} of {matchingSurveys.length} survey{matchingSurveys.length !== 1 ? 's' : ''}
+                      </span>
+                    </div>
+                    <div className="h-2 bg-muted rounded overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded"
+                        style={{ width: `${(count / matchingSurveys.length) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Survey Breakdown Table */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Survey Details</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Individual survey records included in this analysis
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                {/* Header */}
+                <div className="grid grid-cols-6 gap-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border pb-2">
+                  <span>Survey ID</span>
+                  <span>Water</span>
+                  <span>Station</span>
+                  <span>Date</span>
+                  <span>Protocol</span>
+                  <span className="text-right">Fish</span>
+                </div>
+                {/* Rows */}
+                {matchingSurveys.map(s => (
+                  <div key={s.id} className="grid grid-cols-6 gap-4 text-[12px] py-2 border-b border-border/30">
+                    <span className="font-mono text-primary">{s.id}</span>
+                    <span className="text-foreground">{getWaterById(s.waterId)?.name ?? s.waterId}</span>
+                    <span className="text-muted-foreground">{s.stationId}</span>
+                    <span className="text-muted-foreground font-mono">{s.date}</span>
+                    <span className="text-muted-foreground">{s.protocol}</span>
+                    <span className="text-right font-mono font-medium">{s.fishCount}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
         </div>
       </div>
@@ -594,7 +929,7 @@ function CompareView({ surveys, role }: { surveys: Survey[]; role: string }) {
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <p className="text-lg font-semibold text-primary">Insights</p>
+                <p className="text-lg font-semibold text-primary">Cross-Survey Analysis</p>
                 <span className="inline-flex px-2 py-0.5 rounded bg-primary/10 text-primary text-[11px] font-medium">
                   Selection-based analysis
                 </span>
@@ -709,7 +1044,7 @@ function AggregateView({ surveys: selectedSurveys, role }: { surveys: Survey[]; 
           <div className="flex items-center justify-between">
             <div>
               <div className="flex items-center gap-3">
-                <p className="text-lg font-semibold text-primary">Insights</p>
+                <p className="text-lg font-semibold text-primary">Cross-Survey Analysis</p>
                 <span className="inline-flex px-2 py-0.5 rounded bg-primary/10 text-primary text-[11px] font-medium">
                   Selection-based analysis
                 </span>
