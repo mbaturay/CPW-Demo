@@ -1,28 +1,12 @@
 import { useRef, useState, useCallback } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Home, Upload, CheckSquare, Search, BarChart3, Waves } from 'lucide-react';
 import { useRole } from '../context/RoleContext';
-import type { LucideIcon } from 'lucide-react';
+import { navItems } from './navConfig';
+import type { NavItem } from './navConfig';
 
-// ── Nav config ──────────────────────────────────────────────────────
-export interface NavItem {
-  key: string;
-  to: string;
-  icon: LucideIcon;
-  label: string;
-  roles: string[];
-  dataEntryLabel?: string;
-  badge?: string;
-}
-
-export const navItems: NavItem[] = [
-  { key: 'dashboard', to: '/', icon: Home, label: 'Dashboard', roles: ['data-entry', 'area-biologist', 'senior-biologist'], dataEntryLabel: 'My Waters' },
-  { key: 'water', to: '/water', icon: Waves, label: 'Water Profile', roles: ['data-entry', 'area-biologist', 'senior-biologist'] },
-  { key: 'upload', to: '/upload', icon: Upload, label: 'Upload Survey', roles: ['data-entry', 'area-biologist', 'senior-biologist'] },
-  { key: 'validation', to: '/validation', icon: CheckSquare, label: 'Validation', roles: ['data-entry', 'area-biologist', 'senior-biologist'], dataEntryLabel: 'Validation Queue' },
-  { key: 'query', to: '/query', icon: Search, label: 'Query Builder', roles: ['area-biologist', 'senior-biologist'] },
-  { key: 'insights', to: '/insights', icon: BarChart3, label: 'Insights', roles: ['area-biologist', 'senior-biologist'] },
-];
+// Re-export for any consumers that still import from here
+export type { NavItem };
+export { navItems };
 
 /* POWERAPPS-ALIGNMENT: Removed hover-media detection. Power Apps is click-first;
    sidebar now toggles on click instead of hover. */

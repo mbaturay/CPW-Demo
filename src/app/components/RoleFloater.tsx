@@ -10,7 +10,7 @@ export function RoleFloater() {
   return (
     <div
       data-testid="role-floater"
-      className="fixed top-16 right-4 z-40 inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-border text-[12px]"
+      className="fixed top-16 right-20 z-40 inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-white border border-border text-[12px]"
       style={{ boxShadow: 'none' }}
     >
       <span className="text-muted-foreground select-none">Role</span>
