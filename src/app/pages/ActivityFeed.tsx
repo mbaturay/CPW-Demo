@@ -238,12 +238,12 @@ export default function ActivityFeed() {
     return 'indeterminate';
   };
 
-  // Navigate to Insights with selected survey IDs + water context
+  // Navigate to Insights with selected survey IDs + current filter state
   const handleAnalyze = () => {
     const ids = Array.from(selectedIds).join(',');
     const mode = selectedIds.size === 2 ? 'compare' : 'aggregate';
     const params = new URLSearchParams({ selectedSurveyIds: ids, mode });
-    if (waterContext) params.set('waterId', waterContext.id);
+    if (waterFilter !== 'all') params.set('waterId', waterFilter);
     navigate(`/insights?${params}`);
   };
 

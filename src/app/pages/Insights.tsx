@@ -46,9 +46,12 @@ export default function Insights() {
   const [metric, setMetric] = useState('population');
   const [searchParams] = useSearchParams();
 
-  // ── Selection-based analysis params ──
+  // ── Read all query params upfront to avoid TDZ issues ──
   const selectedIdsParam = searchParams.get('selectedSurveyIds');
   const modeParam = searchParams.get('mode');
+  const waterIdParam = searchParams.get('waterId');
+  const basinParam = searchParams.get('basin');
+  const qParam = searchParams.get('q');
 
   // Build a contextual "Back to Surveys" URL that preserves water context + selection
   const backToSurveysUrl = useMemo(() => {
@@ -58,9 +61,6 @@ export default function Insights() {
     const qs = params.toString();
     return `/activity-feed${qs ? `?${qs}` : ''}`;
   }, [waterIdParam, selectedIdsParam]);
-
-  // ── Query-state param (from QueryBuilder) ──
-  const qParam = searchParams.get('q');
 
   const selectedSurveys = useMemo(() => {
     if (!selectedIdsParam) return null;
@@ -78,8 +78,6 @@ export default function Insights() {
 
   // ── Default waterId-based params ──
   const navigate = useNavigate();
-  const waterIdParam = searchParams.get('waterId');  // from Water Profile → locked
-  const basinParam = searchParams.get('basin');       // from dropdown / explore → explore mode
 
   const isDatasetLocked = !!(selectedIdsParam || qParam || waterIdParam);
 
