@@ -28,11 +28,11 @@ export function LeftNavRail() {
         }
       }}
       className={`
-        sticky top-14 h-[calc(100vh-3.5rem)] shrink-0 z-40
+        fixed left-0 top-14 bottom-0 z-40
         bg-[#2d333b] border-r border-[#444c56]
         flex flex-col pt-4 gap-1 overflow-hidden
-        transition-[width] duration-200 ease-in-out
-        ${expanded ? 'w-[200px]' : 'w-16'}
+        transition-[width,box-shadow] duration-200 ease-in-out
+        ${expanded ? 'w-[200px] shadow-[4px_0_12px_rgba(0,0,0,0.15)]' : 'w-16'}
       `}
     >
       {filtered.map((item) => {

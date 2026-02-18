@@ -5,15 +5,13 @@ import { RoleFloater } from './components/RoleFloater';
 
 export default function Layout() {
   return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen">
       <TopNav />
+      <LeftNavRail />
       <RoleFloater />
-      <div className="flex flex-1">
-        <LeftNavRail />
-        <main className="flex-1 min-w-0">
-          <Outlet />
-        </main>
-      </div>
+      <main className="pl-16">
+        <Outlet />
+      </main>
     </div>
   );
 }
