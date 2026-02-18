@@ -1,11 +1,12 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-// POWERAPPS-ALIGNMENT: Removed ChevronDown/ChevronRight — accordion flattened to always-expanded list
-import { Link } from 'react-router';
+import { Checkbox } from '../components/ui/checkbox';
+import { BarChart3 } from 'lucide-react';
+import { Link, useNavigate } from 'react-router';
 
 import { waters, getWaterById } from '../data/world';
 import type { SurveyStatus } from '../data/world';
@@ -43,6 +44,7 @@ function getPrimaryAction(status: SurveyStatus): string {
 
 export default function ActivityFeed() {
   const { surveys } = useDemo();
+  const navigate = useNavigate();
   const neWaters = waters.filter(w => w.region === 'Northeast');
   const neWaterIds = useMemo(() => new Set(neWaters.map(w => w.id)), [neWaters]);
 
@@ -57,8 +59,8 @@ export default function ActivityFeed() {
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
   const [dateFrom, setDateFrom] = useState('');
 
-  // POWERAPPS-ALIGNMENT: Removed collapsible accordion state.
-  // Canvas Apps do not support expand/collapse toggles on Gallery items.
+  // Selection state
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
 
   // Derive filtered list
   const filtered = useMemo(() => {
@@ -69,6 +71,58 @@ export default function ActivityFeed() {
       return true;
     });
   }, [allNeSurveys, waterFilter, statusFilter, dateFrom]);
+
+  // Prune selection when filters change — remove IDs no longer in visible set
+  const filteredIds = useMemo(() => new Set(filtered.map(s => s.id)), [filtered]);
+  useEffect(() => {
+    setSelectedIds(prev => {
+      const pruned = new Set([...prev].filter(id => filteredIds.has(id)));
+      if (pruned.size !== prev.size) return pruned;
+      return prev;
+    });
+  }, [filteredIds]);
+
+  // Toggle single survey selection
+  const toggleSurvey = (id: string, checked: boolean) => {
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      if (checked) next.add(id);
+      else next.delete(id);
+      return next;
+    });
+  };
+
+  // Toggle all surveys in a water group
+  const toggleGroup = (waterId: string, checked: boolean) => {
+    const groupIds = filtered.filter(s => s.waterId === waterId).map(s => s.id);
+    setSelectedIds(prev => {
+      const next = new Set(prev);
+      for (const id of groupIds) {
+        if (checked) next.add(id);
+        else next.delete(id);
+      }
+      return next;
+    });
+  };
+
+  // Compute group checkbox state (true / false / 'indeterminate')
+  const getGroupChecked = (waterId: string): boolean | 'indeterminate' => {
+    const groupIds = filtered.filter(s => s.waterId === waterId).map(s => s.id);
+    const count = groupIds.filter(id => selectedIds.has(id)).length;
+    if (count === 0) return false;
+    if (count === groupIds.length) return true;
+    return 'indeterminate';
+  };
+
+  // Navigate to Insights with selected survey IDs
+  const handleAnalyze = () => {
+    const ids = Array.from(selectedIds).join(',');
+    const mode = selectedIds.size === 2 ? 'compare' : 'aggregate';
+    navigate(`/insights?selectedSurveyIds=${ids}&mode=${mode}`);
+  };
+
+  // POWERAPPS-ALIGNMENT: Removed collapsible accordion state.
+  // Canvas Apps do not support expand/collapse toggles on Gallery items.
 
   // Group by water
   const waterGroups = useMemo(() => {
@@ -97,7 +151,7 @@ export default function ActivityFeed() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background" style={{ paddingBottom: selectedIds.size > 0 ? 72 : 0 }}>
       <header className="bg-white border-b border-border px-8 py-6">
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-center justify-between">
@@ -128,6 +182,9 @@ export default function ActivityFeed() {
           <Card className="border border-border">
             <CardHeader className="border-b border-border/50">
               <CardTitle className="text-[16px]">Filters</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Select surveys to compare or analyze across surveys.
+              </p>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -190,21 +247,29 @@ export default function ActivityFeed() {
               const pendingCount = water.items.filter(
                 s => s.status === 'Pending Validation' || s.status === 'Pending Approval',
               ).length;
+              const groupChecked = getGroupChecked(water.waterId);
 
               return (
                 <Card key={water.waterId} className="border border-border">
                   <CardHeader className="border-b border-border/50">
                     <div className="flex items-center justify-between">
-                      <div>
-                        <Link
-                          to={`/water/profile?waterId=${water.waterId}`}
-                          className="text-[16px] font-semibold text-primary"
-                        >
-                          {water.name}
-                        </Link>
-                        <p className="text-[12px] text-muted-foreground mt-0.5">
-                          {water.items.length} survey{water.items.length !== 1 ? 's' : ''}
-                        </p>
+                      <div className="flex items-center gap-3">
+                        <Checkbox
+                          checked={groupChecked}
+                          onCheckedChange={(checked) => toggleGroup(water.waterId, !!checked)}
+                          aria-label={`Select all surveys for ${water.name}`}
+                        />
+                        <div>
+                          <Link
+                            to={`/water/profile?waterId=${water.waterId}`}
+                            className="text-[16px] font-semibold text-primary"
+                          >
+                            {water.name}
+                          </Link>
+                          <p className="text-[12px] text-muted-foreground mt-0.5">
+                            {water.items.length} survey{water.items.length !== 1 ? 's' : ''}
+                          </p>
+                        </div>
                       </div>
                       {pendingCount > 0 && (
                         <div className="flex items-center gap-2">
@@ -221,20 +286,29 @@ export default function ActivityFeed() {
                       {water.items.map((survey) => (
                         <div
                           key={survey.id}
-                          className="flex items-center justify-between px-4 py-5 border border-border/50 rounded bg-white"
+                          className={`flex items-center justify-between px-4 py-5 border rounded bg-white ${
+                            selectedIds.has(survey.id) ? 'border-primary/40 bg-primary/[0.02]' : 'border-border/50'
+                          }`}
                         >
-                          <div className="flex items-center gap-6">
-                            <div>
-                              <p className="text-[13px] font-mono text-primary font-medium">{survey.id}</p>
-                              <p className="text-[11px] text-muted-foreground mt-0.5">
-                                Station {survey.stationId}
-                              </p>
-                            </div>
-                            <div>
-                              <p className="text-[12px] text-muted-foreground">{survey.protocol}</p>
-                            </div>
-                            <div>
-                              <p className="text-[12px] text-muted-foreground">{survey.date}</p>
+                          <div className="flex items-center gap-4">
+                            <Checkbox
+                              checked={selectedIds.has(survey.id)}
+                              onCheckedChange={(checked) => toggleSurvey(survey.id, !!checked)}
+                              aria-label={`Select survey ${survey.id}`}
+                            />
+                            <div className="flex items-center gap-6">
+                              <div>
+                                <p className="text-[13px] font-mono text-primary font-medium">{survey.id}</p>
+                                <p className="text-[11px] text-muted-foreground mt-0.5">
+                                  Station {survey.stationId}
+                                </p>
+                              </div>
+                              <div>
+                                <p className="text-[12px] text-muted-foreground">{survey.protocol}</p>
+                              </div>
+                              <div>
+                                <p className="text-[12px] text-muted-foreground">{survey.date}</p>
+                              </div>
                             </div>
                           </div>
 
@@ -259,6 +333,34 @@ export default function ActivityFeed() {
 
         </div>
       </div>
+
+      {/* Sticky selection action bar */}
+      {selectedIds.size > 0 && (
+        <div
+          className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t border-border"
+          style={{ boxShadow: '0 -2px 8px rgba(0,0,0,0.06)' }}
+        >
+          <div className="max-w-[1280px] mx-auto px-8 py-3 flex items-center justify-between">
+            <p className="text-[13px] text-foreground">
+              <span className="font-semibold">{selectedIds.size}</span> survey{selectedIds.size !== 1 ? 's' : ''} selected
+            </p>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="sm"
+                className="text-[12px]"
+                onClick={() => setSelectedIds(new Set())}
+              >
+                Clear
+              </Button>
+              <Button size="sm" className="text-[12px]" onClick={handleAnalyze}>
+                <BarChart3 className="w-4 h-4 mr-2" />
+                Analyze selected
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

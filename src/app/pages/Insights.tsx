@@ -1,23 +1,105 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { FileSpreadsheet, TrendingUp, Info, BarChart3 } from 'lucide-react';
+import { FileSpreadsheet, TrendingUp, Info, BarChart3, ArrowLeft } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { WaterBanner } from '../components/WaterBanner';
 
 import { useRole } from '../context/RoleContext';
-import { useSearchParams } from 'react-router';
-import { getWaterById, getTrendForWater } from '../data/world';
+import { Link, useSearchParams } from 'react-router';
+import { getWaterById, getTrendForWater, getFishRecords } from '../data/world';
+import type { Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
+
+/** Derive per-species stats from fish records */
+function buildSpeciesBreakdown(surveyId: string) {
+  const records = getFishRecords(surveyId);
+  if (!records) return null;
+  const map = new Map<string, { count: number; totalLength: number; totalWeight: number }>();
+  for (const r of records) {
+    const entry = map.get(r.species) ?? { count: 0, totalLength: 0, totalWeight: 0 };
+    entry.count++;
+    entry.totalLength += r.length;
+    entry.totalWeight += r.weight;
+    map.set(r.species, entry);
+  }
+  return Array.from(map.entries())
+    .map(([species, stats]) => ({
+      species,
+      count: stats.count,
+      meanLength: Math.round(stats.totalLength / stats.count),
+      meanWeight: Math.round(stats.totalWeight / stats.count),
+    }))
+    .sort((a, b) => b.count - a.count);
+}
 
 export default function Insights() {
   const { role } = useRole();
   const { surveys } = useDemo();
   const [metric, setMetric] = useState('population');
   const [searchParams] = useSearchParams();
+
+  // ── Selection-based analysis params ──
+  const selectedIdsParam = searchParams.get('selectedSurveyIds');
+  const modeParam = searchParams.get('mode');
+
+  const selectedSurveys = useMemo(() => {
+    if (!selectedIdsParam) return null;
+    const ids = selectedIdsParam.split(',');
+    return surveys.filter(s => ids.includes(s.id));
+  }, [selectedIdsParam, surveys]);
+
+  // ── Default waterId-based params ──
   const waterId = searchParams.get('waterId') || 'south-platte';
 
+  // ────────────────────────────────────────────────────
+  // SELECTION-BASED: Empty state
+  // ────────────────────────────────────────────────────
+  if (selectedIdsParam && (!selectedSurveys || selectedSurveys.length === 0)) {
+    return (
+      <div className="min-h-screen bg-background">
+        <header className="bg-white border-b border-border px-8 py-6">
+          <div className="max-w-[1280px] mx-auto">
+            <p className="text-lg font-semibold text-primary">Insights</p>
+            <p className="text-[13px] text-muted-foreground mt-1">Selection-based analysis</p>
+          </div>
+        </header>
+        <div className="px-8 py-16 text-center">
+          <div className="max-w-md mx-auto">
+            <p className="text-[16px] font-medium text-foreground mb-2">No matching surveys found</p>
+            <p className="text-[13px] text-muted-foreground mb-6">
+              The selected survey IDs could not be matched in the current dataset.
+            </p>
+            <Link to="/activity-feed">
+              <Button variant="outline" className="text-[13px]">
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to All Survey Activity
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // ────────────────────────────────────────────────────
+  // SELECTION-BASED: Compare mode (exactly 2 surveys)
+  // ────────────────────────────────────────────────────
+  if (selectedSurveys && modeParam === 'compare' && selectedSurveys.length === 2) {
+    return <CompareView surveys={selectedSurveys} role={role} />;
+  }
+
+  // ────────────────────────────────────────────────────
+  // SELECTION-BASED: Aggregate mode (>2 surveys)
+  // ────────────────────────────────────────────────────
+  if (selectedSurveys && selectedSurveys.length > 0) {
+    return <AggregateView surveys={selectedSurveys} role={role} />;
+  }
+
+  // ────────────────────────────────────────────────────
+  // DEFAULT: Existing waterId-based Insights view
+  // ────────────────────────────────────────────────────
   // Load data from world.ts + demo overrides
   const water = getWaterById(waterId);
   const trend = getTrendForWater(waterId);
@@ -419,6 +501,364 @@ export default function Insights() {
 
             </div>
           </div>
+
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ────────────────────────────────────────────────────
+// Compare View — Side-by-side (exactly 2 surveys)
+// ────────────────────────────────────────────────────
+function CompareView({ surveys, role }: { surveys: Survey[]; role: string }) {
+  const [a, b] = surveys;
+  const waterA = getWaterById(a.waterId);
+  const waterB = getWaterById(b.waterId);
+  const breakdownA = buildSpeciesBreakdown(a.id);
+  const breakdownB = buildSpeciesBreakdown(b.id);
+
+  const renderSurveyColumn = (survey: Survey, water: ReturnType<typeof getWaterById>, breakdown: ReturnType<typeof buildSpeciesBreakdown>) => (
+    <Card className="border border-border flex-1">
+      <CardHeader className="border-b border-border/50">
+        <p className="text-[13px] font-mono text-primary font-medium">{survey.id}</p>
+        <p className="text-[12px] text-muted-foreground mt-1">
+          {water?.name ?? survey.waterId} — Station {survey.stationId}
+        </p>
+        <p className="text-[11px] text-muted-foreground mt-0.5">
+          {survey.date} · {survey.protocol}
+        </p>
+      </CardHeader>
+      <CardContent className="pt-6 space-y-5">
+        {/* Fish Count */}
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Total Fish</p>
+          <p className="text-[32px] font-semibold text-foreground leading-none">{survey.fishCount}</p>
+        </div>
+
+        {/* Species Detected */}
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Species Detected</p>
+          <div className="flex flex-wrap gap-1.5">
+            {survey.speciesDetected.map(sp => (
+              <span key={sp} className="inline-flex px-2 py-0.5 rounded bg-muted text-[11px] font-mono text-foreground">
+                {sp}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Species Breakdown (if fish records available) */}
+        {breakdown && (
+          <div>
+            <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-2">Species Breakdown</p>
+            <div className="space-y-2">
+              {breakdown.map(row => (
+                <div key={row.species} className="flex items-center justify-between text-[12px] p-2 border border-border/50 rounded bg-white">
+                  <span className="font-mono text-primary">{row.species}</span>
+                  <div className="flex items-center gap-4 text-muted-foreground">
+                    <span>{row.count} fish</span>
+                    <span>{row.meanLength} mm avg</span>
+                    <span>{row.meanWeight} g avg</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Survey Metadata */}
+        <div className="pt-4 border-t border-border space-y-2">
+          <div className="flex justify-between text-[12px]">
+            <span className="text-muted-foreground">Protocol</span>
+            <span className="font-medium text-foreground">{survey.protocol}</span>
+          </div>
+          <div className="flex justify-between text-[12px]">
+            <span className="text-muted-foreground">Uploader</span>
+            <span className="font-medium text-foreground">{survey.uploader}</span>
+          </div>
+          <div className="flex justify-between text-[12px]">
+            <span className="text-muted-foreground">Status</span>
+            <span className="font-medium text-foreground">{survey.status}</span>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-white border-b border-border px-8 py-6">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <p className="text-lg font-semibold text-primary">Insights</p>
+                <span className="inline-flex px-2 py-0.5 rounded bg-primary/10 text-primary text-[11px] font-medium">
+                  Selection-based analysis
+                </span>
+              </div>
+              <p className="text-[13px] text-muted-foreground mt-1">
+                Side-by-side comparison of 2 selected surveys
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {role === 'senior-biologist' && (
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Export to Excel
+                </Button>
+              )}
+              <Link to="/activity-feed">
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Surveys
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="px-8 py-8">
+        <div className="max-w-[1280px] mx-auto space-y-8">
+          {/* Side-by-side columns */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {renderSurveyColumn(a, waterA, breakdownA)}
+            {renderSurveyColumn(b, waterB, breakdownB)}
+          </div>
+
+          {/* Comparison Summary */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Comparison Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                <div className="grid grid-cols-3 gap-4 text-[12px] font-medium text-muted-foreground border-b border-border pb-2">
+                  <span>Metric</span>
+                  <span className="text-center">{a.id}</span>
+                  <span className="text-center">{b.id}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-[13px]">
+                  <span className="text-muted-foreground">Fish Count</span>
+                  <span className="text-center font-mono font-medium">{a.fishCount}</span>
+                  <span className="text-center font-mono font-medium">{b.fishCount}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-[13px]">
+                  <span className="text-muted-foreground">Species Count</span>
+                  <span className="text-center font-mono font-medium">{a.speciesDetected.length}</span>
+                  <span className="text-center font-mono font-medium">{b.speciesDetected.length}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-[13px]">
+                  <span className="text-muted-foreground">Protocol</span>
+                  <span className="text-center text-[12px]">{a.protocol}</span>
+                  <span className="text-center text-[12px]">{b.protocol}</span>
+                </div>
+                <div className="grid grid-cols-3 gap-4 text-[13px]">
+                  <span className="text-muted-foreground">Date</span>
+                  <span className="text-center font-mono text-[12px]">{a.date}</span>
+                  <span className="text-center font-mono text-[12px]">{b.date}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ────────────────────────────────────────────────────
+// Aggregate View — Summary across >2 surveys
+// ────────────────────────────────────────────────────
+function AggregateView({ surveys: selectedSurveys, role }: { surveys: Survey[]; role: string }) {
+  const waterIds = [...new Set(selectedSurveys.map(s => s.waterId))];
+  const waterNames = waterIds.map(id => getWaterById(id)?.name ?? id);
+  const dates = selectedSurveys.map(s => s.date).sort();
+  const dateRange = dates.length >= 2 ? `${dates[0]} – ${dates[dates.length - 1]}` : dates[0] ?? '—';
+  const totalFish = selectedSurveys.reduce((sum, s) => sum + s.fishCount, 0);
+
+  // Species frequency: how many surveys detected each species
+  const speciesFreq = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const s of selectedSurveys) {
+      for (const sp of s.speciesDetected) {
+        map.set(sp, (map.get(sp) ?? 0) + 1);
+      }
+    }
+    return Array.from(map.entries())
+      .map(([species, count]) => ({ species, count }))
+      .sort((a, b) => b.count - a.count);
+  }, [selectedSurveys]);
+
+  // Fish count per survey (for bar chart)
+  const fishCountData = selectedSurveys
+    .map(s => ({
+      id: s.id.replace(/^SVY-/, ''),
+      fishCount: s.fishCount,
+    }))
+    .sort((a, b) => b.fishCount - a.fishCount);
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-white border-b border-border px-8 py-6">
+        <div className="max-w-[1280px] mx-auto">
+          <div className="flex items-center justify-between">
+            <div>
+              <div className="flex items-center gap-3">
+                <p className="text-lg font-semibold text-primary">Insights</p>
+                <span className="inline-flex px-2 py-0.5 rounded bg-primary/10 text-primary text-[11px] font-medium">
+                  Selection-based analysis
+                </span>
+              </div>
+              <p className="text-[13px] text-muted-foreground mt-1">
+                Aggregate analysis across {selectedSurveys.length} selected surveys
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              {role === 'senior-biologist' && (
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <FileSpreadsheet className="w-4 h-4 mr-2" />
+                  Export to Excel
+                </Button>
+              )}
+              <Link to="/activity-feed">
+                <Button variant="outline" size="sm" className="text-[13px]">
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Surveys
+                </Button>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <div className="px-8 py-8">
+        <div className="max-w-[1280px] mx-auto space-y-8">
+
+          {/* Summary Strip */}
+          <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
+            <div className="flex divide-x divide-border">
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Surveys Selected</p>
+                <p className="text-[24px] font-semibold text-foreground">{selectedSurveys.length}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Waters Represented</p>
+                <p className="text-[24px] font-semibold text-foreground">{waterIds.length}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{waterNames.join(', ')}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Total Fish Records</p>
+                <p className="text-[24px] font-semibold text-foreground">{totalFish.toLocaleString()}</p>
+              </div>
+              <div className="flex-1 px-6 py-5">
+                <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-1">Date Range</p>
+                <p className="text-[16px] font-semibold text-foreground mt-1">{dateRange}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Fish Count per Survey — Bar Chart */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Fish Count by Survey</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Total fish recorded per selected survey
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="h-[300px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={fishCountData} layout="vertical">
+                    <CartesianGrid strokeDasharray="3 3" stroke="#E2E8F0" horizontal={false} />
+                    <XAxis
+                      type="number"
+                      stroke="#64748B"
+                      tick={{ fill: '#64748B', fontSize: 11 }}
+                      axisLine={{ stroke: '#E2E8F0' }}
+                    />
+                    <YAxis
+                      dataKey="id"
+                      type="category"
+                      width={140}
+                      stroke="#64748B"
+                      tick={{ fill: '#64748B', fontSize: 10 }}
+                      axisLine={{ stroke: '#E2E8F0' }}
+                    />
+                    <Bar dataKey="fishCount" fill="#1B365D" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Species Frequency */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Species Detection Frequency</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Number of surveys in which each species was detected
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-3">
+                {speciesFreq.map(({ species, count }) => (
+                  <div key={species}>
+                    <div className="flex justify-between text-[12px] mb-1">
+                      <span className="font-mono text-foreground">{species}</span>
+                      <span className="text-muted-foreground">
+                        {count} of {selectedSurveys.length} surveys
+                      </span>
+                    </div>
+                    <div className="h-2 bg-muted rounded overflow-hidden">
+                      <div
+                        className="h-full bg-primary rounded"
+                        style={{ width: `${(count / selectedSurveys.length) * 100}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Survey Breakdown Table */}
+          <Card className="border border-border">
+            <CardHeader className="border-b border-border/50">
+              <CardTitle className="text-[16px]">Survey Details</CardTitle>
+              <p className="text-[12px] text-muted-foreground mt-1">
+                Individual survey records included in this analysis
+              </p>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <div className="space-y-2">
+                {/* Header */}
+                <div className="grid grid-cols-6 gap-4 text-[11px] font-medium text-muted-foreground uppercase tracking-wide border-b border-border pb-2">
+                  <span>Survey ID</span>
+                  <span>Water</span>
+                  <span>Station</span>
+                  <span>Date</span>
+                  <span>Protocol</span>
+                  <span className="text-right">Fish</span>
+                </div>
+                {/* Rows */}
+                {selectedSurveys.map(s => (
+                  <div key={s.id} className="grid grid-cols-6 gap-4 text-[12px] py-2 border-b border-border/30">
+                    <span className="font-mono text-primary">{s.id}</span>
+                    <span className="text-foreground">{getWaterById(s.waterId)?.name ?? s.waterId}</span>
+                    <span className="text-muted-foreground">{s.stationId}</span>
+                    <span className="text-muted-foreground font-mono">{s.date}</span>
+                    <span className="text-muted-foreground">{s.protocol}</span>
+                    <span className="text-right font-mono font-medium">{s.fishCount}</span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
         </div>
       </div>
