@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
@@ -7,7 +7,7 @@ import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Responsive
 import { WaterBanner } from '../components/WaterBanner';
 
 import { useRole } from '../context/RoleContext';
-import { Link, useSearchParams } from 'react-router';
+import { Link, useSearchParams, useNavigate } from 'react-router';
 import { getWaterById, getTrendForWater, getFishRecords } from '../data/world';
 import type { Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
@@ -68,7 +68,19 @@ export default function Insights() {
   }, [qParam, surveys]);
 
   // ── Default waterId-based params ──
-  const waterId = searchParams.get('waterId') || 'south-platte';
+  const navigate = useNavigate();
+  const waterIdParam = searchParams.get('waterId');
+  const waterId = useMemo(() => {
+    if (waterIdParam) return waterIdParam;
+    try { return sessionStorage.getItem('cpw:lastWaterId') ?? 'south-platte'; } catch { return 'south-platte'; }
+  }, [waterIdParam]);
+
+  // If resolved from sessionStorage (no URL param), push waterId into URL so refresh/share works
+  useEffect(() => {
+    if (!waterIdParam && !selectedIdsParam && !qParam && waterId !== 'south-platte') {
+      navigate(`/insights?waterId=${waterId}`, { replace: true });
+    }
+  }, [waterIdParam, selectedIdsParam, qParam, waterId, navigate]);
 
   // ────────────────────────────────────────────────────
   // SELECTION-BASED: Empty state
@@ -128,6 +140,14 @@ export default function Insights() {
   const water = getWaterById(waterId);
   const trend = getTrendForWater(waterId);
   const waterSurveys = surveys.filter(s => s.waterId === waterId);
+
+  // Derive year range from actual survey dates
+  const surveyYears = waterSurveys.map(s => new Date(s.date).getFullYear());
+  const surveyMinYear = surveyYears.length > 0 ? Math.min(...surveyYears) : null;
+  const surveyMaxYear = surveyYears.length > 0 ? Math.max(...surveyYears) : null;
+  const surveyYearRange = surveyMinYear != null && surveyMaxYear != null
+    ? `${surveyMinYear}–${surveyMaxYear}`
+    : '—';
 
   const waterName = water?.name ?? 'South Platte Basin';
   const waterRegion = water?.region ?? 'Northeast';
@@ -255,9 +275,13 @@ export default function Insights() {
 
           {/* Context Banner */}
           <div className="bg-muted/20 border border-border rounded px-4 py-3">
-            <p className="text-[13px] text-foreground">
-              Based on <span className="font-semibold">{waterSurveys.length} survey{waterSurveys.length !== 1 ? 's' : ''}</span> conducted between <span className="font-semibold">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols.
-            </p>
+            {waterSurveys.length > 0 ? (
+              <p className="text-[13px] text-foreground">
+                Based on <span className="font-semibold">{waterSurveys.length} survey{waterSurveys.length !== 1 ? 's' : ''}</span> conducted between <span className="font-semibold">{surveyYearRange}</span> using validated protocols.
+              </p>
+            ) : (
+              <p className="text-[13px] text-muted-foreground">No surveys match the current scope.</p>
+            )}
           </div>
 
           {/* Summary Metric Cards */}
@@ -370,7 +394,7 @@ export default function Insights() {
                   <CardTitle className="text-[18px]">Multi-Year Population Trend</CardTitle>
                   <p className="text-[11px] text-muted-foreground mt-1.5 leading-relaxed">
                     Based on <span className="font-medium text-foreground">{waterSurveys.length} survey{waterSurveys.length !== 1 ? 's' : ''}</span> conducted between{' '}
-                    <span className="font-medium text-foreground">{trendData[0]?.year ?? '—'}–{trendData[trendData.length - 1]?.year ?? '—'}</span> using validated protocols
+                    <span className="font-medium text-foreground">{surveyYearRange}</span> using validated protocols
                   </p>
                 </div>
                 <div className="flex items-center gap-3">

@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { WaterBanner } from '../components/WaterBanner';
@@ -16,6 +17,11 @@ export default function WaterProfile() {
   const [searchParams] = useSearchParams();
   const waterId = searchParams.get('waterId');
   if (!waterId) return <Navigate to="/water" replace />;
+
+  // Persist last-viewed water for context-aware nav
+  useEffect(() => {
+    try { sessionStorage.setItem('cpw:lastWaterId', waterId); } catch { /* noop */ }
+  }, [waterId]);
 
   // Load water data from world.ts
   const water = getWaterById(waterId);
