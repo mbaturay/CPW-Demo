@@ -1,8 +1,10 @@
+import { useState } from 'react';
 import { Link, useLocation } from 'react-router';
 import { useRole } from '../context/RoleContext';
 import { navItems } from './navConfig';
 
 export function LeftNavRail() {
+  const [expanded, setExpanded] = useState(false);
   const location = useLocation();
   const { role } = useRole();
 
@@ -17,7 +19,21 @@ export function LeftNavRail() {
     <nav
       role="navigation"
       aria-label="Main navigation"
-      className="fixed left-0 top-14 bottom-0 w-16 z-40 bg-[#2d333b] border-r border-[#444c56] flex flex-col items-center pt-4 gap-1"
+      onMouseEnter={() => setExpanded(true)}
+      onMouseLeave={() => setExpanded(false)}
+      onFocus={() => setExpanded(true)}
+      onBlur={(e) => {
+        if (!e.currentTarget.contains(e.relatedTarget as Node)) {
+          setExpanded(false);
+        }
+      }}
+      className={`
+        sticky top-14 h-[calc(100vh-3.5rem)] shrink-0 z-40
+        bg-[#2d333b] border-r border-[#444c56]
+        flex flex-col pt-4 gap-1 overflow-hidden
+        transition-[width] duration-200 ease-in-out
+        ${expanded ? 'w-[200px]' : 'w-16'}
+      `}
     >
       {filtered.map((item) => {
         const Icon = item.icon;
@@ -33,7 +49,7 @@ export function LeftNavRail() {
             to={item.to}
             aria-label={label}
             className={`
-              group relative flex items-center justify-center w-11 h-11 rounded-lg
+              group relative flex items-center h-11 mx-2.5 rounded-lg
               transition-colors duration-100
               focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-1 focus-visible:ring-offset-[#2d333b]
               ${isActive
@@ -42,22 +58,40 @@ export function LeftNavRail() {
               }
             `}
           >
-            <Icon className="w-5 h-5" />
+            <div className="w-11 shrink-0 flex items-center justify-center">
+              <Icon className="w-5 h-5" />
+            </div>
 
-            {/* Tooltip — appears to the right of the rail */}
+            {/* Label — revealed on expand */}
             <span
-              className="
-                pointer-events-none absolute left-full ml-3 px-2.5 py-1.5 rounded-md
-                bg-slate-900 text-white text-xs font-medium whitespace-nowrap
-                opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100
-                transition-opacity duration-150
-                shadow-lg
-              "
+              className={`
+                text-sm font-medium whitespace-nowrap
+                transition-all duration-200 ease-in-out
+                ${expanded
+                  ? 'opacity-100 translate-x-0'
+                  : 'opacity-0 -translate-x-1'
+                }
+              `}
             >
               {label}
             </span>
 
-            {/* Active indicator bar on right edge (facing content) */}
+            {/* Tooltip — visible only when collapsed */}
+            <span
+              className={`
+                pointer-events-none absolute left-full ml-3 px-2.5 py-1.5 rounded-md
+                bg-slate-900 text-white text-xs font-medium whitespace-nowrap
+                shadow-lg transition-opacity duration-150
+                ${expanded
+                  ? 'opacity-0 invisible'
+                  : 'opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100'
+                }
+              `}
+            >
+              {label}
+            </span>
+
+            {/* Active indicator bar */}
             {isActive && (
               <span className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-l-sm bg-white" />
             )}
