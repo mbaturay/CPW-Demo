@@ -800,3 +800,24 @@ export function getTrendForWater(waterId: string) {
 export function getFishRecords(surveyId: string): FishRecord[] | undefined {
   return fishRecords[surveyId];
 }
+
+// ── Survey quality classification for analysis guardrails ──
+
+export type SurveyQuality = 'validated' | 'unvalidated' | 'invalid';
+
+export function getSurveyQuality(survey: Survey): SurveyQuality {
+  // Validation errors override status-based classification
+  const vc = getValidationBySurveyId(survey.id);
+  if (vc && vc.summary.errors > 0) return 'invalid';
+
+  switch (survey.status) {
+    case 'Draft':
+    case 'Returned for Correction':
+      return 'invalid';
+    case 'Approved':
+    case 'Published':
+      return 'validated';
+    default:
+      return 'unvalidated';
+  }
+}

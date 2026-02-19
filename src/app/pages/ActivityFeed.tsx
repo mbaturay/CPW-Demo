@@ -5,14 +5,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
 import { Checkbox } from '../components/ui/checkbox';
-import { BarChart3, Info, X } from 'lucide-react';
+import { BarChart3, Info, X, AlertCircle, ShieldCheck, ShieldAlert } from 'lucide-react';
 import { Link, useNavigate, useSearchParams } from 'react-router';
 
-import { waters, getWaterById } from '../data/world';
+import { waters, getWaterById, getSurveyQuality } from '../data/world';
 import type { SurveyStatus, Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
 import { useRole } from '../context/RoleContext';
 import type { UserRole } from '../context/RoleContext';
+import {
+  AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle,
+  AlertDialogDescription, AlertDialogFooter, AlertDialogCancel,
+} from '../components/ui/alert-dialog';
 
 const SCOPE_LABELS: Record<string, string> = {
   statewide: 'Statewide',
@@ -185,6 +189,7 @@ export default function ActivityFeed() {
     return new Set(selectedParam.split(',').filter(Boolean));
   });
   const [selectionRestored, setSelectionRestored] = useState(!!selectedParam);
+  const [showUnvalidatedDialog, setShowUnvalidatedDialog] = useState(false);
 
   // Derive filtered list
   const filtered = useMemo(() => {
@@ -205,6 +210,18 @@ export default function ActivityFeed() {
       return prev;
     });
   }, [filteredIds]);
+
+  // Quality breakdown of selected surveys
+  const selectionBreakdown = useMemo(() => {
+    const result = { validated: [] as Survey[], unvalidated: [] as Survey[], invalid: [] as Survey[] };
+    for (const s of filtered) {
+      if (!selectedIds.has(s.id)) continue;
+      result[getSurveyQuality(s)].push(s);
+    }
+    return result;
+  }, [filtered, selectedIds]);
+  const hasInvalid = selectionBreakdown.invalid.length > 0;
+  const hasUnvalidated = selectionBreakdown.unvalidated.length > 0;
 
   // Toggle single survey selection
   const toggleSurvey = (id: string, checked: boolean) => {
@@ -238,13 +255,39 @@ export default function ActivityFeed() {
     return 'indeterminate';
   };
 
-  // Navigate to Insights with selected survey IDs + current filter state
-  const handleAnalyze = () => {
-    const ids = Array.from(selectedIds).join(',');
-    const mode = selectedIds.size === 2 ? 'compare' : 'aggregate';
+  // Build the navigation URL for analysis
+  const buildAnalyzeUrl = (surveyIds: string[], totalSelected?: number) => {
+    const ids = surveyIds.join(',');
+    const mode = surveyIds.length === 2 ? 'compare' : 'aggregate';
     const params = new URLSearchParams({ selectedSurveyIds: ids, mode });
     if (waterFilter !== 'all') params.set('waterId', waterFilter);
-    navigate(`/insights?${params}`);
+    if (totalSelected && totalSelected > surveyIds.length) {
+      params.set('originalCount', String(totalSelected));
+    }
+    return `/insights?${params}`;
+  };
+
+  // Navigate to Insights — with quality guardrails
+  const handleAnalyze = () => {
+    if (hasInvalid) return; // Button is disabled; safety check
+    if (hasUnvalidated) { setShowUnvalidatedDialog(true); return; }
+    navigate(buildAnalyzeUrl(Array.from(selectedIds)));
+  };
+
+  const handleAnalyzeValidatedOnly = () => {
+    setShowUnvalidatedDialog(false);
+    const validatedIds = selectionBreakdown.validated.map(s => s.id);
+    if (validatedIds.length === 0) return;
+    navigate(buildAnalyzeUrl(validatedIds, selectedIds.size));
+  };
+
+  const handleAnalyzeAll = () => {
+    setShowUnvalidatedDialog(false);
+    const allIds = [
+      ...selectionBreakdown.validated.map(s => s.id),
+      ...selectionBreakdown.unvalidated.map(s => s.id),
+    ];
+    navigate(buildAnalyzeUrl(allIds));
   };
 
   // POWERAPPS-ALIGNMENT: Removed collapsible accordion state.
@@ -277,7 +320,7 @@ export default function ActivityFeed() {
   };
 
   return (
-    <div className="min-h-screen bg-background" style={{ paddingBottom: selectedIds.size > 0 ? 72 : 0 }}>
+    <div className="min-h-screen bg-background" style={{ paddingBottom: selectedIds.size > 0 ? (hasInvalid ? 96 : 72) : 0 }}>
       <header className="bg-white border-b border-border px-8 py-6">
         <div className="max-w-[1280px] mx-auto">
           <div className="flex items-center justify-between">
@@ -494,30 +537,132 @@ export default function ActivityFeed() {
           className="fixed bottom-0 left-0 right-0 z-50 bg-white/95 border-t border-border"
           style={{ boxShadow: '0 -2px 8px rgba(0,0,0,0.06)' }}
         >
-          <div className="max-w-[1280px] mx-auto px-8 py-3 flex items-center justify-between">
-            <p className="text-[13px] text-foreground">
-              <span className="font-semibold">{selectedIds.size}</span> survey{selectedIds.size !== 1 ? 's' : ''} selected
-              {selectionRestored && (
-                <span className="text-muted-foreground ml-2">(restored)</span>
-              )}
-            </p>
-            <div className="flex items-center gap-3">
-              <Button
-                variant="outline"
-                size="sm"
-                className="text-[12px]"
-                onClick={() => { setSelectedIds(new Set()); setSelectionRestored(false); }}
-              >
-                Clear
-              </Button>
-              <Button size="sm" className="text-[12px]" onClick={handleAnalyze}>
-                <BarChart3 className="w-4 h-4 mr-2" />
-                Analyze selected
-              </Button>
+          <div className="max-w-[1280px] mx-auto px-8 py-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4">
+                <p className="text-[13px] text-foreground">
+                  <span className="font-semibold">{selectedIds.size}</span> survey{selectedIds.size !== 1 ? 's' : ''} selected
+                  {selectionRestored && (
+                    <span className="text-muted-foreground ml-2">(restored)</span>
+                  )}
+                </p>
+                {/* Quality breakdown pills */}
+                <div className="flex items-center gap-2 text-[11px]">
+                  {selectionBreakdown.validated.length > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/10 text-success font-medium">
+                      <ShieldCheck className="w-3 h-3" />
+                      {selectionBreakdown.validated.length} validated
+                    </span>
+                  )}
+                  {selectionBreakdown.unvalidated.length > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
+                      <ShieldAlert className="w-3 h-3" />
+                      {selectionBreakdown.unvalidated.length} unvalidated
+                    </span>
+                  )}
+                  {selectionBreakdown.invalid.length > 0 && (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-destructive/10 text-destructive font-medium">
+                      <AlertCircle className="w-3 h-3" />
+                      {selectionBreakdown.invalid.length} invalid
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="text-[12px]"
+                  onClick={() => { setSelectedIds(new Set()); setSelectionRestored(false); }}
+                >
+                  Clear
+                </Button>
+                <Button
+                  size="sm"
+                  className="text-[12px]"
+                  onClick={handleAnalyze}
+                  disabled={hasInvalid}
+                >
+                  <BarChart3 className="w-4 h-4 mr-2" />
+                  Analyze selected
+                </Button>
+              </div>
             </div>
+            {hasInvalid && (
+              <div className="mt-2 flex items-center gap-2 text-[12px] text-destructive">
+                <AlertCircle className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>
+                  {selectionBreakdown.invalid.length} survey{selectionBreakdown.invalid.length !== 1 ? 's have' : ' has'} validation errors and cannot be analyzed.
+                </span>
+                <Link
+                  to={`/validation?surveyId=${selectionBreakdown.invalid[0].id}`}
+                  className="underline underline-offset-2 font-medium hover:text-destructive/80"
+                >
+                  Review issues
+                </Link>
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Unvalidated surveys confirmation dialog */}
+      <AlertDialog open={showUnvalidatedDialog} onOpenChange={setShowUnvalidatedDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-[16px]">
+              Include unvalidated surveys?
+            </AlertDialogTitle>
+            <AlertDialogDescription asChild>
+              <div className="space-y-3">
+                <p className="text-[13px] text-muted-foreground">
+                  Your selection includes{' '}
+                  <span className="font-semibold text-warning">
+                    {selectionBreakdown.unvalidated.length} unvalidated
+                  </span>{' '}
+                  survey{selectionBreakdown.unvalidated.length !== 1 ? 's' : ''} that{' '}
+                  {selectionBreakdown.unvalidated.length !== 1 ? 'have' : 'has'} not been
+                  approved. Results may be affected by data quality issues.
+                </p>
+                <div className="text-[12px] space-y-1.5 p-3 bg-muted/30 rounded border border-border/50">
+                  <p className="font-medium text-foreground mb-2">Selection breakdown:</p>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full bg-success" />
+                    <span className="text-muted-foreground">
+                      {selectionBreakdown.validated.length} validated (Approved / Published)
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-block w-2 h-2 rounded-full bg-warning" />
+                    <span className="text-muted-foreground">
+                      {selectionBreakdown.unvalidated.length} unvalidated (Pending / Flagged)
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel className="text-[13px]">Cancel</AlertDialogCancel>
+            <Button
+              variant="outline"
+              size="sm"
+              className="text-[13px]"
+              onClick={handleAnalyzeValidatedOnly}
+              disabled={selectionBreakdown.validated.length === 0}
+            >
+              Analyze validated only ({selectionBreakdown.validated.length})
+            </Button>
+            <Button
+              size="sm"
+              className="text-[13px]"
+              onClick={handleAnalyzeAll}
+            >
+              Analyze all selected
+            </Button>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

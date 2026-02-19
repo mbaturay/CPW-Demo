@@ -2,13 +2,13 @@ import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Button } from '../components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../components/ui/select';
-import { FileSpreadsheet, TrendingUp, Info, BarChart3, ArrowLeft, ChevronDown } from 'lucide-react';
+import { FileSpreadsheet, TrendingUp, Info, BarChart3, ArrowLeft, ChevronDown, ShieldCheck, ShieldAlert, AlertCircle } from 'lucide-react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, ResponsiveContainer } from 'recharts';
 import { StationViz } from '../components/StationViz';
 
 import { useRole } from '../context/RoleContext';
 import { Link, useSearchParams, useNavigate } from 'react-router';
-import { waters, getWaterById, getTrendForWater, getFishRecords } from '../data/world';
+import { waters, getWaterById, getTrendForWater, getFishRecords, getSurveyQuality } from '../data/world';
 import type { Survey } from '../data/world';
 import { useDemo } from '../context/DemoContext';
 import {
@@ -67,6 +67,12 @@ export default function Insights() {
     const ids = selectedIdsParam.split(',');
     return surveys.filter(s => ids.includes(s.id));
   }, [selectedIdsParam, surveys]);
+
+  // Track original selection count for exclusion notice
+  const originalCountParam = searchParams.get('originalCount');
+  const originalSelectedCount = originalCountParam
+    ? parseInt(originalCountParam, 10)
+    : (selectedSurveys?.length ?? 0);
 
   // ── Decode query state and run query ──
   const queryResult: QueryResult | null = useMemo(() => {
@@ -133,14 +139,14 @@ export default function Insights() {
   // SELECTION-BASED: Compare mode (exactly 2 surveys)
   // ────────────────────────────────────────────────────
   if (selectedSurveys && modeParam === 'compare' && selectedSurveys.length === 2) {
-    return <CompareView surveys={selectedSurveys} role={role} backUrl={backToSurveysUrl} />;
+    return <CompareView surveys={selectedSurveys} role={role} backUrl={backToSurveysUrl} originalCount={originalSelectedCount} />;
   }
 
   // ────────────────────────────────────────────────────
   // SELECTION-BASED: Aggregate mode (>2 surveys)
   // ────────────────────────────────────────────────────
   if (selectedSurveys && selectedSurveys.length > 0) {
-    return <AggregateView surveys={selectedSurveys} role={role} backUrl={backToSurveysUrl} />;
+    return <AggregateView surveys={selectedSurveys} role={role} backUrl={backToSurveysUrl} originalCount={originalSelectedCount} />;
   }
 
   // ────────────────────────────────────────────────────
@@ -468,7 +474,18 @@ export default function Insights() {
                   </p>
                   <p>
                     <span className="font-medium text-foreground">Data Quality:</span>{' '}
-                    All surveys validated for protocol compliance and biological plausibility.
+                    {(() => {
+                      const qb = { validated: 0, unvalidated: 0, invalid: 0 };
+                      for (const s of waterSurveys) { qb[getSurveyQuality(s)]++; }
+                      if (qb.unvalidated === 0 && qb.invalid === 0) {
+                        return 'All surveys validated for protocol compliance and biological plausibility. ';
+                      }
+                      const parts: string[] = [];
+                      if (qb.validated > 0) parts.push(`${qb.validated} validated`);
+                      if (qb.unvalidated > 0) parts.push(`${qb.unvalidated} unvalidated`);
+                      if (qb.invalid > 0) parts.push(`${qb.invalid} with errors`);
+                      return `Dataset includes ${parts.join(', ')}. `;
+                    })()}
                     Confidence intervals computed at 95% level using standard error propagation.
                   </p>
                 </div>
@@ -1032,7 +1049,7 @@ function InsightsWaterBanner({
 // ────────────────────────────────────────────────────
 // Compare View — Side-by-side (exactly 2 surveys)
 // ────────────────────────────────────────────────────
-function CompareView({ surveys, role, backUrl }: { surveys: Survey[]; role: string; backUrl: string }) {
+function CompareView({ surveys, role, backUrl, originalCount }: { surveys: Survey[]; role: string; backUrl: string; originalCount: number }) {
   const [a, b] = surveys;
   const waterA = getWaterById(a.waterId);
   const waterB = getWaterById(b.waterId);
@@ -1143,6 +1160,8 @@ function CompareView({ surveys, role, backUrl }: { surveys: Survey[]; role: stri
 
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-8">
+          <DataQualityScopeBanner surveys={surveys} originalCount={originalCount} backUrl={backUrl} />
+
           {/* Side-by-side columns */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {renderSurveyColumn(a, waterA, breakdownA)}
@@ -1194,7 +1213,7 @@ function CompareView({ surveys, role, backUrl }: { surveys: Survey[]; role: stri
 // ────────────────────────────────────────────────────
 // Aggregate View — Summary across >2 surveys
 // ────────────────────────────────────────────────────
-function AggregateView({ surveys: selectedSurveys, role, backUrl }: { surveys: Survey[]; role: string; backUrl: string }) {
+function AggregateView({ surveys: selectedSurveys, role, backUrl, originalCount }: { surveys: Survey[]; role: string; backUrl: string; originalCount: number }) {
   const waterIds = [...new Set(selectedSurveys.map(s => s.waterId))];
   const waterNames = waterIds.map(id => getWaterById(id)?.name ?? id);
   const dates = selectedSurveys.map(s => s.date).sort();
@@ -1258,6 +1277,7 @@ function AggregateView({ surveys: selectedSurveys, role, backUrl }: { surveys: S
 
       <div className="px-8 py-8">
         <div className="max-w-[1280px] mx-auto space-y-8">
+          <DataQualityScopeBanner surveys={selectedSurveys} originalCount={originalCount} backUrl={backUrl} />
 
           {/* Summary Strip */}
           <div className="border border-border rounded bg-white" style={{ boxShadow: 'var(--shadow-1)' }}>
@@ -1382,6 +1402,87 @@ function AggregateView({ surveys: selectedSurveys, role, backUrl }: { surveys: S
 
         </div>
       </div>
+    </div>
+  );
+}
+
+// ── Shared scope/quality banner for selection-based analysis ──
+
+function DataQualityScopeBanner({
+  surveys: analyzedSurveys,
+  originalCount,
+  backUrl,
+}: {
+  surveys: Survey[];
+  originalCount: number;
+  backUrl: string;
+}) {
+  const breakdown = useMemo(() => {
+    const result = { validated: 0, unvalidated: 0 };
+    for (const s of analyzedSurveys) {
+      const q = getSurveyQuality(s);
+      if (q === 'validated') result.validated++;
+      else result.unvalidated++;
+    }
+    return result;
+  }, [analyzedSurveys]);
+
+  const excludedCount = originalCount - analyzedSurveys.length;
+  const allValidated = breakdown.unvalidated === 0 && excludedCount === 0;
+
+  const waterIds = [...new Set(analyzedSurveys.map(s => s.waterId))];
+  const waterNames = waterIds.map(id => getWaterById(id)?.name ?? id);
+
+  return (
+    <div className="border border-border rounded bg-white px-4 py-3 space-y-2">
+      <div className="flex items-center gap-2 text-[13px]">
+        <Info className="w-4 h-4 text-muted-foreground flex-shrink-0" />
+        <span className="text-foreground">
+          Analyzing <span className="font-semibold">{analyzedSurveys.length}</span>{' '}
+          survey{analyzedSurveys.length !== 1 ? 's' : ''} from{' '}
+          <span className="font-semibold">{waterNames.join(', ')}</span>
+        </span>
+      </div>
+
+      <div className="flex items-center gap-3 text-[11px] ml-6">
+        {allValidated ? (
+          <span className="inline-flex items-center gap-1 text-success font-medium">
+            <ShieldCheck className="w-3 h-3" />
+            All surveys validated for protocol compliance
+          </span>
+        ) : (
+          <>
+            {breakdown.validated > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-success/10 text-success font-medium">
+                <ShieldCheck className="w-3 h-3" />
+                {breakdown.validated} validated
+              </span>
+            )}
+            {breakdown.unvalidated > 0 && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-warning/10 text-warning font-medium">
+                <ShieldAlert className="w-3 h-3" />
+                {breakdown.unvalidated} unvalidated
+              </span>
+            )}
+          </>
+        )}
+      </div>
+
+      {excludedCount > 0 && (
+        <div className="flex items-center gap-2 text-[12px] text-muted-foreground ml-6">
+          <AlertCircle className="w-3.5 h-3.5 text-destructive flex-shrink-0" />
+          <span>
+            Excluded <span className="font-medium text-destructive">{excludedCount}</span>{' '}
+            invalid survey{excludedCount !== 1 ? 's' : ''} from analysis.
+          </span>
+          <Link
+            to={backUrl}
+            className="underline underline-offset-2 text-primary hover:text-primary/80 font-medium"
+          >
+            Back to Surveys
+          </Link>
+        </div>
+      )}
     </div>
   );
 }
